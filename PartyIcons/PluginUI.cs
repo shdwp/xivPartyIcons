@@ -4,6 +4,7 @@ using System.IO;
 using System.Numerics;
 using System.Reflection;
 using Dalamud.IoC;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using ImGuiScene;
@@ -33,15 +34,31 @@ namespace PartyIcons
 
         public void Initialize()
         {
-            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-
-            _nameplateExamples = new Dictionary<NameplateMode, TextureWrap>
+            var assembly = Assembly.GetExecutingAssembly();
+            var examplesImageNames = new Dictionary<NameplateMode, string>
             {
-                { NameplateMode.SmallJobIcon, Interface.UiBuilder.LoadImage(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "Resources/1.png")) },
-                { NameplateMode.BigJobIcon, Interface.UiBuilder.LoadImage(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "Resources/2.png")) },
-                { NameplateMode.BigJobIconAndRole, Interface.UiBuilder.LoadImage(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "Resources/3.png")) },
-                { NameplateMode.BigRole, Interface.UiBuilder.LoadImage(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "Resources/4.png")) },
+                { NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png" },
+                { NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png" },
+                { NameplateMode.BigJobIconAndRole, "PartyIcons.Resources.3.png" },
+                { NameplateMode.BigRole, "PartyIcons.Resources.4.png" },
             };
+
+            _nameplateExamples = new Dictionary<NameplateMode, TextureWrap>();
+
+            foreach (var kv in examplesImageNames)
+            {
+                using var fileStream = assembly.GetManifestResourceStream(kv.Value);
+                if (fileStream == null)
+                {
+                    PluginLog.Error($"Failed to get resource stream for {kv.Value}");
+                    continue;
+                }
+
+                using var memoryStream = new MemoryStream();
+                fileStream.CopyTo(memoryStream);
+
+                _nameplateExamples[kv.Key] = Interface.UiBuilder.LoadImage(memoryStream.ToArray());
+            }
         }
 
         public void Dispose()
@@ -116,11 +133,7 @@ namespace PartyIcons
 
                 ImGui.Dummy(new Vector2(0, 25f));
                 ImGui.TextWrapped("Nameplates are only applied when you are in a party with other people, unless testing mode is enabled. ");
-                ImGui.TextWrapped("Please note that it usually takes a while for nameplates to reload. " +
-                           "\nYou can force refresh by moving nameplates on and off the screen. " +
-                           "And for your own nameplate you should be able to refresh it by toggling first person camera on and off. " +
-                           "\nAlternatively, you can go into Own nameplate settings in Character Configuration " +
-                           "and force refresh by changing Title Display Settings.");
+                ImGui.TextWrapped("Please note that it usually takes a some time for nameplates to reload, especially for own character nameplate.");
 
                 ImGui.Dummy(new Vector2(0, 15f));
                 ImGui.Text("Nameplate examples:");

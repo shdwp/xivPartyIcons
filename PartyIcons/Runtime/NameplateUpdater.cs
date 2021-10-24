@@ -4,6 +4,7 @@ using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Entities;
 using PartyIcons.View;
+using XivCommon;
 
 namespace PartyIcons.Runtime
 {
@@ -12,17 +13,27 @@ namespace PartyIcons.Runtime
         private NameplateView              _view;
         private PluginAddressResolver      _address;
         private Hook<SetNamePlateDelegate> _hook;
+        private XivCommonBase              _base;
+        private int                        _forceRedrawCount = 0;
 
-        public NameplateUpdater(PluginAddressResolver address, NameplateView view)
+        public NameplateUpdater(PluginAddressResolver address, NameplateView view, XivCommonBase @base)
         {
             _address = address;
             _view = view;
+            _base = @base;
             _hook = new Hook<SetNamePlateDelegate>(_address.AddonNamePlate_SetNamePlatePtr, SetNamePlateDetour);
         }
 
         public void Enable()
         {
             _hook.Enable();
+        }
+
+        public void ForceRefresh()
+        {
+            PluginLog.Debug("Enabled force redrawing nameplates");
+            _base.Functions.NamePlates.ForceRedraw = true;
+            _forceRedrawCount = 0;
         }
 
         public void Disable()
@@ -51,6 +62,17 @@ namespace PartyIcons.Runtime
 
         public IntPtr SetNamePlate(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title, IntPtr name, IntPtr fcName, int iconID)
         {
+            if (_base.Functions.NamePlates.ForceRedraw)
+            {
+                _forceRedrawCount++;
+
+                if (_forceRedrawCount > 200)
+                {
+                    _base.Functions.NamePlates.ForceRedraw = false;
+                    PluginLog.Debug("Disabled force redraw");
+                }
+            }
+
             var npObject = new XivApi.SafeNamePlateObject(namePlateObjectPtr);
             if (npObject == null)
             {

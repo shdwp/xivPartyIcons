@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
@@ -21,6 +22,7 @@ namespace PartyIcons.Runtime
     {
         public event Action<string, RoleId> OnRoleOccupied;
         public event Action<string, RoleId> OnRoleSuggested;
+        public event Action                 OnAssignedRolesUpdated;
 
         [PluginService] private Framework   Framework   { get; set; }
         [PluginService] private ChatGui     ChatGui     { get; set; }
@@ -33,22 +35,25 @@ namespace PartyIcons.Runtime
         private uint _territoryId;
         private int  _previousStateHash;
 
-        private Dictionary<string, RoleId> _rolePatterns = new()
-        {
-            { " mt ", RoleId.MT },
-            { " t1 ", RoleId.MT },
-            { " ot ", RoleId.OT },
-            { " t2 ", RoleId.OT },
-            { " m1 ", RoleId.M1 },
-            { " m2 ", RoleId.M2 },
-            { " r1 ", RoleId.R1 },
-            { " r2 ", RoleId.R2 },
-        };
+        private Dictionary<RoleId, string> _rolePatterns          = new();
+        private Dictionary<RoleId, Regex>  _roleSuggestionRegexes = new();
 
         private Dictionary<string, RoleId> _occupiedRoles   = new();
         private Dictionary<string, RoleId> _assignedRoles   = new();
         private Dictionary<string, RoleId> _suggestedRoles  = new();
         private HashSet<RoleId>            _unassignedRoles = new();
+
+        public RoleTracker()
+        {
+            foreach (var role in Enum.GetValues<RoleId>())
+            {
+                var roleIdentifier = role.ToString().ToLower();
+                var regex = new Regex($"\\W{roleIdentifier}\\W");
+
+                _rolePatterns[role] = $" {roleIdentifier} ";
+                _roleSuggestionRegexes[role] = regex;
+            }
+        }
 
         public void Enable()
         {
@@ -148,6 +153,8 @@ namespace PartyIcons.Runtime
                     _unassignedRoles.Remove(roleToAssign);
                 }
             }
+
+            OnAssignedRolesUpdated?.Invoke();
         }
 
         public string DebugDescription()
@@ -276,20 +283,20 @@ namespace PartyIcons.Runtime
                 var paddedText = $" {text} ";
 
                 var assignmentsChanged = false;
-                foreach (var kv in _rolePatterns)
+                foreach (var role in Enum.GetValues<RoleId>())
                 {
-                    if (paddedText == kv.Key)
+                    if (paddedText.Equals(_rolePatterns[role]))
                     {
-                        PluginLog.Debug($"Message contained role occupation ({playerName}@{playerWorld} - {text}, detected {kv.Key}, role {kv.Value})");
+                        PluginLog.Debug($"Message contained role occupation ({playerName}@{playerWorld} - {text}, detected role {role})");
                         assignmentsChanged = true;
-                        OccupyRole(playerName, playerWorld.Value, kv.Value);
+                        OccupyRole(playerName, playerWorld.Value, role);
                         break;
                     }
 
-                    if (paddedText.Contains(kv.Key.Trim()))
+                    if (_roleSuggestionRegexes[role].IsMatch(paddedText))
                     {
-                        PluginLog.Debug($"Message contained role suggestion ({playerName}@{playerWorld}: {text}, detected {kv.Key}, role {kv.Value})");
-                        SuggestRole(playerName, playerWorld.Value, kv.Value);
+                        PluginLog.Debug($"Message contained role suggestion ({playerName}@{playerWorld}: {text}, detected {role}");
+                        SuggestRole(playerName, playerWorld.Value, role);
                     }
                 }
 

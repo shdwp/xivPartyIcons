@@ -66,8 +66,15 @@ namespace PartyIcons.View
         {
             foreach (var role in Enum.GetValues<RoleId>())
             {
+                if (role == RoleId.Undefined)
+                {
+                    continue;
+                }
+
                 args.Items.Add(new NormalContextMenuItem(role.ToString(), (args) => OnAssignRole(args, role)));
             }
+
+            args.Items.Add(new NormalContextMenuItem("Return", (_) => { }));
         }
 
         private bool IsMenuValid(BaseContextMenuArgs args)

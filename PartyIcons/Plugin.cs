@@ -73,7 +73,7 @@ namespace PartyIcons
             _modeSetter = new NameplateModeSetter(_nameplateView, Configuration);
             Interface.Inject(_modeSetter);
 
-            _nameplateUpdater = new NameplateUpdater(Address, _nameplateView);
+            _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, Base);
             _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
             _contextMenu = new PlayerContextMenu(Base, _roleTracker);
@@ -82,6 +82,8 @@ namespace PartyIcons
             _ui.Initialize();
             Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
             Interface.UiBuilder.OpenConfigUi += _ui.OpenSettings;
+
+            _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
 
             _modeSetter.Enable();
             _roleTracker.Enable();
@@ -92,6 +94,8 @@ namespace PartyIcons
 
         public void Dispose()
         {
+            _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
+
             _contextMenu.Dispose();
             _nameplateUpdater.Dispose();
             _npcNameplateFixer.Dispose();
@@ -111,6 +115,12 @@ namespace PartyIcons
         private void OnConfigurationSave()
         {
             _modeSetter.ForceRefresh();
+            _nameplateUpdater.ForceRefresh();
+        }
+
+        private void OnAssignedRolesUpdated()
+        {
+            _nameplateUpdater.ForceRefresh();
         }
 
         private void OnCommand(string command, string arguments)
@@ -126,6 +136,7 @@ namespace PartyIcons
                 _roleTracker.ResetOccupations();
                 _roleTracker.ResetAssignments();
                 _roleTracker.CalculateUnassignedPartyRoles();
+                ChatGui.Print("Occupations are reset, roles are auto assigned.");
             }
             else if (arguments == "debug")
             {

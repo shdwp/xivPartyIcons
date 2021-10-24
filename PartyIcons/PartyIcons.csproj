@@ -17,25 +17,25 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>$(AppData)\XIVLauncher\devPlugins\PartyIcons\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="..\Data\PartyIcons.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources/1.png">
+    <EmbeddedResource Include="Resources/1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources/2.png">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources/2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources/3.png">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources/3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources/4.png">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources/4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
   </ItemGroup>
 
   <PropertyGroup>
@@ -75,13 +75,4 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-  
-  <Target Name="ILRepack" AfterTargets="Build">
-    <ItemGroup>
-      <InputAssemblies Include="$(TargetPath)" />
-      <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
-    </ItemGroup>
-    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /out:$(TargetDir)/merged/$(TargetFileName) @(InputAssemblies, ' ')" />
-  </Target>
-
 </Project>
