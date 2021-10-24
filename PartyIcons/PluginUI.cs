@@ -48,6 +48,11 @@ namespace PartyIcons
         {
         }
 
+        public void OpenSettings()
+        {
+            SettingsVisible = true;
+        }
+
         public void DrawSettingsWindow()
         {
             if (!SettingsVisible)

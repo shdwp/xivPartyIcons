@@ -7,6 +7,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -18,11 +19,15 @@ namespace PartyIcons.Runtime
 {
     public sealed class RoleTracker : IDisposable
     {
+        public event Action<string, RoleId> OnRoleOccupied;
+        public event Action<string, RoleId> OnRoleSuggested;
+
         [PluginService] private Framework   Framework   { get; set; }
         [PluginService] private ChatGui     ChatGui     { get; set; }
         [PluginService] private ClientState ClientState { get; set; }
         [PluginService] private Condition   Condition   { get; set; }
         [PluginService] private PartyList   PartyList   { get; set; }
+        [PluginService] private ToastGui    ToastGui    { get; set; }
 
         private bool _currentlyInParty;
         private uint _territoryId;
@@ -83,11 +88,15 @@ namespace PartyIcons.Runtime
             }
 
             _occupiedRoles[PlayerId(name, world)] = roleId;
+            OnRoleOccupied?.Invoke(name, roleId);
+            ToastGui.ShowQuest($"{name} occupied {roleId}");
         }
 
         public void SuggestRole(string name, uint world, RoleId roleId)
         {
             _suggestedRoles[PlayerId(name, world)] = roleId;
+            OnRoleSuggested?.Invoke(name, roleId);
+            ToastGui.ShowQuest($"{roleId} is now suggested for {name}");
         }
 
         public void ResetOccupations()
@@ -244,14 +253,15 @@ namespace PartyIcons.Runtime
                 string? playerName = null;
                 uint? playerWorld = null;
 
-                if (senderid == 0)
+                var playerPayload = sender.Payloads.FirstOrDefault(p => p is PlayerPayload) as PlayerPayload;
+                if (playerPayload == null)
                 {
+                    PluginLog.Debug($"Message with senderid {senderid} and null player payload {sender} {message}");
                     playerName = ClientState.LocalPlayer.Name.TextValue;
                     playerWorld = ClientState.LocalPlayer.HomeWorld.Id;
                 }
                 else
                 {
-                    var playerPayload = sender.Payloads.FirstOrDefault(p => p is PlayerPayload) as PlayerPayload;
                     playerName = playerPayload?.PlayerName;
                     playerWorld = playerPayload?.World.RowId;
                 }

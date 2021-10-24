@@ -167,8 +167,6 @@ namespace PartyIcons.View
             ref int iconID
         )
         {
-            fcName = SeStringUtils.EmptyPtr;
-
             var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
             if (_configuration.HideLocalPlayerNameplate && uid == ClientState.LocalPlayer.ObjectId)
             {

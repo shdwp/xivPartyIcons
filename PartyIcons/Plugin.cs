@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Dalamud.Game;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Party;
@@ -8,7 +7,6 @@ using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using PartyIcons.Api;
-using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Utils;
 using PartyIcons.View;
@@ -51,7 +49,10 @@ namespace PartyIcons
             Configuration.Initialize(Interface);
             Configuration.OnSave += OnConfigurationSave;
 
-            CommandManager.AddHandler(commandName, new CommandInfo(OnCommand));
+            CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
+            {
+                HelpMessage = "opens configuration window; \"reset\" or \"r\" resets all assignments; \"debug\" prints debugging info."
+            });
 
             Address = new PluginAddressResolver();
             Address.Setup(SigScanner);
@@ -80,6 +81,8 @@ namespace PartyIcons
 
             _ui.Initialize();
             Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
+            Interface.UiBuilder.OpenConfigUi += _ui.OpenSettings;
+
             _modeSetter.Enable();
             _roleTracker.Enable();
             _nameplateUpdater.Enable();
@@ -95,6 +98,7 @@ namespace PartyIcons
             _roleTracker.Dispose();
             _modeSetter.Dispose();
             Interface.UiBuilder.Draw -= _ui.DrawSettingsWindow;
+            Interface.UiBuilder.OpenConfigUi -= _ui.OpenSettings;
             _ui.Dispose();
 
             SeStringUtils.Dispose();
@@ -113,18 +117,15 @@ namespace PartyIcons
         {
             arguments = arguments.Trim().ToLower();
 
-            if (arguments == "")
+            if (arguments == "" || arguments == "config")
             {
+                _ui.OpenSettings();
             }
             else if (arguments == "reset" || arguments == "r")
             {
                 _roleTracker.ResetOccupations();
                 _roleTracker.ResetAssignments();
                 _roleTracker.CalculateUnassignedPartyRoles();
-            }
-            else if (arguments == "config")
-            {
-                _ui.SettingsVisible = true;
             }
             else if (arguments == "debug")
             {
