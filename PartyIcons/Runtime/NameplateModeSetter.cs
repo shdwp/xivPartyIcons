@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
@@ -21,7 +20,6 @@ namespace PartyIcons.Runtime
         private readonly Configuration _configuration;
 
         private ExcelSheet<ContentFinderCondition> _contentFinderConditionsSheet;
-        private ExcelSheet<ContentType>            _contentTypesSheet;
 
         public NameplateModeSetter(NameplateView nameplateView, Configuration configuration)
         {
@@ -32,7 +30,6 @@ namespace PartyIcons.Runtime
         public void Enable()
         {
             _contentFinderConditionsSheet = DataManager.GameData.GetExcelSheet<ContentFinderCondition>();
-            _contentTypesSheet = DataManager.GameData.GetExcelSheet<ContentType>();
 
             ForceRefresh();
             ClientState.TerritoryChanged += OnTerritoryChanged;
@@ -41,6 +38,7 @@ namespace PartyIcons.Runtime
         public void ForceRefresh()
         {
             OnTerritoryChanged(null, 0);
+            _nameplateView.OthersMode = _configuration.Others;
         }
 
         public void Disable()
@@ -59,33 +57,35 @@ namespace PartyIcons.Runtime
             if (content == null)
             {
                 PluginLog.Information($"Content null {ClientState.TerritoryType}");
-                _nameplateView.Mode = _configuration.Overworld;
+                _nameplateView.PartyMode = _configuration.Overworld;
                 return;
             }
 
-            var type = _contentTypesSheet.GetRow(content.ContentType.Row);
-            if (type == null)
-            {
-                PluginLog.Information($"Content type null {content.ContentType.Row}");
-                _nameplateView.Mode = _configuration.Overworld;
-                return;
-            }
-
-            PluginLog.Debug($"Territory changed {content.Name} ({type.Name}, {ClientState.TerritoryType})");
             if (_configuration.ChatContentMessage)
             {
-                ChatGui.Print($"Entering {content.Name} ({type.Name}).");
+                ChatGui.Print($"Entering {content.Name}.");
             }
 
-            _nameplateView.Mode = type.Name.RawString switch
-            {
-                "Trials"         => _configuration.Raid,
-                "Dungeons"       => _configuration.Dungeon,
-                "Raids"          => _configuration.Raid,
-                "Alliance Raids" => _configuration.AllianceRaid,
+            PluginLog.Debug($"Territory changed {content.Name} (type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row})");
 
-                _ => _configuration.Dungeon,
-            };
+            switch (content.ContentMemberType.Row)
+            {
+                case 2:
+                    _nameplateView.PartyMode = _configuration.Dungeon;
+                    break;
+
+                case 3:
+                    _nameplateView.PartyMode = _configuration.Raid;
+                    break;
+
+                case 4:
+                    _nameplateView.PartyMode = _configuration.AllianceRaid;
+                    break;
+
+                default:
+                    _nameplateView.PartyMode = _configuration.Dungeon;
+                    break;
+            }
         }
     }
 }

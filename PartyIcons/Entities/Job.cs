@@ -43,8 +43,8 @@ namespace PartyIcons.Entities
         BLU = 36,
         GNB = 37,
         DNC = 38,
-        //SAG = 39,
-        //REP = 40
+        RPR = 39,
+        SGE = 40
     }
 
     public static class JobExtensions
@@ -66,7 +66,7 @@ namespace PartyIcons.Entities
                 case Job.AST:
                 case Job.WHM:
                 case Job.SCH: 
-                /*case Job.SAG:*/
+                case Job.SGE:
                     return JobRole.Healer;
 
                 case Job.PGL:
@@ -76,7 +76,7 @@ namespace PartyIcons.Entities
                 case Job.ROG:
                 case Job.NIN:
                 case Job.SAM: 
-                /*case Job.REP:*/
+                case Job.RPR:
                     return JobRole.Melee;
 
                 case Job.ARC:

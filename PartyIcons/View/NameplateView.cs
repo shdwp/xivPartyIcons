@@ -23,13 +23,15 @@ namespace PartyIcons.View
         private RoleTracker _roleTracker;
         private IconSet     _iconSet;
 
-        private IntPtr[]                _roleStrings;
+        private IntPtr[]                _roleStringsWestern;
+        private IntPtr[]                _roleStringsEastern;
         private IntPtr[]                _numberStrings;
         private IntPtr[]                _unknownRoleStrings;
         private Dictionary<int, IntPtr> _statusIconStrings;
         private IntPtr                  _bigIconNamePadding;
 
-        public NameplateMode Mode { get; set; }
+        public NameplateMode PartyMode  { get; set; }
+        public NameplateMode OthersMode { get; set; }
 
         // tank, melee, ranged, healer
         private readonly ushort[]      _roleColors   = { 37, 524, 32, 42 };
@@ -42,10 +44,11 @@ namespace PartyIcons.View
         {
             _roleTracker = roleTracker;
             _configuration = configuration;
+            OthersMode = NameplateMode.BigJobIcon;
 
             _iconSet = new IconSet();
 
-            _roleStrings = new[]
+            _roleStringsWestern = new[]
             {
                 SeStringUtils.EmptyPtr,
                 SeStringUtils.TextPtr("", _roleColors[0]),
@@ -54,6 +57,19 @@ namespace PartyIcons.View
                 SeStringUtils.TextPtr("", _roleColors[1]),
                 SeStringUtils.TextPtr("", _roleColors[2]),
                 SeStringUtils.TextPtr("", _roleColors[2]),
+                SeStringUtils.TextPtr("", _roleColors[3]),
+                SeStringUtils.TextPtr("", _roleColors[3]),
+            };
+
+            _roleStringsEastern = new[]
+            {
+                SeStringUtils.EmptyPtr,
+                SeStringUtils.TextPtr("", _roleColors[0]),
+                SeStringUtils.TextPtr("", _roleColors[0]),
+                SeStringUtils.TextPtr("", _roleColors[1]),
+                SeStringUtils.TextPtr("", _roleColors[1]),
+                SeStringUtils.TextPtr("", _roleColors[2]),
+                SeStringUtils.TextPtr("", _roleColors[2]),
                 SeStringUtils.TextPtr("", _roleColors[3]),
                 SeStringUtils.TextPtr("", _roleColors[3]),
             };
@@ -96,11 +112,17 @@ namespace PartyIcons.View
 
         public void Dispose()
         {
-            foreach (var ptr in _roleStrings)
+            foreach (var ptr in _roleStringsWestern)
             {
                 Marshal.FreeHGlobal(ptr);
             }
-            _roleStrings = null;
+            _roleStringsWestern = null;
+
+            foreach (var ptr in _roleStringsEastern)
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+            _roleStringsEastern = null;
 
             foreach (var ptr in _numberStrings)
             {
@@ -125,13 +147,7 @@ namespace PartyIcons.View
 
         public void SetupForPC(XivApi.SafeNamePlateObject npObject)
         {
-            if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
-            {
-                SetupDefault(npObject);
-                return;
-            }
-
-            switch (Mode)
+            switch (GetModeForNameplate(npObject))
             {
                 case NameplateMode.Default:
                 case NameplateMode.SmallJobIcon:
@@ -141,7 +157,7 @@ namespace PartyIcons.View
                 case NameplateMode.BigJobIcon:
                     npObject.SetIconPosition(-11, 24);
                     npObject.SetIconScale(3f);
-                    npObject.SetNameScale(0.5f);
+                    npObject.SetNameScale(0.75f);
                     break;
 
                 case NameplateMode.BigJobIconAndRole:
@@ -168,9 +184,11 @@ namespace PartyIcons.View
         )
         {
             var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
-            if (_configuration.HideLocalPlayerNameplate && uid == ClientState.LocalPlayer.ObjectId)
+            var mode = GetModeForNameplate(npObject);
+
+            if (_configuration.HideLocalPlayerNameplate && uid == ClientState.LocalPlayer?.ObjectId)
             {
-                switch (Mode)
+                switch (mode)
                 {
                     case NameplateMode.Default:
                     case NameplateMode.SmallJobIcon:
@@ -195,11 +213,6 @@ namespace PartyIcons.View
                 }
             }
 
-            if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
-            {
-                return;
-            }
-
             var playerCharacter = ObjectTable.SearchById(uid) as PlayerCharacter;
             if (playerCharacter == null)
             {
@@ -207,7 +220,7 @@ namespace PartyIcons.View
             }
 
             var hasRole = _roleTracker.TryGetAssignedRole(playerCharacter.Name.TextValue, playerCharacter.HomeWorld.Id, out var roleId);
-            switch (Mode)
+            switch (mode)
             {
                 case NameplateMode.Default:
                     break;
@@ -241,7 +254,14 @@ namespace PartyIcons.View
                 case NameplateMode.BigRole:
                     if (hasRole)
                     {
-                        name = _roleStrings[(int)roleId];
+                        if (_configuration.EasternNamingConvention)
+                        {
+                            name = _roleStringsEastern[(int)roleId];
+                        }
+                        else
+                        {
+                            name = _roleStringsWestern[(int)roleId];
+                        }
                     }
                     else
                     {
@@ -298,6 +318,20 @@ namespace PartyIcons.View
             else
             {
                 return _bigIconNamePadding;
+            }
+        }
+
+        private NameplateMode GetModeForNameplate(XivApi.SafeNamePlateObject npObject)
+        {
+            var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
+            var mode = OthersMode;
+            if (_configuration.TestingMode || npObject.NamePlateInfo.IsPartyMember() || uid == ClientState.LocalPlayer?.ObjectId)
+            {
+                return PartyMode;
+            }
+            else
+            {
+                return OthersMode;
             }
         }
     }

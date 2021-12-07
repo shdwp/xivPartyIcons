@@ -12,12 +12,14 @@ namespace PartyIcons
         public int  Version { get; set; } = 1;
         public bool ChatContentMessage       = true;
         public bool HideLocalPlayerNameplate = true;
-        public bool TestingMode = true;
+        public bool TestingMode              = true;
+        public bool EasternNamingConvention  = false;
 
         public NameplateMode Overworld    { get; set; } = NameplateMode.SmallJobIcon;
         public NameplateMode AllianceRaid { get; set; } = NameplateMode.BigJobIcon;
         public NameplateMode Dungeon      { get; set; } = NameplateMode.BigJobIcon;
         public NameplateMode Raid         { get; set; } = NameplateMode.BigRole;
+        public NameplateMode Others       { get; set; } = NameplateMode.SmallJobIcon;
 
         private DalamudPluginInterface _interface;
 

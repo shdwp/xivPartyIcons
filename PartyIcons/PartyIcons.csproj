@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>shdwp</Authors>
     <Company>shdwp</Company>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1.0</Version>
     <Description>PartyIcons plugin</Description>
     <Copyright>shdwp 2021</Copyright>
     <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
@@ -43,9 +43,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.2" />
+    <PackageReference Include="DalamudPackager" Version="2.1.5" />
     <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
-    <PackageReference Include="XivCommon" Version="3.1.0" />
+    <PackageReference Include="XivCommon" Version="4.0.0-alpha.1" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>

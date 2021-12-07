@@ -105,6 +105,16 @@ namespace PartyIcons
                 ImGui.Text("Display chat message when entering duty");
                 ImGuiHelpTooltip("Can be used to determine the duty type before fully loading in.");
 
+                var easternNamingConvention = _configuration.EasternNamingConvention;
+                if (ImGui.Checkbox("##easteannaming", ref easternNamingConvention))
+                {
+                    _configuration.EasternNamingConvention = easternNamingConvention;
+                    _configuration.Save();
+                }
+                ImGui.SameLine();
+                ImGui.Text("Eastern role naming convention");
+                ImGuiHelpTooltip("Use japanese data center role naming convention (MT ST D1-D4 H1-2).");
+
                 var hideLocalNameplate = _configuration.HideLocalPlayerNameplate;
                 if (ImGui.Checkbox("##hidelocal", ref hideLocalNameplate))
                 {
@@ -113,7 +123,7 @@ namespace PartyIcons
                 }
                 ImGui.SameLine();
                 ImGui.Text("Hide own nameplate");
-                ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.");
+                ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
                 ImGui.Text("Overworld party nameplates:");
                 ImGuiHelpTooltip("Nameplates used for your party while not in duty.");
@@ -127,9 +137,13 @@ namespace PartyIcons
                 ImGuiHelpTooltip("Nameplates used for your party while in raid.");
                 ModeSection("##raid", () => _configuration.Raid, (mode) => _configuration.Raid = mode);
 
-                ImGui.Text("Alliance Raid nameplates:");
+                ImGui.Text("Alliance Raid party nameplates:");
                 ImGuiHelpTooltip("Nameplates used for your party while in alliance raid.");
                 ModeSection("##alliance", () => _configuration.AllianceRaid, (mode) => _configuration.AllianceRaid = mode);
+
+                ImGui.Text("Other PC nameplates:");
+                ImGuiHelpTooltip("Nameplates used for non-party players.");
+                ModeSection("##others", () => _configuration.Others, (mode) => _configuration.Others = mode);
 
                 ImGui.Dummy(new Vector2(0, 25f));
                 ImGui.TextWrapped("Nameplates are only applied when you are in a party with other people, unless testing mode is enabled. ");

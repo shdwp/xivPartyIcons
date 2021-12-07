@@ -126,7 +126,6 @@ namespace PartyIcons.Api
             {
                 if (Pointer == IntPtr.Zero)
                 {
-                    PluginLog.Debug($"[{GetType().Name}] AddonNamePlate was null");
                     return null;
                 }
 

@@ -140,7 +140,7 @@ namespace PartyIcons
             }
             else if (arguments == "debug")
             {
-                ChatGui.Print($"Current mode is {_nameplateView.Mode}, party count {PartyList.Length}");
+                ChatGui.Print($"Current mode is {_nameplateView.PartyMode}, party count {PartyList.Length}");
                 ChatGui.Print(_roleTracker.DebugDescription());
             }
         }

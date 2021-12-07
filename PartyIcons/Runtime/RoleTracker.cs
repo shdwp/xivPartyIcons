@@ -53,6 +53,16 @@ namespace PartyIcons.Runtime
                 _rolePatterns[role] = $" {roleIdentifier} ";
                 _roleSuggestionRegexes[role] = regex;
             }
+
+            _rolePatterns[RoleId.OT] = " ST ";
+            _roleSuggestionRegexes[RoleId.OT] = new Regex("\\WST\\W");
+
+            for (var i = 1; i < 5; i++)
+            {
+                var roleId = RoleId.M1 + i - 1;
+                _rolePatterns[roleId] = "d" + i;
+                _roleSuggestionRegexes[roleId] = new Regex($"\\Wd{i}\\W");
+            }
         }
 
         public void Enable()
@@ -94,7 +104,7 @@ namespace PartyIcons.Runtime
 
             _occupiedRoles[PlayerId(name, world)] = roleId;
             OnRoleOccupied?.Invoke(name, roleId);
-            ToastGui.ShowQuest($"{name} occupied {roleId}");
+            ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions { DisplayCheckmark = true });
         }
 
         public void SuggestRole(string name, uint world, RoleId roleId)
