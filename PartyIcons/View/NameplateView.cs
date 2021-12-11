@@ -297,6 +297,15 @@ namespace PartyIcons.View
 
                 case JobRole.Ranged:
                     return _iconSet.GetJobIcon("Orange", info.GetJobID());
+                    
+                case JobRole.Magical:
+                    return _iconSet.GetJobIcon("Purple", info.GetJobID());
+                
+                case JobRole.Crafter:
+                    return _iconSet.GetJobIcon("Gold", info.GetJobID());
+                    
+                case JobRole.Gatherer:
+                    return _iconSet.GetJobIcon("Yellow", info.GetJobID());
 
                 default:
                     return 0;
