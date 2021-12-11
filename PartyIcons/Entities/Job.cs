@@ -83,13 +83,15 @@ namespace PartyIcons.Entities
                 case Job.BRD:
                 case Job.MCH:
                 case Job.DNC:
+                    return JobRole.Ranged
+                
                 case Job.THM:
                 case Job.BLM:
                 case Job.ACN:
                 case Job.SMN:
                 case Job.RDM:
                 case Job.BLU:
-                    return JobRole.Ranged;
+                    return JobRole.Magical;
 
                 case Job.CRP:
                 case Job.BSM:
