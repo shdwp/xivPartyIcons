@@ -8,6 +8,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using PartyIcons.Api;
 using PartyIcons.Runtime;
+using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
 using PartyIcons.View;
 using XivCommon;
@@ -35,13 +36,15 @@ namespace PartyIcons
 
         private Configuration Configuration { get; }
 
-        private readonly PlayerContextMenu   _contextMenu;
-        private readonly PluginUI            _ui;
-        private readonly NameplateUpdater    _nameplateUpdater;
-        private readonly NPCNameplateFixer   _npcNameplateFixer;
-        private readonly NameplateView       _nameplateView;
-        private readonly RoleTracker         _roleTracker;
-        private readonly NameplateModeSetter _modeSetter;
+        private readonly PlayerContextMenu    _contextMenu;
+        private readonly PluginUI             _ui;
+        private readonly NameplateUpdater     _nameplateUpdater;
+        private readonly NPCNameplateFixer    _npcNameplateFixer;
+        private readonly NameplateView        _nameplateView;
+        private readonly RoleTracker          _roleTracker;
+        private readonly ViewModeSetter  _modeSetter;
+        private readonly ChatNameUpdater      _chatNameUpdater;
+        private readonly PlayerStylesheet     _playerStylesheet;
 
         public Plugin()
         {
@@ -60,23 +63,28 @@ namespace PartyIcons
             Interface.Inject(_ui);
 
             Base = new XivCommonBase(Hooks.ContextMenu);
+            XivApi.Initialize(this, Address);
 
             SeStringUtils.Initialize();
-            XivApi.Initialize(this, Address);
+
+            _playerStylesheet = new PlayerStylesheet(Configuration);
 
             _roleTracker = new RoleTracker();
             Interface.Inject(_roleTracker);
 
-            _nameplateView = new NameplateView(_roleTracker, Configuration);
+            _nameplateView = new NameplateView(_roleTracker, Configuration, _playerStylesheet);
             Interface.Inject(_nameplateView);
 
-            _modeSetter = new NameplateModeSetter(_nameplateView, Configuration);
+            _chatNameUpdater = new ChatNameUpdater(_roleTracker, _playerStylesheet);
+            Interface.Inject(_chatNameUpdater);
+
+            _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater);
             Interface.Inject(_modeSetter);
 
             _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, Base);
             _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
-            _contextMenu = new PlayerContextMenu(Base, _roleTracker);
+            _contextMenu = new PlayerContextMenu(Base, _roleTracker, _playerStylesheet);
             Interface.Inject(_contextMenu);
 
             _ui.Initialize();
@@ -89,6 +97,7 @@ namespace PartyIcons
             _roleTracker.Enable();
             _nameplateUpdater.Enable();
             _npcNameplateFixer.Enable();
+            _chatNameUpdater.Enable();
             _contextMenu.Enable();
         }
 
@@ -96,6 +105,7 @@ namespace PartyIcons
         {
             _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
 
+            _chatNameUpdater.Dispose();
             _contextMenu.Dispose();
             _nameplateUpdater.Dispose();
             _npcNameplateFixer.Dispose();

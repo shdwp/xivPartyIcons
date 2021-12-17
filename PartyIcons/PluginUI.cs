@@ -8,6 +8,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using ImGuiScene;
+using PartyIcons.View;
 
 namespace PartyIcons
 {
@@ -125,28 +126,42 @@ namespace PartyIcons
                 ImGui.Text("Hide own nameplate");
                 ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
-                ImGui.Text("Overworld party nameplates:");
-                ImGuiHelpTooltip("Nameplates used for your party while not in duty.");
-                ModeSection("##overworld", () => _configuration.Overworld, (mode) => _configuration.Overworld = mode);
+                ImGui.Dummy(new Vector2(0, 25f));
+                ImGui.Text("Dungeon:");
+                ImGuiHelpTooltip("Modes used for your party while in dungeon.");
+                NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon, (mode) => _configuration.NameplateDungeon = mode);
+                ImGui.SameLine();
+                ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon, (mode) => _configuration.ChatDungeon = mode);
+                ImGui.Dummy(new Vector2(0, 15f));
 
-                ImGui.Text("Dungeon nameplates:");
-                ImGuiHelpTooltip("Nameplates used for your party while in dungeon.");
-                ModeSection("##dungeon", () => _configuration.Dungeon, (mode) => _configuration.Dungeon = mode);
+                ImGui.Text("Raid:");
+                ImGuiHelpTooltip("Modes used for your party while in raid.");
+                NameplateModeSection("##np_raid", () => _configuration.NameplateRaid, (mode) => _configuration.NameplateRaid = mode);
+                ImGui.SameLine();
+                ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode);
+                ImGui.Dummy(new Vector2(0, 15f));
 
-                ImGui.Text("Raid nameplates:");
-                ImGuiHelpTooltip("Nameplates used for your party while in raid.");
-                ModeSection("##raid", () => _configuration.Raid, (mode) => _configuration.Raid = mode);
+                ImGui.Text("Alliance Raid party:");
+                ImGuiHelpTooltip("Modes used for your party while in alliance raid.");
+                NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid, (mode) => _configuration.NameplateAllianceRaid = mode);
+                ImGui.SameLine();
+                ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid, (mode) => _configuration.ChatAllianceRaid = mode);
+                ImGui.Dummy(new Vector2(0, 15f));
 
-                ImGui.Text("Alliance Raid party nameplates:");
-                ImGuiHelpTooltip("Nameplates used for your party while in alliance raid.");
-                ModeSection("##alliance", () => _configuration.AllianceRaid, (mode) => _configuration.AllianceRaid = mode);
+                ImGui.Text("Overworld party:");
+                ImGuiHelpTooltip("Modes used for your party while not in duty.");
+                NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld, (mode) => _configuration.NameplateOverworld = mode);
+                ImGui.SameLine();
+                ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld, (mode) => _configuration.ChatOverworld = mode);
+                ImGui.Dummy(new Vector2(0, 15f));
 
-                ImGui.Text("Other PC nameplates:");
-                ImGuiHelpTooltip("Nameplates used for non-party players.");
-                ModeSection("##others", () => _configuration.Others, (mode) => _configuration.Others = mode);
+                ImGui.Text("Other player characters:");
+                ImGuiHelpTooltip("Modes used for non-party players.");
+                NameplateModeSection("##np_others", () => _configuration.NameplateOthers, (mode) => _configuration.NameplateOthers = mode);
+                ImGui.SameLine();
+                ChatModeSection("##chat_others", () => _configuration.ChatOthers, (mode) => _configuration.ChatOthers = mode);
 
                 ImGui.Dummy(new Vector2(0, 25f));
-                ImGui.TextWrapped("Nameplates are only applied when you are in a party with other people, unless testing mode is enabled. ");
                 ImGui.TextWrapped("Please note that it usually takes a some time for nameplates to reload, especially for own character nameplate.");
 
                 ImGui.Dummy(new Vector2(0, 15f));
@@ -170,8 +185,51 @@ namespace PartyIcons
             }
         }
 
-        private void ModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter)
+        private void ImGuiHelpTooltip(string tooltip)
         {
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1f), "?");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip(tooltip);
+            }
+        }
+
+        private void ChatModeSection(string label, Func<ChatMode> getter, Action<ChatMode> setter)
+        {
+            ImGui.Text("Chat name: ");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(400f);
+            if (ImGui.BeginCombo(label, ChatModeToString(getter())))
+            {
+                foreach (var mode in Enum.GetValues<ChatMode>())
+                {
+                    if (ImGui.Selectable(ChatModeToString(mode), mode == getter()))
+                    {
+                        setter(mode);
+                        _configuration.Save();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+        }
+
+        private string ChatModeToString(ChatMode mode)
+        {
+            return mode switch
+            {
+                ChatMode.GameDefault      => "Game Default",
+                ChatMode.Role             => "Role",
+                ChatMode.Job              => "Job abbreviation",
+                _                         => throw new ArgumentException(),
+            };
+        }
+
+        private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter)
+        {
+            ImGui.Text("Nameplate: ");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(400f);
             if (ImGui.BeginCombo(label, NameplateModeToString(getter())))
             {
                 foreach (var mode in Enum.GetValues<NameplateMode>())
@@ -183,16 +241,6 @@ namespace PartyIcons
                     }
                 }
                 ImGui.EndCombo();
-            }
-        }
-
-        private void ImGuiHelpTooltip(string tooltip)
-        {
-            ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1f), "?");
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip(tooltip);
             }
         }
 

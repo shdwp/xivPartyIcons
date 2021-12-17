@@ -10,21 +10,23 @@ using PartyIcons.View;
 
 namespace PartyIcons.Runtime
 {
-    public sealed class NameplateModeSetter
+    public sealed class ViewModeSetter
     {
         [PluginService] public ClientState ClientState { get; set; }
         [PluginService] public DataManager DataManager { get; set; }
         [PluginService] public ChatGui     ChatGui     { get; set; }
 
-        private readonly NameplateView _nameplateView;
-        private readonly Configuration _configuration;
+        private readonly NameplateView   _nameplateView;
+        private readonly Configuration   _configuration;
+        private readonly ChatNameUpdater _chatNameUpdater;
 
         private ExcelSheet<ContentFinderCondition> _contentFinderConditionsSheet;
 
-        public NameplateModeSetter(NameplateView nameplateView, Configuration configuration)
+        public ViewModeSetter(NameplateView nameplateView, Configuration configuration, ChatNameUpdater chatNameUpdater)
         {
             _nameplateView = nameplateView;
             _configuration = configuration;
+            _chatNameUpdater = chatNameUpdater;
         }
 
         public void Enable()
@@ -37,8 +39,10 @@ namespace PartyIcons.Runtime
 
         public void ForceRefresh()
         {
+            _nameplateView.OthersMode = _configuration.NameplateOthers;
+            _chatNameUpdater.OthersMode = _configuration.ChatOthers;
+
             OnTerritoryChanged(null, 0);
-            _nameplateView.OthersMode = _configuration.Others;
         }
 
         public void Disable()
@@ -57,7 +61,8 @@ namespace PartyIcons.Runtime
             if (content == null)
             {
                 PluginLog.Information($"Content null {ClientState.TerritoryType}");
-                _nameplateView.PartyMode = _configuration.Overworld;
+                _nameplateView.PartyMode = _configuration.NameplateOverworld;
+                _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
                 return;
             }
 
@@ -71,19 +76,23 @@ namespace PartyIcons.Runtime
             switch (content.ContentMemberType.Row)
             {
                 case 2:
-                    _nameplateView.PartyMode = _configuration.Dungeon;
+                    _nameplateView.PartyMode = _configuration.NameplateDungeon;
+                    _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
                     break;
 
                 case 3:
-                    _nameplateView.PartyMode = _configuration.Raid;
+                    _nameplateView.PartyMode = _configuration.NameplateRaid;
+                    _chatNameUpdater.PartyMode = _configuration.ChatRaid;
                     break;
 
                 case 4:
-                    _nameplateView.PartyMode = _configuration.AllianceRaid;
+                    _nameplateView.PartyMode = _configuration.NameplateAllianceRaid;
+                    _chatNameUpdater.PartyMode = _configuration.ChatAllianceRaid;
                     break;
 
                 default:
-                    _nameplateView.PartyMode = _configuration.Dungeon;
+                    _nameplateView.PartyMode = _configuration.NameplateDungeon;
+                    _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
                     break;
             }
         }

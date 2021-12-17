@@ -3,6 +3,7 @@ using Dalamud.Hooking;
 using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Entities;
+using PartyIcons.Utils;
 using PartyIcons.View;
 using XivCommon;
 
@@ -73,6 +74,10 @@ namespace PartyIcons.Runtime
                 }
             }
 
+            var originalTitle = title;
+            var originalName = name;
+            var originalFcName = fcName;
+
             var npObject = new XivApi.SafeNamePlateObject(namePlateObjectPtr);
             if (npObject == null)
             {
@@ -111,6 +116,22 @@ namespace PartyIcons.Runtime
 
             var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
             _view.SetupForPC(npObject);
+
+            if (originalName != name)
+            {
+                SeStringUtils.FreePtr(name);
+            }
+
+            if (originalTitle != title)
+            {
+                SeStringUtils.FreePtr(title);
+            }
+
+            if (originalFcName != fcName)
+            {
+                SeStringUtils.FreePtr(fcName);
+            }
+
             return result;
         }
     }

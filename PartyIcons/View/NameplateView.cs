@@ -1,142 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
-using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
+using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
 
 namespace PartyIcons.View
 {
     public sealed class NameplateView : IDisposable
     {
-        [PluginService] private PartyList   PartyList   { get; set; }
         [PluginService] private ObjectTable ObjectTable { get; set; }
 
-        private RoleTracker _roleTracker;
-        private IconSet     _iconSet;
+        private readonly Configuration        _configuration;
+        private readonly PlayerStylesheet     _stylesheet;
+        private readonly RoleTracker          _roleTracker;
 
-        private IntPtr[]                _roleStringsWestern;
-        private IntPtr[]                _roleStringsEastern;
-        private IntPtr[]                _numberStrings;
-        private IntPtr[]                _unknownRoleStrings;
-        private Dictionary<int, IntPtr> _statusIconStrings;
-        private IntPtr                  _bigIconNamePadding;
+        private readonly IconSet _iconSet;
 
         public NameplateMode PartyMode  { get; set; }
         public NameplateMode OthersMode { get; set; }
 
-        // tank, melee, ranged, healer
-        private readonly ushort[]      _roleColors   = { 37, 524, 32, 42 };
-        private readonly string[]      _roleIconSets = { "Grey", "Blue", "Blue", "Red", "Red", "Orange", "Orange", "Green", "Green", };
-        private readonly Configuration _configuration;
-
         [PluginService] private ClientState ClientState { get; set; }
 
-        public NameplateView(RoleTracker roleTracker, Configuration configuration)
+        public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet)
         {
             _roleTracker = roleTracker;
             _configuration = configuration;
-            OthersMode = NameplateMode.BigJobIcon;
-
+            _stylesheet = stylesheet;
             _iconSet = new IconSet();
-
-            _roleStringsWestern = new[]
-            {
-                SeStringUtils.EmptyPtr,
-                SeStringUtils.TextPtr("", _roleColors[0]),
-                SeStringUtils.TextPtr("", _roleColors[0]),
-                SeStringUtils.TextPtr("", _roleColors[1]),
-                SeStringUtils.TextPtr("", _roleColors[1]),
-                SeStringUtils.TextPtr("", _roleColors[2]),
-                SeStringUtils.TextPtr("", _roleColors[2]),
-                SeStringUtils.TextPtr("", _roleColors[3]),
-                SeStringUtils.TextPtr("", _roleColors[3]),
-            };
-
-            _roleStringsEastern = new[]
-            {
-                SeStringUtils.EmptyPtr,
-                SeStringUtils.TextPtr("", _roleColors[0]),
-                SeStringUtils.TextPtr("", _roleColors[0]),
-                SeStringUtils.TextPtr("", _roleColors[1]),
-                SeStringUtils.TextPtr("", _roleColors[1]),
-                SeStringUtils.TextPtr("", _roleColors[2]),
-                SeStringUtils.TextPtr("", _roleColors[2]),
-                SeStringUtils.TextPtr("", _roleColors[3]),
-                SeStringUtils.TextPtr("", _roleColors[3]),
-            };
-
-            _unknownRoleStrings = new[]
-            {
-                SeStringUtils.TextPtr(""),
-                SeStringUtils.TextPtr("", _roleColors[0]),
-                SeStringUtils.TextPtr("", _roleColors[1]),
-                SeStringUtils.TextPtr("", _roleColors[2]),
-                SeStringUtils.TextPtr("", _roleColors[3]),
-            };
-
-            var numberOne = "   ";
-            var numberTwo = "   ";
-
-            _numberStrings = new[]
-            {
-                SeStringUtils.EmptyPtr,
-                SeStringUtils.TextPtr(numberOne, _roleColors[0]),
-                SeStringUtils.TextPtr(numberTwo, _roleColors[0]),
-                SeStringUtils.TextPtr(numberOne, _roleColors[1]),
-                SeStringUtils.TextPtr(numberTwo, _roleColors[1]),
-                SeStringUtils.TextPtr(numberOne, _roleColors[2]),
-                SeStringUtils.TextPtr(numberTwo, _roleColors[2]),
-                SeStringUtils.TextPtr(numberOne, _roleColors[3]),
-                SeStringUtils.TextPtr(numberTwo, _roleColors[3]),
-            };
-
-            _statusIconStrings = new Dictionary<int, IntPtr>();
-            var prefix = "   ";
-            _statusIconStrings[061523] = SeStringUtils.IconPtr(BitmapFontIcon.NewAdventurer, prefix);
-            _statusIconStrings[061540] = SeStringUtils.IconPtr(BitmapFontIcon.Mentor, prefix);
-            _statusIconStrings[061543] = SeStringUtils.IconPtr(BitmapFontIcon.MentorCrafting, prefix);
-            _statusIconStrings[061542] = SeStringUtils.IconPtr(BitmapFontIcon.MentorPvE, prefix);
-            _statusIconStrings[061547] = SeStringUtils.IconPtr(BitmapFontIcon.Returner, prefix);
-
-            _bigIconNamePadding = SeStringUtils.TextPtr(prefix + " ");
         }
 
         public void Dispose()
         {
-            foreach (var ptr in _roleStringsWestern)
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            _roleStringsWestern = null;
-
-            foreach (var ptr in _roleStringsEastern)
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            _roleStringsEastern = null;
-
-            foreach (var ptr in _numberStrings)
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            _numberStrings = null;
-
-            foreach (var ptr in _statusIconStrings.Values)
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            _statusIconStrings = null;
-
-            Marshal.FreeHGlobal(_bigIconNamePadding);
         }
 
         public void SetupDefault(XivApi.SafeNamePlateObject npObject)
@@ -193,8 +94,8 @@ namespace PartyIcons.View
                     case NameplateMode.Default:
                     case NameplateMode.SmallJobIcon:
                     case NameplateMode.BigJobIcon:
-                        name = SeStringUtils.EmptyPtr;
-                        fcName = SeStringUtils.EmptyPtr;
+                        name = SeStringUtils.emptyPtr;
+                        fcName = SeStringUtils.emptyPtr;
                         displayTitle = false;
                         iconID = 0;
                         return;
@@ -203,8 +104,8 @@ namespace PartyIcons.View
                     case NameplateMode.BigRole:
                         if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
                         {
-                            name = SeStringUtils.EmptyPtr;
-                            fcName = SeStringUtils.EmptyPtr;
+                            name = SeStringUtils.emptyPtr;
+                            fcName = SeStringUtils.emptyPtr;
                             displayTitle = false;
                             iconID = 0;
                             return;
@@ -231,22 +132,22 @@ namespace PartyIcons.View
 
                 case NameplateMode.BigJobIcon:
                     name = GetStateNametext(iconID);
-                    fcName = SeStringUtils.EmptyPtr;
+                    fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
                     iconID = GetClassIcon(npObject.NamePlateInfo);
                     break;
 
                 case NameplateMode.BigJobIconAndRole:
-                    fcName = SeStringUtils.EmptyPtr;
+                    fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
                     if (hasRole)
                     {
-                        name = _numberStrings[(int)roleId];
+                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlateNumber(roleId));
                         iconID = GetClassRoleColoredIcon(npObject.NamePlateInfo, roleId);
                     }
                     else
                     {
-                        name = SeStringUtils.EmptyPtr;
+                        name = SeStringUtils.emptyPtr;
                         iconID = GetClassIcon(npObject.NamePlateInfo);
                     }
                     break;
@@ -254,29 +155,15 @@ namespace PartyIcons.View
                 case NameplateMode.BigRole:
                     if (hasRole)
                     {
-                        if (_configuration.EasternNamingConvention)
-                        {
-                            name = _roleStringsEastern[(int)roleId];
-                        }
-                        else
-                        {
-                            name = _roleStringsWestern[(int)roleId];
-                        }
+                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
                     }
                     else
                     {
-                        var generalRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                        if ((int)generalRole <= 3)
-                        {
-                            name = _unknownRoleStrings[(int)generalRole + 1];
-                        }
-                        else
-                        {
-                            name = _unknownRoleStrings[0];
-                        }
+                        var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
+                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
                     }
 
-                    fcName = SeStringUtils.EmptyPtr;
+                    fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
                     break;
             }
@@ -286,16 +173,16 @@ namespace PartyIcons.View
         {
             switch (JobExtensions.GetRole((Job)info.GetJobID()))
             {
-                case JobRole.Tank:
+                case GenericRole.Tank:
                     return _iconSet.GetJobIcon("Blue", info.GetJobID());
 
-                case JobRole.Healer:
+                case GenericRole.Healer:
                     return _iconSet.GetJobIcon("Green", info.GetJobID());
 
-                case JobRole.Melee:
+                case GenericRole.Melee:
                     return _iconSet.GetJobIcon("Red", info.GetJobID());
 
-                case JobRole.Ranged:
+                case GenericRole.Ranged:
                     return _iconSet.GetJobIcon("Orange", info.GetJobID());
 
                 default:
@@ -306,19 +193,21 @@ namespace PartyIcons.View
 
         private int GetClassRoleColoredIcon(XivApi.SafeNamePlateInfo info, RoleId roleId)
         {
-            return _iconSet.GetJobIcon(_roleIconSets[(int)roleId], info.GetJobID());
+            return _iconSet.GetJobIcon(_stylesheet.GetRoleIconset(roleId), info.GetJobID());
         }
 
         private IntPtr GetStateNametext(int iconId)
         {
-            if (_statusIconStrings.TryGetValue(iconId, out var ptr))
+            var prefix = "   ";
+            return iconId switch
             {
-                return ptr;
-            }
-            else
-            {
-                return _bigIconNamePadding;
-            }
+                061523 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix)),
+                061540 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
+                061543 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
+                061542 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
+                061547 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
+                _      => SeStringUtils.SeStringToPtr(SeStringUtils.Text(prefix + " "))
+            };
         }
 
         private NameplateMode GetModeForNameplate(XivApi.SafeNamePlateObject npObject)

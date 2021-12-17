@@ -2,6 +2,7 @@
 using Dalamud.Logging;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
+using PartyIcons.Stylesheet;
 using XivCommon;
 using XivCommon.Functions.ContextMenu;
 
@@ -9,13 +10,15 @@ namespace PartyIcons.View
 {
     public sealed class PlayerContextMenu : IDisposable
     {
-        private XivCommonBase _base;
-        private RoleTracker   _roleTracker;
+        private readonly XivCommonBase    _base;
+        private readonly RoleTracker      _roleTracker;
+        private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(XivCommonBase @base, RoleTracker roleTracker)
+        public PlayerContextMenu(XivCommonBase @base, RoleTracker roleTracker, PlayerStylesheet stylesheet)
         {
             _base = @base;
             _roleTracker = roleTracker;
+            _stylesheet = stylesheet;
         }
 
         public void Enable()
@@ -44,13 +47,15 @@ namespace PartyIcons.View
 
             if (_roleTracker.TryGetSuggestedRole(args.Text.TextValue, args.ObjectWorld, out var role))
             {
-                args.Items.Add(new NormalContextMenuItem($"Assign to {role} (suggested)", (args) => OnAssignRole(args, role)));
+                var roleName = _stylesheet.GetRoleName(role);
+                args.Items.Add(new NormalContextMenuItem($"Assign to {roleName} (suggested)", (args) => OnAssignRole(args, role)));
             }
 
             if (_roleTracker.TryGetAssignedRole(args.Text.TextValue, args.ObjectWorld, out var currentRole))
             {
                 var swappedRole = RoleIdUtils.Counterpart(currentRole);
-                args.Items.Add(new NormalContextMenuItem($"Party role swap to {swappedRole}", (args) => OnAssignRole(args, swappedRole)));
+                var swappedRoleName = _stylesheet.GetRoleName(swappedRole);
+                args.Items.Add(new NormalContextMenuItem($"Party role swap to {swappedRoleName}", (args) => OnAssignRole(args, swappedRole)));
             }
 
             args.Items.Add(new NormalContextSubMenuItem("Party role assign ", OnAssignSubMenuOpen));
@@ -71,10 +76,8 @@ namespace PartyIcons.View
                     continue;
                 }
 
-                args.Items.Add(new NormalContextMenuItem(role.ToString(), (args) => OnAssignRole(args, role)));
+                args.Items.Add(new NormalContextMenuItem(_stylesheet.GetRoleName(role), (args) => OnAssignRole(args, role)));
             }
-
-            args.Items.Add(new NormalContextMenuItem("Return", (_) => { }));
         }
 
         private bool IsMenuValid(BaseContextMenuArgs args)

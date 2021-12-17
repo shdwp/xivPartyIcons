@@ -35,8 +35,8 @@ namespace PartyIcons.Runtime
         private uint _territoryId;
         private int  _previousStateHash;
 
-        private Dictionary<RoleId, string> _rolePatterns          = new();
-        private Dictionary<RoleId, Regex>  _roleSuggestionRegexes = new();
+        private List<(RoleId, string)> _occupationMessages = new();
+        private List<(RoleId, Regex)>  _suggestionRegexes  = new();
 
         private Dictionary<string, RoleId> _occupiedRoles   = new();
         private Dictionary<string, RoleId> _assignedRoles   = new();
@@ -50,18 +50,18 @@ namespace PartyIcons.Runtime
                 var roleIdentifier = role.ToString().ToLower();
                 var regex = new Regex($"\\W{roleIdentifier}\\W");
 
-                _rolePatterns[role] = $" {roleIdentifier} ";
-                _roleSuggestionRegexes[role] = regex;
+                _occupationMessages.Add((role, $" {roleIdentifier} "));
+                _suggestionRegexes.Add((role, regex));
             }
 
-            _rolePatterns[RoleId.OT] = " ST ";
-            _roleSuggestionRegexes[RoleId.OT] = new Regex("\\WST\\W");
+            _occupationMessages.Add((RoleId.OT, " st "));
+            _suggestionRegexes.Add((RoleId.OT, new Regex("\\Wst\\W")));
 
             for (var i = 1; i < 5; i++)
             {
                 var roleId = RoleId.M1 + i - 1;
-                _rolePatterns[roleId] = "d" + i;
-                _roleSuggestionRegexes[roleId] = new Regex($"\\Wd{i}\\W");
+                _occupationMessages.Add((roleId, $" d{i} "));
+                _suggestionRegexes.Add((roleId, new Regex($"\\Wd{i}\\W")));
             }
         }
 
@@ -229,17 +229,17 @@ namespace PartyIcons.Runtime
             return $"{member.Name.TextValue}@{member.World.Id}";
         }
 
-        private RoleId FindUnassignedRoleForMemberRole(JobRole role)
+        private RoleId FindUnassignedRoleForMemberRole(GenericRole role)
         {
             RoleId roleToAssign = default;
 
             switch (role)
             {
-                case JobRole.Tank:
+                case GenericRole.Tank:
                     roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.MT || s == RoleId.OT);
                     break;
 
-                case JobRole.Melee:
+                case GenericRole.Melee:
                     roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.M1 || s == RoleId.M2);
                     if (roleToAssign == default)
                     {
@@ -247,7 +247,7 @@ namespace PartyIcons.Runtime
                     }
                     break;
 
-                case JobRole.Ranged:
+                case GenericRole.Ranged:
                     roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.R1 || s == RoleId.R2);
                     if (roleToAssign == default)
                     {
@@ -255,7 +255,7 @@ namespace PartyIcons.Runtime
                     }
                     break;
 
-                case JobRole.Healer:
+                case GenericRole.Healer:
                     roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.H1 || s == RoleId.H2);
                     break;
             }
@@ -292,28 +292,59 @@ namespace PartyIcons.Runtime
                 var text = message.TextValue.Trim().ToLower();
                 var paddedText = $" {text} ";
 
-                var assignmentsChanged = false;
-                foreach (var role in Enum.GetValues<RoleId>())
-                {
-                    if (paddedText.Equals(_rolePatterns[role]))
-                    {
-                        PluginLog.Debug($"Message contained role occupation ({playerName}@{playerWorld} - {text}, detected role {role})");
-                        assignmentsChanged = true;
-                        OccupyRole(playerName, playerWorld.Value, role);
-                        break;
-                    }
+                var roleToOccupy = RoleId.Undefined;
+                var occupationTainted = false;
+                var roleToSuggest = RoleId.Undefined;
+                var suggestionTainted = false;
 
-                    if (_roleSuggestionRegexes[role].IsMatch(paddedText))
+                foreach (var tuple in _occupationMessages)
+                {
+                    if (tuple.Item2.Equals(paddedText))
                     {
-                        PluginLog.Debug($"Message contained role suggestion ({playerName}@{playerWorld}: {text}, detected {role}");
-                        SuggestRole(playerName, playerWorld.Value, role);
+                        PluginLog.Debug($"Message contained role occupation ({playerName}@{playerWorld} - {text}, detected role {tuple.Item1})");
+
+                        if (roleToOccupy == RoleId.Undefined)
+                        {
+                            roleToOccupy = tuple.Item1;
+                        }
+                        else
+                        {
+                            PluginLog.Debug($"Multiple role occupation matches, aborting");
+                            occupationTainted = true;
+                            break;
+                        }
                     }
                 }
 
-                if (assignmentsChanged)
+                foreach (var tuple in _suggestionRegexes)
                 {
+                    if (tuple.Item2.IsMatch(paddedText))
+                    {
+                        PluginLog.Debug($"Message contained role suggestion ({playerName}@{playerWorld}: {text}, detected {tuple.Item1}");
+
+                        if (roleToSuggest == RoleId.Undefined)
+                        {
+                            roleToSuggest = tuple.Item1;
+                        }
+                        else
+                        {
+                            PluginLog.Debug("Multiple role suggesting matches, aborting");
+                            suggestionTainted = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!occupationTainted && roleToOccupy != RoleId.Undefined)
+                {
+                    OccupyRole(playerName, playerWorld.Value, roleToOccupy);
+
                     PluginLog.Debug($"Recalculating assignments due to new occupations");
                     CalculateUnassignedPartyRoles();
+                }
+                else if (!suggestionTainted && roleToSuggest != RoleId.Undefined)
+                {
+                    SuggestRole(playerName, playerWorld.Value, roleToSuggest);
                 }
             }
         }

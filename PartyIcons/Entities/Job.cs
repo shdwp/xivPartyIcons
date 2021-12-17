@@ -50,7 +50,7 @@ namespace PartyIcons.Entities
     public static class JobExtensions
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0066:Convert switch statement to expression", Justification = "No, it looks dumb")]
-        public static JobRole GetRole(this Job job)
+        public static GenericRole GetRole(this Job job)
         {
             switch (job)
             {
@@ -60,14 +60,14 @@ namespace PartyIcons.Entities
                 case Job.WAR:
                 case Job.DRK:
                 case Job.GNB:
-                    return JobRole.Tank;
+                    return GenericRole.Tank;
 
                 case Job.CNJ:
                 case Job.AST:
                 case Job.WHM:
                 case Job.SCH: 
                 case Job.SGE:
-                    return JobRole.Healer;
+                    return GenericRole.Healer;
 
                 case Job.PGL:
                 case Job.LNC:
@@ -77,7 +77,7 @@ namespace PartyIcons.Entities
                 case Job.NIN:
                 case Job.SAM: 
                 case Job.RPR:
-                    return JobRole.Melee;
+                    return GenericRole.Melee;
 
                 case Job.ARC:
                 case Job.BRD:
@@ -89,7 +89,7 @@ namespace PartyIcons.Entities
                 case Job.SMN:
                 case Job.RDM:
                 case Job.BLU:
-                    return JobRole.Ranged;
+                    return GenericRole.Ranged;
 
                 case Job.CRP:
                 case Job.BSM:
@@ -99,12 +99,12 @@ namespace PartyIcons.Entities
                 case Job.WVR:
                 case Job.ALC:
                 case Job.CUL:
-                    return JobRole.Crafter;
+                    return GenericRole.Crafter;
 
                 case Job.MIN:
                 case Job.BTN:
                 case Job.FSH:
-                    return JobRole.Gatherer;
+                    return GenericRole.Gatherer;
 
                 default: throw new ArgumentException($"Unknown jobID {(int)job}");
             }

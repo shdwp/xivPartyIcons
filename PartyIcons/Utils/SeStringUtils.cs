@@ -8,16 +8,15 @@ namespace PartyIcons.Utils
 {
     public static class SeStringUtils
     {
-        public static IntPtr EmptyPtr;
+        public static IntPtr emptyPtr;
 
         public static void Initialize()
         {
-            EmptyPtr = TextPtr("");
+            emptyPtr = SeStringToPtr(Text(""));
         }
 
         public static void Dispose()
         {
-            Marshal.FreeHGlobal(EmptyPtr);
         }
 
         public static SeString SeStringFromPtr(IntPtr seStringPtr)
@@ -43,23 +42,31 @@ namespace PartyIcons.Utils
             return pointer;
         }
 
-        public static IntPtr TextPtr(string rawText)
+        public static void FreePtr(IntPtr seStringPtr)
+        {
+            if (seStringPtr != emptyPtr)
+            {
+                Marshal.FreeHGlobal(seStringPtr);
+            }
+        }
+
+        public static SeString Text(string rawText)
         {
             var seString = new SeString(new List<Payload>());
             seString.Append(new TextPayload(rawText));
-            return SeStringToPtr(seString);
+            return seString;
         }
 
-        public static IntPtr TextPtr(string text, ushort color)
+        public static SeString Text(string text, ushort color)
         {
             var seString = new SeString(new List<Payload>());
             seString.Append(new UIForegroundPayload(color));
             seString.Append(new TextPayload(text));
             seString.Append(UIForegroundPayload.UIForegroundOff);
-            return SeStringToPtr(seString);
+            return seString;
         }
 
-        public static IntPtr IconPtr(BitmapFontIcon icon, string prefix=null)
+        public static SeString Icon(BitmapFontIcon icon, string prefix=null)
         {
             var seString = new SeString(new List<Payload>());
             if (prefix != null)
@@ -68,7 +75,7 @@ namespace PartyIcons.Utils
             }
 
             seString.Append(new IconPayload(icon));
-            return SeStringToPtr(seString);
+            return seString;
         }
     }
 }
