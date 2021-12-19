@@ -85,7 +85,6 @@ namespace PartyIcons.View
 
 
                 case NameplateMode.SmallRole:
-                    npObject.SetIconPosition(0, 72);
                     if(_configuration.ShowPlayerStatus)
                         npObject.SetIconScale(1f);
                     else 
@@ -218,19 +217,12 @@ namespace PartyIcons.View
                 case NameplateMode.SmallRole:
                     if (hasRole)
                     {
-                        if (_configuration.ShowPlayerStatus)
-                            name = SeStringUtils.SeStringToPtr(GetStateNametextS(iconID).Append(_stylesheet.GetRolePlate(roleId)));
-                        else
-                            name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
+                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
                     }
                     else
                     {
-
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                        if (_configuration.ShowPlayerStatus)
-                            name = SeStringUtils.SeStringToPtr(GetStateNametextS(iconID).Append(_stylesheet.GetGenericRolePlate(genericRole)));
-                        else
-                            name = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
+                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
                     }
 
                     fcName = SeStringUtils.emptyPtr;
