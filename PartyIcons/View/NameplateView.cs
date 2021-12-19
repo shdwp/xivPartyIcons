@@ -201,10 +201,10 @@ namespace PartyIcons.View
                     displayTitle = false;
                     if (hasRole)
                     {
-                        if(_configuration.ShowPlayerStatus)
+                        if (_configuration.ShowPlayerStatus)
                             name = SeStringUtils.SeStringToPtr(GetStateNametextS(iconID).Append(_stylesheet.GetRolePlateNumber(roleId)));
                         else
-                            name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlateNumber(roleId));
+                            name = SeStringUtils.SeStringToPtr(SeStringUtils.Text(_iconPrefix).Append(_stylesheet.GetRolePlateNumber(roleId)));
                         iconID = GetClassRoleColoredIcon(npObject.NamePlateInfo, roleId);
                     }
                     else
