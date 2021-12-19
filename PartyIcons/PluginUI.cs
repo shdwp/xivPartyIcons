@@ -126,6 +126,18 @@ namespace PartyIcons
                 ImGui.Text("Hide own nameplate");
                 ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
+                var showPlayerStatus = _configuration.ShowPlayerStatus;
+                if (ImGui.Checkbox("##showplayerstatus", ref showPlayerStatus))
+                {
+                    _configuration.ShowPlayerStatus = showPlayerStatus;
+                    _configuration.Save();
+                }
+
+                ImGui.SameLine();
+                ImGui.Text("Show player status");
+                ImGuiHelpTooltip("Display player status, or at least if it's a new adventurer or a mentor if possible");
+
+
                 ImGui.Dummy(new Vector2(0, 25f));
                 ImGui.Text("Dungeon:");
                 ImGuiHelpTooltip("Modes used for your party while in dungeon.");
@@ -248,12 +260,15 @@ namespace PartyIcons
         {
             return mode switch
             {
-                NameplateMode.Default           => "Game default",
-                NameplateMode.BigJobIcon        => "Big job icon",
-                NameplateMode.SmallJobIcon      => "Small job icon and name",
-                NameplateMode.BigJobIconAndRole => "Big job icon and role number",
-                NameplateMode.BigRole           => "Role letters",
-                _                               => throw new ArgumentException(),
+                NameplateMode.Default               => "Game default",
+                NameplateMode.BigJobIcon            => "Big job icon",
+                NameplateMode.SmallJobIcon          => "Small job icon and name",
+                NameplateMode.BigJobIconAndRole     => "Big job icon and role number",
+                NameplateMode.BigRole               => "Role letters",
+                NameplateMode.SmallJobIconOnly      => "small job icon without name",
+                NameplateMode.SmallJobIconAndRole   => "small job icon and role number",
+                NameplateMode.SmallRole             => "small job role letters",
+                _                                   => throw new ArgumentException(),
             };
         }
     }
