@@ -24,7 +24,7 @@ namespace PartyIcons.View
 
         private readonly IconSet _iconSet;
         private const string _iconPrefix = "   ";
-        private readonly int[] nameables = { 061523, 061540, 061542, 061543, 061544, 061547 };
+        private readonly int[] nameables = { 061521, 061522, 061523, 061540, 061542, 061543, 061544, 061547 };
 
         public NameplateMode PartyMode  { get; set; }
         public NameplateMode OthersMode { get; set; }
@@ -273,6 +273,8 @@ namespace PartyIcons.View
         {
             return iconId switch
             {
+                //061521 - party leader
+                //061522 - party member
                 061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
                 061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
                 061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
