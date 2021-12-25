@@ -16,6 +16,7 @@ namespace PartyIcons
         public bool TestingMode              = true;
         public bool EasternNamingConvention  = false;
         public bool ShowPlayerStatus = true;
+        public bool FramedSmallIcons = false;
 
         public NameplateMode NameplateOverworld    { get; set; } = NameplateMode.SmallJobIcon;
         public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIcon;

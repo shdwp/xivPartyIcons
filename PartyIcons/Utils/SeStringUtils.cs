@@ -66,7 +66,7 @@ namespace PartyIcons.Utils
             return seString;
         }
 
-        public static SeString Icon(BitmapFontIcon icon, string prefix=null)
+        public static SeString Icon(BitmapFontIcon icon, string? prefix=null)
         {
             var seString = new SeString(new List<Payload>());
             if (prefix != null)

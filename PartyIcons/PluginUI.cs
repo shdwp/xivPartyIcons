@@ -137,6 +137,16 @@ namespace PartyIcons
                 ImGui.Text("Show player status");
                 ImGuiHelpTooltip("Display player status, or at least if it's a new adventurer or a mentor if possible");
 
+                var framedSmallIcons = _configuration.FramedSmallIcons;
+                if (ImGui.Checkbox("##framedsmallicons", ref framedSmallIcons))
+                {
+                    _configuration.FramedSmallIcons = framedSmallIcons;
+                    _configuration.Save();
+                }
+
+                ImGui.SameLine();
+                ImGui.Text("Show small icons as plates");
+                ImGuiHelpTooltip("Small icons will be displayed in their framed version.");
 
                 ImGui.Dummy(new Vector2(0, 25f));
                 ImGui.Text("Dungeon:");
