@@ -31,6 +31,8 @@ namespace PartyIcons.Runtime
         [PluginService] private PartyList   PartyList   { get; set; }
         [PluginService] private ToastGui    ToastGui    { get; set; }
 
+        private readonly Configuration _configuration;
+
         private bool _currentlyInParty;
         private uint _territoryId;
         private int  _previousStateHash;
@@ -43,8 +45,9 @@ namespace PartyIcons.Runtime
         private Dictionary<string, RoleId> _suggestedRoles  = new();
         private HashSet<RoleId>            _unassignedRoles = new();
 
-        public RoleTracker()
+        public RoleTracker(Configuration configuration)
         {
+            _configuration = configuration;
             foreach (var role in Enum.GetValues<RoleId>())
             {
                 var roleIdentifier = role.ToString().ToLower();
@@ -139,6 +142,7 @@ namespace PartyIcons.Runtime
         {
             ResetAssignments();
 
+            PluginLog.Debug("Assigning current occupations");
             foreach (var kv in _occupiedRoles)
             {
                 PluginLog.Debug($"{kv.Key} == {kv.Value} as per occupation");
@@ -147,6 +151,35 @@ namespace PartyIcons.Runtime
                 _unassignedRoles.Remove(kv.Value);
             }
 
+            PluginLog.Debug("Assigning static assignments");
+            foreach (var kv in _configuration.StaticAssignments)
+            {
+                foreach (var member in PartyList)
+                {
+                    var playerId = PlayerId(member);
+                    if (_assignedRoles.ContainsKey(playerId))
+                    {
+                        PluginLog.Debug($"{PlayerId(member)} has already been assigned a role");
+                        continue;
+                    }
+
+                    if (kv.Key.Equals(playerId))
+                    {
+                        var applicableRoles = GetApplicableRolesForGenericRole(JobRoleExtensions.RoleFromByte(member.ClassJob.GameData.Role));
+                        if (applicableRoles.Contains(kv.Value))
+                        {
+                            PluginLog.Debug($"{PlayerId(member)} == {kv.Value} as per static assignments");
+                            _assignedRoles[playerId] = kv.Value;
+                        }
+                        else
+                        {
+                            PluginLog.Debug($"Skipping static assignment - applicable roles {string.Join(", ", applicableRoles)}, static role - {kv.Value}");
+                        }
+                    }
+                }
+            }
+
+            PluginLog.Debug("Assigning the rest");
             foreach (var member in PartyList)
             {
                 if (_assignedRoles.ContainsKey(PlayerId(member)))
@@ -155,7 +188,7 @@ namespace PartyIcons.Runtime
                     continue;
                 }
 
-                RoleId roleToAssign = FindUnassignedRoleForMemberRole(JobRoleExtensions.RoleFromByte(member.ClassJob.GameData.Role));
+                RoleId roleToAssign = FindUnassignedRoleForGenericRole(JobRoleExtensions.RoleFromByte(member.ClassJob.GameData.Role));
                 if (roleToAssign != default)
                 {
                     PluginLog.Debug($"{PlayerId(member)} == {roleToAssign} as per first available");
@@ -226,41 +259,34 @@ namespace PartyIcons.Runtime
 
         private string PlayerId(PartyMember member)
         {
-            return $"{member.Name.TextValue}@{member.World.Id}";
+            return $"{member.Name.TextValue}@{member.World.GameData.Name}";
         }
 
-        private RoleId FindUnassignedRoleForMemberRole(GenericRole role)
+        private RoleId FindUnassignedRoleForGenericRole(GenericRole role)
         {
-            RoleId roleToAssign = default;
+            var applicableRoles = GetApplicableRolesForGenericRole(role);
+            return _unassignedRoles.FirstOrDefault(r => applicableRoles.Contains(r));
+        }
 
+        private IEnumerable<RoleId> GetApplicableRolesForGenericRole(GenericRole role)
+        {
             switch (role)
             {
                 case GenericRole.Tank:
-                    roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.MT || s == RoleId.OT);
-                    break;
+                    return new[] { RoleId.MT, RoleId.OT };
 
                 case GenericRole.Melee:
-                    roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.M1 || s == RoleId.M2);
-                    if (roleToAssign == default)
-                    {
-                        roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.R1 || s == RoleId.R2);
-                    }
-                    break;
+                    return new[] { RoleId.M1, RoleId.M2, RoleId.R1, RoleId.R2 };
 
                 case GenericRole.Ranged:
-                    roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.R1 || s == RoleId.R2);
-                    if (roleToAssign == default)
-                    {
-                        roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.M1 || s == RoleId.M2);
-                    }
-                    break;
+                    return new[] { RoleId.R1, RoleId.R2, RoleId.M1, RoleId.M2 };
 
                 case GenericRole.Healer:
-                    roleToAssign = _unassignedRoles.FirstOrDefault(s => s == RoleId.H1 || s == RoleId.H2);
-                    break;
-            }
+                    return new[] { RoleId.H1, RoleId.H2 };
 
-            return roleToAssign;
+                default:
+                    return new[] { RoleId.Undefined };
+            }
         }
 
         private void OnChatMessage(XivChatType type, uint senderid, ref SeString sender, ref SeString message, ref bool ishandled)
@@ -273,9 +299,8 @@ namespace PartyIcons.Runtime
                 var playerPayload = sender.Payloads.FirstOrDefault(p => p is PlayerPayload) as PlayerPayload;
                 if (playerPayload == null)
                 {
-                    PluginLog.Debug($"Message with senderid {senderid} and null player payload {sender} {message}");
-                    playerName = ClientState.LocalPlayer.Name.TextValue;
-                    playerWorld = ClientState.LocalPlayer.HomeWorld.Id;
+                    playerName = ClientState.LocalPlayer?.Name.TextValue;
+                    playerWorld = ClientState.LocalPlayer?.HomeWorld.Id;
                 }
                 else
                 {

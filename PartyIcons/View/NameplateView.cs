@@ -19,9 +19,9 @@ namespace PartyIcons.View
     {
         [PluginService] private ObjectTable ObjectTable { get; set; }
 
-        private readonly Configuration        _configuration;
-        private readonly PlayerStylesheet     _stylesheet;
-        private readonly RoleTracker          _roleTracker;
+        private readonly Configuration    _configuration;
+        private readonly PlayerStylesheet _stylesheet;
+        private readonly RoleTracker      _roleTracker;
 
         private readonly IconSet _iconSet;
 
@@ -58,20 +58,58 @@ namespace PartyIcons.View
                     break;
 
                 case NameplateMode.BigJobIcon:
-                    npObject.SetIconPosition(-11, 24);
-                    npObject.SetIconScale(3f);
                     npObject.SetNameScale(0.75f);
+
+                    switch (_configuration.IconSizeMode)
+                    {
+                        case IconSizeMode.Smaller:
+                            npObject.SetIconPosition(9, 60);
+                            npObject.SetIconScale(1.5f);
+                            break;
+
+                        case IconSizeMode.Medium:
+                            npObject.SetIconPosition(-12, 24);
+                            npObject.SetIconScale(3f);
+                            break;
+
+                        case IconSizeMode.Bigger:
+                            npObject.SetIconPosition(-27, -12);
+                            npObject.SetIconScale(4f);
+                            break;
+                    }
                     break;
 
                 case NameplateMode.BigJobIconAndPartySlot:
-                    npObject.SetIconPosition(-14, 41);
-                    npObject.SetIconScale(2.3f);
-                    npObject.SetNameScale(1f);
+                    switch (_configuration.IconSizeMode)
+                    {
+                        case IconSizeMode.Smaller:
+                            npObject.SetIconPosition(12, 68);
+                            npObject.SetIconScale(1.2f);
+                            npObject.SetNameScale(0.6f);
+                            break;
+
+                        case IconSizeMode.Medium:
+                            npObject.SetIconPosition(-14, 41);
+                            npObject.SetIconScale(2.3f);
+                            npObject.SetNameScale(1f);
+                            break;
+
+                        case IconSizeMode.Bigger:
+                            npObject.SetIconPosition(-32, 15);
+                            npObject.SetIconScale(3f);
+                            npObject.SetNameScale(1.5f);
+                            break;
+                    }
                     break;
 
                 case NameplateMode.BigRole:
                     npObject.SetIconScale(0f);
-                    npObject.SetNameScale(1f);
+                    npObject.SetNameScale(_configuration.IconSizeMode switch
+                    {
+                        IconSizeMode.Smaller => 0.5f,
+                        IconSizeMode.Medium  => 1f,
+                        IconSizeMode.Bigger  => 1.5f,
+                    });
                     break;
             }
         }
@@ -96,13 +134,13 @@ namespace PartyIcons.View
                     case NameplateMode.Default:
                     case NameplateMode.SmallJobIcon:
                     case NameplateMode.BigJobIcon:
+                    case NameplateMode.BigJobIconAndPartySlot:
                         name = SeStringUtils.emptyPtr;
                         fcName = SeStringUtils.emptyPtr;
                         displayTitle = false;
                         iconID = 0;
                         return;
 
-                    case NameplateMode.BigJobIconAndPartySlot:
                     case NameplateMode.BigRole:
                         if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
                         {
@@ -147,7 +185,7 @@ namespace PartyIcons.View
                     {
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
                         var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
-                        str.Payloads.Insert(0, new TextPayload("    "));
+                        str.Payloads.Insert(0, new TextPayload("   "));
                         name = SeStringUtils.SeStringToPtr(str);
                         iconID = GetClassIcon(npObject.NamePlateInfo);
                     }
@@ -177,29 +215,9 @@ namespace PartyIcons.View
 
         private int GetClassIcon(XivApi.SafeNamePlateInfo info)
         {
-            switch (JobExtensions.GetRole((Job)info.GetJobID()))
-            {
-                case GenericRole.Tank:
-                    return _iconSet.GetJobIcon("Blue", info.GetJobID());
-
-                case GenericRole.Healer:
-                    return _iconSet.GetJobIcon("Green", info.GetJobID());
-
-                case GenericRole.Melee:
-                    return _iconSet.GetJobIcon("Red", info.GetJobID());
-
-                case GenericRole.Ranged:
-                    return _iconSet.GetJobIcon("Orange", info.GetJobID());
-
-                default:
-                    return 0;
-
-            }
-        }
-
-        private int GetClassRoleColoredIcon(XivApi.SafeNamePlateInfo info, RoleId roleId)
-        {
-            return _iconSet.GetJobIcon(_stylesheet.GetRoleIconset(roleId), info.GetJobID());
+            var genericRole = JobExtensions.GetRole((Job)info.GetJobID());
+            var iconSet = _stylesheet.GetGenericRoleIconset(genericRole);
+            return _iconSet.GetJobIcon(iconSet, info.GetJobID());
         }
 
         private IntPtr GetStateNametext(int iconId)

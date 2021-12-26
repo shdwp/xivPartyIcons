@@ -75,7 +75,6 @@ namespace PartyIcons.Runtime
             {
                 if (member.Name.ToString() == playerPayload.PlayerName && member.World.Id == playerPayload.World.RowId)
                 {
-                    PluginLog.Debug($"Found party member: {member.Name}");
                     return true;
                 }
             }
@@ -181,6 +180,15 @@ namespace PartyIcons.Runtime
                             prefixString.Append(new TextPayload(numberPrefix));
                         }
                         prefixString.Append(_stylesheet.GetGenericRoleChatPrefix(senderJob).Payloads);
+                        prefixString.Append(new TextPayload(" "));
+                        break;
+
+                    case ChatMode.OnlyColor:
+                        prefixString.Append(new UIForegroundPayload(_stylesheet.GetGenericRoleChatColor(senderJob)));
+                        if (numberPrefix.Length > 0)
+                        {
+                            prefixString.Append(new TextPayload(numberPrefix));
+                        }
                         prefixString.Append(new TextPayload(" "));
                         break;
 

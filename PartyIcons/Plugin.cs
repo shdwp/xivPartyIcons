@@ -59,7 +59,10 @@ namespace PartyIcons
 
             Address = new PluginAddressResolver();
             Address.Setup(SigScanner);
-            _ui = new PluginUI(Configuration);
+
+            _playerStylesheet = new PlayerStylesheet(Configuration);
+
+            _ui = new PluginUI(Configuration, _playerStylesheet);
             Interface.Inject(_ui);
 
             Base = new XivCommonBase(Hooks.ContextMenu);
@@ -67,9 +70,7 @@ namespace PartyIcons
 
             SeStringUtils.Initialize();
 
-            _playerStylesheet = new PlayerStylesheet(Configuration);
-
-            _roleTracker = new RoleTracker();
+            _roleTracker = new RoleTracker(Configuration);
             Interface.Inject(_roleTracker);
 
             _nameplateView = new NameplateView(_roleTracker, Configuration, _playerStylesheet);

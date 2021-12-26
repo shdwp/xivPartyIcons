@@ -9,7 +9,7 @@ namespace PartyIcons.Runtime
 {
     public sealed class NPCNameplateFixer : IDisposable
     {
-        private readonly CancellationTokenSource FixNonPlayerCharacterNamePlatesTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource FixNonPlayerCharacterNamePlatesTokenSource = new();
         private readonly NameplateView           _view;
 
         public NPCNameplateFixer(NameplateView view)
@@ -24,7 +24,8 @@ namespace PartyIcons.Runtime
 
         public void Dispose()
         {
-            FixNonPlayerCharacterNamePlatesTokenSource.Dispose();
+            PluginLog.Debug("NPCNameplateFixer dispose, cancelling the token");
+            FixNonPlayerCharacterNamePlatesTokenSource.Cancel();
             RevertAll();
         }
 
@@ -32,13 +33,19 @@ namespace PartyIcons.Runtime
         {
             try
             {
+                PluginLog.Debug("NPCNameplateFixer thread started");
                 while (!token.IsCancellationRequested)
                 {
                     RevertNPC();
                     Task.Delay(16, token).Wait(token);
                 }
+
+                PluginLog.Debug("NPCNameplateFixer thread halted");
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+                PluginLog.Debug("NPCNameplateFixed thread stopped");
+            }
             catch (Exception ex)
             {
                 PluginLog.Error(ex, "Non-PC Updater loop has crashed");

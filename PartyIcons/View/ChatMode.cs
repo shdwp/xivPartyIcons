@@ -3,6 +3,7 @@
     public enum ChatMode
     {
         GameDefault,
+        OnlyColor,
         Role,
         Job,
     }

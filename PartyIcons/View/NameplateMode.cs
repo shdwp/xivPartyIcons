@@ -3,7 +3,6 @@
     public enum NameplateMode
     {
         Default,
-
         SmallJobIcon,
         BigJobIcon,
         BigJobIconAndPartySlot,

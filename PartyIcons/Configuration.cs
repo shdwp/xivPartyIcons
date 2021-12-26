@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dalamud.Configuration;
 using Dalamud.Plugin;
+using PartyIcons.Entities;
 using PartyIcons.View;
 
 namespace PartyIcons
@@ -16,6 +18,9 @@ namespace PartyIcons
         public bool  TestingMode              = true;
         public bool  EasternNamingConvention  = false;
 
+        public IconSetId    IconSetId    { get; set; } = IconSetId.GlowingColored;
+        public IconSizeMode IconSizeMode { get; set; } = IconSizeMode.Medium;
+
         public NameplateMode NameplateOverworld    { get; set; } = NameplateMode.SmallJobIcon;
         public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIcon;
         public NameplateMode NameplateDungeon      { get; set; } = NameplateMode.BigJobIcon;
@@ -27,6 +32,8 @@ namespace PartyIcons
         public ChatMode ChatDungeon      { get; set; } = ChatMode.Job;
         public ChatMode ChatRaid         { get; set; } = ChatMode.Role;
         public ChatMode ChatOthers       { get; set; } = ChatMode.Job;
+
+        public Dictionary<string, RoleId> StaticAssignments { get; set; } = new();
 
         private DalamudPluginInterface _interface;
 

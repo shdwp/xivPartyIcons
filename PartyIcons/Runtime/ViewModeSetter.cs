@@ -71,9 +71,16 @@ namespace PartyIcons.Runtime
                 ChatGui.Print($"Entering {content.Name}.");
             }
 
-            PluginLog.Debug($"Territory changed {content.Name} (type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row})");
+            var memberType = content.ContentMemberType.Row;
+            if (content.RowId == 16 || content.RowId == 15)
+            {
+                // Praetorium and Castrum Meridianum
+                memberType = 2;
+            }
 
-            switch (content.ContentMemberType.Row)
+            PluginLog.Debug($"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
+
+            switch (memberType)
             {
                 case 2:
                     _nameplateView.PartyMode = _configuration.NameplateDungeon;

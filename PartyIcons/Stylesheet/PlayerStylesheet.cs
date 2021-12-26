@@ -1,15 +1,18 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Lumina.Excel.GeneratedSheets;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
+using PartyIcons.View;
 
 namespace PartyIcons.Stylesheet
 {
     public sealed class PlayerStylesheet
     {
         private readonly Configuration _configuration;
+        private          ushort        _fallbackColor = 1;
 
         public PlayerStylesheet(Configuration configuration)
         {
@@ -33,7 +36,7 @@ namespace PartyIcons.Stylesheet
                     return 42;
 
                 default:
-                    return 0;
+                    return _fallbackColor;
             }
         }
 
@@ -58,24 +61,62 @@ namespace PartyIcons.Stylesheet
                     return GetGenericRoleColor(GenericRole.Healer);
 
                 default:
-                    return 0;
+                    return _fallbackColor;
             }
         }
 
         public string GetRoleIconset(RoleId roleId)
         {
-            return roleId switch
+            switch (_configuration.IconSetId)
             {
-                RoleId.MT => "Blue",
-                RoleId.OT => "Blue",
-                RoleId.M1 => "Red",
-                RoleId.M2 => "Red",
-                RoleId.R1 => "Orange",
-                RoleId.R2 => "Orange",
-                RoleId.H1 => "Green",
-                RoleId.H2 => "Green",
-                _         => "Grey",
-            };
+                case IconSetId.Framed:
+                    return "Framed";
+
+                case IconSetId.GlowingGold:
+                    return "Glowing";
+
+                case IconSetId.GlowingColored:
+                    return roleId switch
+                    {
+                        RoleId.MT => "Blue",
+                        RoleId.OT => "Blue",
+                        RoleId.M1 => "Red",
+                        RoleId.M2 => "Red",
+                        RoleId.R1 => "Orange",
+                        RoleId.R2 => "Orange",
+                        RoleId.H1 => "Green",
+                        RoleId.H2 => "Green",
+                        _         => "Grey",
+                    };
+
+                default:
+                    throw new ArgumentException($"Unknown icon set id: {_configuration.IconSetId}");
+            }
+        }
+
+        public string GetGenericRoleIconset(GenericRole role)
+        {
+            switch (_configuration.IconSetId)
+            {
+                case IconSetId.Framed:
+                    return "Framed";
+
+                case IconSetId.GlowingGold:
+                    return "Glowing";
+
+                case IconSetId.GlowingColored:
+                    return role switch
+                    {
+                        GenericRole.Tank   => "Blue",
+                        GenericRole.Melee  => "Red",
+                        GenericRole.Ranged => "Orange",
+                        GenericRole.Healer => "Green",
+                        _                  => "Grey",
+                    };
+
+                default:
+                    throw new ArgumentException($"Unknown icon set id: {_configuration.IconSetId}");
+            }
         }
 
         public string GetRoleName(RoleId roleId)
