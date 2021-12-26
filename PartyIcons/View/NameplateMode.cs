@@ -1,4 +1,4 @@
-﻿namespace PartyIcons
+﻿namespace PartyIcons.View
 {
     public enum NameplateMode
     {
@@ -6,7 +6,7 @@
 
         SmallJobIcon,
         BigJobIcon,
-        BigJobIconAndRole,
+        BigJobIconAndPartySlot,
         BigRole,
     }
 }

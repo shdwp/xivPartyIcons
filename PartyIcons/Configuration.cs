@@ -10,11 +10,11 @@ namespace PartyIcons
     {
         public event Action OnSave;
 
-        public int  Version { get; set; } = 1;
-        public bool ChatContentMessage       = true;
-        public bool HideLocalPlayerNameplate = true;
-        public bool TestingMode              = true;
-        public bool EasternNamingConvention  = false;
+        public int   Version { get; set; } = 1;
+        public bool  ChatContentMessage       = true;
+        public bool  HideLocalPlayerNameplate = true;
+        public bool  TestingMode              = true;
+        public bool  EasternNamingConvention  = false;
 
         public NameplateMode NameplateOverworld    { get; set; } = NameplateMode.SmallJobIcon;
         public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIcon;

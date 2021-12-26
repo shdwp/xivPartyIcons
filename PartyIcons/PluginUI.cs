@@ -40,7 +40,7 @@ namespace PartyIcons
             {
                 { NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png" },
                 { NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png" },
-                { NameplateMode.BigJobIconAndRole, "PartyIcons.Resources.3.png" },
+                { NameplateMode.BigJobIconAndPartySlot, "PartyIcons.Resources.3.png" },
                 { NameplateMode.BigRole, "PartyIcons.Resources.4.png" },
             };
 
@@ -251,7 +251,7 @@ namespace PartyIcons
                 NameplateMode.Default           => "Game default",
                 NameplateMode.BigJobIcon        => "Big job icon",
                 NameplateMode.SmallJobIcon      => "Small job icon and name",
-                NameplateMode.BigJobIconAndRole => "Big job icon and role number",
+                NameplateMode.BigJobIconAndPartySlot => "Big job icon and party slot number",
                 NameplateMode.BigRole           => "Role letters",
                 _                               => throw new ArgumentException(),
             };

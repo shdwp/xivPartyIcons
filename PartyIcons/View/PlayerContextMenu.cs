@@ -78,6 +78,8 @@ namespace PartyIcons.View
 
                 args.Items.Add(new NormalContextMenuItem(_stylesheet.GetRoleName(role), (args) => OnAssignRole(args, role)));
             }
+
+            args.Items.Add(new NormalContextMenuItem("Return", (args) => { }));
         }
 
         private bool IsMenuValid(BaseContextMenuArgs args)

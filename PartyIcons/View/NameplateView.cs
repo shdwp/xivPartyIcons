@@ -4,7 +4,9 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
+using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
@@ -61,7 +63,7 @@ namespace PartyIcons.View
                     npObject.SetNameScale(0.75f);
                     break;
 
-                case NameplateMode.BigJobIconAndRole:
+                case NameplateMode.BigJobIconAndPartySlot:
                     npObject.SetIconPosition(-14, 41);
                     npObject.SetIconScale(2.3f);
                     npObject.SetNameScale(1f);
@@ -100,7 +102,7 @@ namespace PartyIcons.View
                         iconID = 0;
                         return;
 
-                    case NameplateMode.BigJobIconAndRole:
+                    case NameplateMode.BigJobIconAndPartySlot:
                     case NameplateMode.BigRole:
                         if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
                         {
@@ -137,13 +139,17 @@ namespace PartyIcons.View
                     iconID = GetClassIcon(npObject.NamePlateInfo);
                     break;
 
-                case NameplateMode.BigJobIconAndRole:
+                case NameplateMode.BigJobIconAndPartySlot:
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
-                    if (hasRole)
+                    var partySlot = PartyListHUD.GetPartySlotNumber(npObject.NamePlateInfo.Data.ObjectID.ObjectID);
+                    if (partySlot != null)
                     {
-                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlateNumber(roleId));
-                        iconID = GetClassRoleColoredIcon(npObject.NamePlateInfo, roleId);
+                        var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
+                        var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
+                        str.Payloads.Insert(0, new TextPayload("    "));
+                        name = SeStringUtils.SeStringToPtr(str);
+                        iconID = GetClassIcon(npObject.NamePlateInfo);
                     }
                     else
                     {

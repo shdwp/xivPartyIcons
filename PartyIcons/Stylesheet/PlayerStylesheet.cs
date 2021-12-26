@@ -165,6 +165,11 @@ namespace PartyIcons.Stylesheet
             }
         }
 
+        public SeString GetPartySlotNumber(uint number, GenericRole genericRole)
+        {
+            return SeStringUtils.Text(BoxedCharacterString(number.ToString()), GetGenericRoleColor(genericRole));
+        }
+
         public SeString GetRoleChatPrefix(RoleId roleId)
         {
             return GetRolePlate(roleId);
