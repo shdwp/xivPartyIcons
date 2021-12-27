@@ -16,17 +16,19 @@ namespace PartyIcons.Runtime
         [PluginService] public DataManager DataManager { get; set; }
         [PluginService] public ChatGui     ChatGui     { get; set; }
 
-        private readonly NameplateView   _nameplateView;
-        private readonly Configuration   _configuration;
-        private readonly ChatNameUpdater _chatNameUpdater;
+        private readonly NameplateView       _nameplateView;
+        private readonly Configuration       _configuration;
+        private readonly ChatNameUpdater     _chatNameUpdater;
+        private readonly PartyListHUDUpdater _partyListHudUpdater;
 
         private ExcelSheet<ContentFinderCondition> _contentFinderConditionsSheet;
 
-        public ViewModeSetter(NameplateView nameplateView, Configuration configuration, ChatNameUpdater chatNameUpdater)
+        public ViewModeSetter(NameplateView nameplateView, Configuration configuration, ChatNameUpdater chatNameUpdater, PartyListHUDUpdater partyListHudUpdater)
         {
             _nameplateView = nameplateView;
             _configuration = configuration;
             _chatNameUpdater = chatNameUpdater;
+            _partyListHudUpdater = partyListHudUpdater;
         }
 
         public void Enable()
@@ -102,6 +104,8 @@ namespace PartyIcons.Runtime
                     _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
                     break;
             }
+
+            _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters;
         }
     }
 }

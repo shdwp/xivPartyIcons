@@ -1,6 +1,6 @@
 ﻿namespace PartyIcons.View
 {
-    public enum IconSizeMode
+    public enum NameplateSizeMode
     {
         Smaller,
         Medium,

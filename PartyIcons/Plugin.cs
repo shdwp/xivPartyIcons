@@ -5,8 +5,10 @@ using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using PartyIcons.Api;
+using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
@@ -36,15 +38,17 @@ namespace PartyIcons
 
         private Configuration Configuration { get; }
 
-        private readonly PlayerContextMenu    _contextMenu;
-        private readonly PluginUI             _ui;
-        private readonly NameplateUpdater     _nameplateUpdater;
-        private readonly NPCNameplateFixer    _npcNameplateFixer;
-        private readonly NameplateView        _nameplateView;
-        private readonly RoleTracker          _roleTracker;
-        private readonly ViewModeSetter  _modeSetter;
-        private readonly ChatNameUpdater      _chatNameUpdater;
-        private readonly PlayerStylesheet     _playerStylesheet;
+        private readonly PartyListHUDView  _partyHUDView;
+        private readonly PartyListHUDUpdater   _partyListHudUpdater;
+        private readonly PlayerContextMenu _contextMenu;
+        private readonly PluginUI          _ui;
+        private readonly NameplateUpdater  _nameplateUpdater;
+        private readonly NPCNameplateFixer _npcNameplateFixer;
+        private readonly NameplateView     _nameplateView;
+        private readonly RoleTracker       _roleTracker;
+        private readonly ViewModeSetter    _modeSetter;
+        private readonly ChatNameUpdater   _chatNameUpdater;
+        private readonly PlayerStylesheet  _playerStylesheet;
 
         public Plugin()
         {
@@ -70,17 +74,19 @@ namespace PartyIcons
 
             SeStringUtils.Initialize();
 
+            _partyHUDView = new PartyListHUDView(GameGui, _playerStylesheet);
+
             _roleTracker = new RoleTracker(Configuration);
             Interface.Inject(_roleTracker);
 
-            _nameplateView = new NameplateView(_roleTracker, Configuration, _playerStylesheet);
+            _nameplateView = new NameplateView(_roleTracker, Configuration, _playerStylesheet, _partyHUDView);
             Interface.Inject(_nameplateView);
 
             _chatNameUpdater = new ChatNameUpdater(_roleTracker, _playerStylesheet);
             Interface.Inject(_chatNameUpdater);
 
-            _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater);
-            Interface.Inject(_modeSetter);
+            _partyListHudUpdater = new PartyListHUDUpdater(_partyHUDView, _roleTracker, Configuration);
+            Interface.Inject(_partyListHudUpdater);
 
             _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, Base);
             _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
@@ -94,6 +100,10 @@ namespace PartyIcons
 
             _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
 
+            _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
+            Interface.Inject(_modeSetter);
+
+            _partyListHudUpdater.Enable();
             _modeSetter.Enable();
             _roleTracker.Enable();
             _nameplateUpdater.Enable();
@@ -106,6 +116,8 @@ namespace PartyIcons
         {
             _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
 
+            _partyHUDView.Dispose();
+            _partyListHudUpdater.Dispose();
             _chatNameUpdater.Dispose();
             _contextMenu.Dispose();
             _nameplateUpdater.Dispose();
@@ -149,10 +161,20 @@ namespace PartyIcons
                 _roleTracker.CalculateUnassignedPartyRoles();
                 ChatGui.Print("Occupations are reset, roles are auto assigned.");
             }
-            else if (arguments == "debug")
+            else if (arguments == "dbg state")
             {
                 ChatGui.Print($"Current mode is {_nameplateView.PartyMode}, party count {PartyList.Length}");
                 ChatGui.Print(_roleTracker.DebugDescription());
+            }
+            else if (arguments == "dbg party")
+            {
+                foreach (var member in PartyList)
+                {
+                    var index = _partyHUDView.GetPartySlotIndex(member.ObjectId);
+                    ChatGui.Print($"Party member index {index} name {member.Name} worldid {member.World.Id}");
+                }
+
+                ChatGui.Print(_partyHUDView.GetDebugInfo());
             }
         }
     }

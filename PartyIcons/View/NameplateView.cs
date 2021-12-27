@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
@@ -22,6 +23,7 @@ namespace PartyIcons.View
         private readonly Configuration    _configuration;
         private readonly PlayerStylesheet _stylesheet;
         private readonly RoleTracker      _roleTracker;
+        private readonly PartyListHUDView _partyListHudView;
 
         private readonly IconSet _iconSet;
 
@@ -30,11 +32,12 @@ namespace PartyIcons.View
 
         [PluginService] private ClientState ClientState { get; set; }
 
-        public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet)
+        public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet, PartyListHUDView partyListHudView)
         {
             _roleTracker = roleTracker;
             _configuration = configuration;
             _stylesheet = stylesheet;
+            _partyListHudView = partyListHudView;
             _iconSet = new IconSet();
         }
 
@@ -50,68 +53,76 @@ namespace PartyIcons.View
 
         public void SetupForPC(XivApi.SafeNamePlateObject npObject)
         {
+            var nameScale = 0.75f;
+            var iconScale = 1f;
+            var iconOffset = new Vector2(0, 0);
+
             switch (GetModeForNameplate(npObject))
             {
                 case NameplateMode.Default:
                 case NameplateMode.SmallJobIcon:
                     SetupDefault(npObject);
-                    break;
+                    return;
 
                 case NameplateMode.BigJobIcon:
-                    npObject.SetNameScale(0.75f);
+                    nameScale = 0.75f;
 
-                    switch (_configuration.IconSizeMode)
+                    switch (_configuration.SizeMode)
                     {
-                        case IconSizeMode.Smaller:
-                            npObject.SetIconPosition(9, 60);
-                            npObject.SetIconScale(1.5f);
+                        case NameplateSizeMode.Smaller:
+                            iconOffset = new Vector2(9, 50);
+                            iconScale = 1.5f;
                             break;
 
-                        case IconSizeMode.Medium:
-                            npObject.SetIconPosition(-12, 24);
-                            npObject.SetIconScale(3f);
+                        case NameplateSizeMode.Medium:
+                            iconOffset = new Vector2(-12, 24);
+                            iconScale = 3f;
                             break;
 
-                        case IconSizeMode.Bigger:
-                            npObject.SetIconPosition(-27, -12);
-                            npObject.SetIconScale(4f);
+                        case NameplateSizeMode.Bigger:
+                            iconOffset = new Vector2(-27, -12);
+                            iconScale = 4f;
                             break;
                     }
                     break;
 
                 case NameplateMode.BigJobIconAndPartySlot:
-                    switch (_configuration.IconSizeMode)
+                    switch (_configuration.SizeMode)
                     {
-                        case IconSizeMode.Smaller:
-                            npObject.SetIconPosition(12, 68);
-                            npObject.SetIconScale(1.2f);
-                            npObject.SetNameScale(0.6f);
+                        case NameplateSizeMode.Smaller:
+                            iconOffset = new Vector2(12, 62);
+                            iconScale = 1.2f;
+                            nameScale = 0.6f;
                             break;
 
-                        case IconSizeMode.Medium:
-                            npObject.SetIconPosition(-14, 41);
-                            npObject.SetIconScale(2.3f);
-                            npObject.SetNameScale(1f);
+                        case NameplateSizeMode.Medium:
+                            iconOffset = new Vector2(-14, 41);
+                            iconScale = 2.3f;
+                            nameScale = 1f;
                             break;
 
-                        case IconSizeMode.Bigger:
-                            npObject.SetIconPosition(-32, 15);
-                            npObject.SetIconScale(3f);
-                            npObject.SetNameScale(1.5f);
+                        case NameplateSizeMode.Bigger:
+                            iconOffset = new Vector2(-32, 15);
+                            iconScale = 3f;
+                            nameScale = 1.5f;
                             break;
                     }
                     break;
 
-                case NameplateMode.BigRole:
-                    npObject.SetIconScale(0f);
-                    npObject.SetNameScale(_configuration.IconSizeMode switch
+                case NameplateMode.RoleLetters:
+                    iconScale = 0f;
+                    nameScale = _configuration.SizeMode switch
                     {
-                        IconSizeMode.Smaller => 0.5f,
-                        IconSizeMode.Medium  => 1f,
-                        IconSizeMode.Bigger  => 1.5f,
-                    });
+                        NameplateSizeMode.Smaller => 0.5f,
+                        NameplateSizeMode.Medium  => 1f,
+                        NameplateSizeMode.Bigger  => 1.5f,
+                    };
                     break;
             }
+
+            npObject.SetIconPosition((short)iconOffset.X, (short)iconOffset.Y);
+            npObject.SetIconScale(iconScale);
+            npObject.SetNameScale(nameScale);
         }
 
         public void NameplateDataForPC(
@@ -141,7 +152,7 @@ namespace PartyIcons.View
                         iconID = 0;
                         return;
 
-                    case NameplateMode.BigRole:
+                    case NameplateMode.RoleLetters:
                         if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
                         {
                             name = SeStringUtils.emptyPtr;
@@ -180,7 +191,7 @@ namespace PartyIcons.View
                 case NameplateMode.BigJobIconAndPartySlot:
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
-                    var partySlot = PartyListHUD.GetPartySlotNumber(npObject.NamePlateInfo.Data.ObjectID.ObjectID);
+                    var partySlot = _partyListHudView.GetPartySlotIndex(npObject.NamePlateInfo.Data.ObjectID.ObjectID) + 1;
                     if (partySlot != null)
                     {
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
@@ -196,7 +207,7 @@ namespace PartyIcons.View
                     }
                     break;
 
-                case NameplateMode.BigRole:
+                case NameplateMode.RoleLetters:
                     if (hasRole)
                     {
                         name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));

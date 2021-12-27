@@ -12,19 +12,20 @@ namespace PartyIcons
     {
         public event Action OnSave;
 
-        public int   Version { get; set; } = 1;
-        public bool  ChatContentMessage       = true;
-        public bool  HideLocalPlayerNameplate = true;
-        public bool  TestingMode              = true;
-        public bool  EasternNamingConvention  = false;
+        public int  Version { get; set; } = 1;
+        public bool ChatContentMessage       = true;
+        public bool HideLocalPlayerNameplate = true;
+        public bool TestingMode              = true;
+        public bool EasternNamingConvention  = false;
+        public bool DisplayRoleInPartyList   = false;
 
-        public IconSetId    IconSetId    { get; set; } = IconSetId.GlowingColored;
-        public IconSizeMode IconSizeMode { get; set; } = IconSizeMode.Medium;
+        public IconSetId         IconSetId { get; set; } = IconSetId.GlowingColored;
+        public NameplateSizeMode SizeMode  { get; set; } = NameplateSizeMode.Medium;
 
         public NameplateMode NameplateOverworld    { get; set; } = NameplateMode.SmallJobIcon;
         public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIcon;
         public NameplateMode NameplateDungeon      { get; set; } = NameplateMode.BigJobIcon;
-        public NameplateMode NameplateRaid         { get; set; } = NameplateMode.BigRole;
+        public NameplateMode NameplateRaid         { get; set; } = NameplateMode.RoleLetters;
         public NameplateMode NameplateOthers       { get; set; } = NameplateMode.SmallJobIcon;
 
         public ChatMode ChatOverworld    { get; set; } = ChatMode.Role;

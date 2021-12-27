@@ -142,7 +142,7 @@ namespace PartyIcons.Runtime
         {
             ResetAssignments();
 
-            PluginLog.Debug("Assigning current occupations");
+            PluginLog.Debug($"Assigning current occupations ({_occupiedRoles.Count})");
             foreach (var kv in _occupiedRoles)
             {
                 PluginLog.Debug($"{kv.Key} == {kv.Value} as per occupation");
@@ -151,7 +151,7 @@ namespace PartyIcons.Runtime
                 _unassignedRoles.Remove(kv.Value);
             }
 
-            PluginLog.Debug("Assigning static assignments");
+            PluginLog.Debug($"Assigning static assignments ({_configuration.StaticAssignments.Count})");
             foreach (var kv in _configuration.StaticAssignments)
             {
                 foreach (var member in PartyList)
@@ -163,12 +163,13 @@ namespace PartyIcons.Runtime
                         continue;
                     }
 
-                    if (kv.Key.Equals(playerId))
+                    var playerDescription = $"{member.Name}@{member.World.GameData.Name}";
+                    if (kv.Key.Equals(playerDescription))
                     {
                         var applicableRoles = GetApplicableRolesForGenericRole(JobRoleExtensions.RoleFromByte(member.ClassJob.GameData.Role));
                         if (applicableRoles.Contains(kv.Value))
                         {
-                            PluginLog.Debug($"{PlayerId(member)} == {kv.Value} as per static assignments");
+                            PluginLog.Debug($"{playerId} == {kv.Value} as per static assignments {playerDescription}");
                             _assignedRoles[playerId] = kv.Value;
                         }
                         else
@@ -259,13 +260,13 @@ namespace PartyIcons.Runtime
 
         private string PlayerId(PartyMember member)
         {
-            return $"{member.Name.TextValue}@{member.World.GameData.Name}";
+            return $"{member.Name.TextValue}@{member.World.Id}";
         }
 
         private RoleId FindUnassignedRoleForGenericRole(GenericRole role)
         {
             var applicableRoles = GetApplicableRolesForGenericRole(role);
-            return _unassignedRoles.FirstOrDefault(r => applicableRoles.Contains(r));
+            return applicableRoles.FirstOrDefault(r => _unassignedRoles.Contains(r));
         }
 
         private IEnumerable<RoleId> GetApplicableRolesForGenericRole(GenericRole role)

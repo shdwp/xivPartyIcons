@@ -6,6 +6,6 @@
         SmallJobIcon,
         BigJobIcon,
         BigJobIconAndPartySlot,
-        BigRole,
+        RoleLetters,
     }
 }

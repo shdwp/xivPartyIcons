@@ -48,7 +48,7 @@ namespace PartyIcons
                 { NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png" },
                 { NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png" },
                 { NameplateMode.BigJobIconAndPartySlot, "PartyIcons.Resources.3.png" },
-                { NameplateMode.BigRole, "PartyIcons.Resources.4.png" },
+                { NameplateMode.RoleLetters, "PartyIcons.Resources.4.png" },
             };
 
             _nameplateExamples = new Dictionary<NameplateMode, TextureWrap>();
@@ -131,7 +131,7 @@ namespace PartyIcons
             }
             ImGui.SameLine();
             ImGui.Text("Enable testing mode");
-            ImGuiHelpTooltip("Applied settings to any player, contrary to only the ones that are in the party.");
+            ImGuiHelpTooltip("Applies settings to any player, contrary to only the ones that are in the party.");
 
             var chatContentMessage = _configuration.ChatContentMessage;
             if (ImGui.Checkbox("##chatmessage", ref chatContentMessage))
@@ -152,6 +152,16 @@ namespace PartyIcons
             ImGui.SameLine();
             ImGui.Text("Eastern role naming convention");
             ImGuiHelpTooltip("Use japanese data center role naming convention (MT ST D1-D4 H1-2).");
+
+            var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
+            if (ImGui.Checkbox("##displayrolesinpartylist", ref displayRoleInPartyList))
+            {
+                _configuration.DisplayRoleInPartyList = displayRoleInPartyList;
+                _configuration.Save();
+            }
+            ImGui.SameLine();
+            ImGui.Text("Replace party numbers with role in Party List");
+            ImGuiHelpTooltip("EXPERIMENTAL. Only works when nameplates set to 'Role letters'.", true);
         }
 
         private void DrawNameplateSettings()
@@ -165,6 +175,8 @@ namespace PartyIcons
             ImGui.SameLine();
             ImGui.Text("Hide own nameplate");
             ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
+
+            ImGui.Dummy(new Vector2(0f, 25f));
 
             var iconSetId = _configuration.IconSetId;
             ImGui.Text("Icon set:");
@@ -183,22 +195,23 @@ namespace PartyIcons
                 ImGui.EndCombo();
             }
 
-            var iconSizeMode = _configuration.IconSizeMode;
-            ImGui.Text("Icon size:");
+            var iconSizeMode = _configuration.SizeMode;
+            ImGui.Text("Nameplate size:");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(300);
             if (ImGui.BeginCombo("##icon_size", iconSizeMode.ToString()))
             {
-                foreach (var mode in Enum.GetValues<IconSizeMode>())
+                foreach (var mode in Enum.GetValues<NameplateSizeMode>())
                 {
                     if (ImGui.Selectable(mode + "##icon_set_" + mode))
                     {
-                        _configuration.IconSizeMode = mode;
+                        _configuration.SizeMode = mode;
                         _configuration.Save();
                     }
                 }
                 ImGui.EndCombo();
             }
+            ImGuiHelpTooltip("Affects all presets, except Game Default and Small Job Icon.");
 
             ImGui.Dummy(new Vector2(0, 25f));
             ImGui.Text("Dungeon:");
@@ -249,7 +262,7 @@ namespace PartyIcons
 
         private void DrawStaticAssignmentsSettings()
         {
-            ImGui.TextWrapped("Name should include world name, separated by @.");
+            ImGui.TextWrapped("Name should include world name, separated by @. Experimental option.");
             ImGui.Dummy(new Vector2(0f, 25f));
 
             foreach (var kv in new Dictionary<string, RoleId>(_configuration.StaticAssignments))
@@ -314,10 +327,19 @@ namespace PartyIcons
             }
         }
 
-        private void ImGuiHelpTooltip(string tooltip)
+        private void ImGuiHelpTooltip(string tooltip, bool experimental = false)
         {
             ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1f), "?");
+
+            if (experimental)
+            {
+                ImGui.TextColored(new Vector4(0.8f, 0.0f, 0.0f, 1f), "!");
+            }
+            else
+            {
+                ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1f), "?");
+            }
+
             if (ImGui.IsItemHovered())
             {
                 ImGui.SetTooltip(tooltip);
@@ -378,9 +400,9 @@ namespace PartyIcons
         {
             return id switch
             {
-                IconSetId.Framed => "Framed, role colored",
+                IconSetId.Framed         => "Framed, role colored",
                 IconSetId.GlowingColored => "Glowing, role colored",
-                IconSetId.GlowingGold => "Glowing, gold",
+                IconSetId.GlowingGold    => "Glowing, gold",
             };
         }
 
@@ -392,7 +414,7 @@ namespace PartyIcons
                 NameplateMode.BigJobIcon             => "Big job icon",
                 NameplateMode.SmallJobIcon           => "Small job icon and name",
                 NameplateMode.BigJobIconAndPartySlot => "Big job icon and party number",
-                NameplateMode.BigRole                => "Role letters",
+                NameplateMode.RoleLetters                => "Role letters",
                 _                                    => throw new ArgumentException(),
             };
         }
