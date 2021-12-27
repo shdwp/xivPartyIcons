@@ -70,7 +70,7 @@ namespace PartyIcons.View
                         if (oldIconId != -1 && !nameables.Contains(oldIconId))
                         {
                             SetupDefault(npObject);
-                            npObject.AdjustIconPosition(12, 0);
+                            npObject.AdjustIconPosition(10, 0);
                             return;
                         }
                         npObject.SetIconScale(0.75f);
@@ -80,7 +80,7 @@ namespace PartyIcons.View
                     else
                     {
                         SetupDefault(npObject);
-                        npObject.AdjustIconPosition(12, 0);
+                        npObject.AdjustIconPosition(10, 0);
                     }
                     return;
 
