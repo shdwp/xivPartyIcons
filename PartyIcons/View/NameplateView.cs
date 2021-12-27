@@ -63,6 +63,9 @@ namespace PartyIcons.View
             switch (GetModeForNameplate(npObject))
             {
                 case NameplateMode.Default:
+                    SetupDefault(npObject);
+                    return;
+
                 case NameplateMode.SmallJobIcon:
 
                     if (_configuration.IconSetId == IconSetId.Framed)
@@ -315,9 +318,9 @@ namespace PartyIcons.View
                 //061522 - party member
                 061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
                 061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
-                061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
+                061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
                 061543 => SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix),
-                061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
+                061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
                 061547 => SeStringUtils.Icon(BitmapFontIcon.Returner, prefix),
                 _ => null
             };
