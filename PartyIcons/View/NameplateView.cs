@@ -240,14 +240,14 @@ namespace PartyIcons.View
 
                 case NameplateMode.SmallJobIcon:
                     name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, SeStringUtils.SeStringFromPtr(name));
-                    iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1);
+                    iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1);
                     break;
 
                 case NameplateMode.BigJobIcon:
                     name = GetStateNametext(iconID);
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
-                    iconID = GetClassIcon(npObject.NamePlateInfo);
+                    iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1);
                     break;
 
                 case NameplateMode.BigJobIconAndPartySlot:
@@ -260,12 +260,12 @@ namespace PartyIcons.View
                         //var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
                         //str.Payloads.Insert(0, new TextPayload(_iconPrefix));
                         name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole));
-                        iconID = GetClassIcon(npObject.NamePlateInfo);
+                        iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1);
                     }
                     else
                     {
                         name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1);
-                        iconID = GetClassIcon(npObject.NamePlateInfo);
+                        iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1);
                     }
                     break;
 
