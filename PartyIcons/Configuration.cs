@@ -18,7 +18,8 @@ namespace PartyIcons
         public bool TestingMode              = true;
         public bool EasternNamingConvention  = false;
         public bool DisplayRoleInPartyList   = false;
-
+        public bool ShowPlayerStatus = true;
+        
         public IconSetId         IconSetId { get; set; } = IconSetId.GlowingColored;
         public NameplateSizeMode SizeMode  { get; set; } = NameplateSizeMode.Medium;
 

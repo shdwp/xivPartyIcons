@@ -13,6 +13,7 @@ using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
+using System.Linq;
 
 namespace PartyIcons.View
 {
@@ -26,6 +27,8 @@ namespace PartyIcons.View
         private readonly PartyListHUDView _partyListHudView;
 
         private readonly IconSet _iconSet;
+        private const string _iconPrefix = "   ";
+        private readonly int[] nameables = { 061521, 061522, 061523, 061540, 061542, 061543, 061544, 061547 };
 
         public NameplateMode PartyMode  { get; set; }
         public NameplateMode OthersMode { get; set; }
@@ -51,7 +54,7 @@ namespace PartyIcons.View
             npObject.SetNameScale(0.5f);
         }
 
-        public void SetupForPC(XivApi.SafeNamePlateObject npObject)
+        public void SetupForPC(XivApi.SafeNamePlateObject npObject, int oldIconId)
         {
             var nameScale = 0.75f;
             var iconScale = 1f;
@@ -61,7 +64,24 @@ namespace PartyIcons.View
             {
                 case NameplateMode.Default:
                 case NameplateMode.SmallJobIcon:
-                    SetupDefault(npObject);
+
+                    if (_configuration.IconSetId == IconSetId.Framed)
+                    {
+                        if (oldIconId != -1 && !nameables.Contains(oldIconId))
+                        {
+                            SetupDefault(npObject);
+                            npObject.AdjustIconPosition(12, 0);
+                            return;
+                        }
+                        npObject.SetIconScale(0.75f);
+                        npObject.SetNameScale(0.5f);
+                        npObject.AdjustIconPosition(14, 4);
+                    }
+                    else
+                    {
+                        SetupDefault(npObject);
+                        npObject.AdjustIconPosition(12, 0);
+                    }
                     return;
 
                 case NameplateMode.BigJobIcon:
@@ -82,6 +102,12 @@ namespace PartyIcons.View
                         case NameplateSizeMode.Bigger:
                             iconOffset = new Vector2(-27, -12);
                             iconScale = 4f;
+                            break;
+
+                        case NameplateSizeMode.Tiny:
+                            iconOffset = new Vector2(15, 74);
+                            iconScale = 1f;
+                            nameScale = 0.5f;
                             break;
                     }
                     break;
@@ -106,18 +132,50 @@ namespace PartyIcons.View
                             iconScale = 3f;
                             nameScale = 1.5f;
                             break;
+
+                        case NameplateSizeMode.Tiny:
+                            iconOffset = new Vector2(15, 74);
+                            iconScale = 1f;
+                            nameScale = 0.5f;
+                            break;
                     }
                     break;
 
                 case NameplateMode.RoleLetters:
-                    iconScale = 0f;
+                    if (_configuration.ShowPlayerStatus)
+                        switch (_configuration.SizeMode)
+                        {
+                            case NameplateSizeMode.Smaller:
+                            case NameplateSizeMode.Tiny:
+                                iconOffset = new Vector2(15, 74);
+                                iconScale = 1f;
+                                break;
+                            case NameplateSizeMode.Medium:
+                                iconOffset = new Vector2(0, 53);
+                                iconScale = 1.5f;
+                                break;
+                            case NameplateSizeMode.Bigger:
+                                iconOffset = new Vector2(-15, 34);
+                                iconScale = 2f;
+                                break;
+                        }
+                    else iconScale = 0f;
+
                     nameScale = _configuration.SizeMode switch
                     {
                         NameplateSizeMode.Smaller => 0.5f,
                         NameplateSizeMode.Medium  => 1f,
                         NameplateSizeMode.Bigger  => 1.5f,
+                        NameplateSizeMode.Tiny => 0.5f
                     };
                     break;
+            }
+
+            if (GetModeForNameplate(npObject) < NameplateMode.RoleLetters && _configuration.IconSetId == IconSetId.Framed)
+            {
+                iconScale *=  0.75f;
+                iconOffset.Y += 4;
+                iconOffset.X += 2;
             }
 
             npObject.SetIconPosition((short)iconOffset.X, (short)iconOffset.Y);
@@ -149,7 +207,7 @@ namespace PartyIcons.View
                         name = SeStringUtils.emptyPtr;
                         fcName = SeStringUtils.emptyPtr;
                         displayTitle = false;
-                        iconID = 0;
+                        iconID = -1;
                         return;
 
                     case NameplateMode.RoleLetters:
@@ -158,7 +216,7 @@ namespace PartyIcons.View
                             name = SeStringUtils.emptyPtr;
                             fcName = SeStringUtils.emptyPtr;
                             displayTitle = false;
-                            iconID = 0;
+                            iconID = -1;
                             return;
                         }
                         break;
@@ -178,7 +236,8 @@ namespace PartyIcons.View
                     break;
 
                 case NameplateMode.SmallJobIcon:
-                    iconID = GetClassIcon(npObject.NamePlateInfo);
+                    name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, SeStringUtils.SeStringFromPtr(name));
+                    iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1);
                     break;
 
                 case NameplateMode.BigJobIcon:
@@ -195,14 +254,14 @@ namespace PartyIcons.View
                     if (partySlot != null)
                     {
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                        var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
-                        str.Payloads.Insert(0, new TextPayload("   "));
-                        name = SeStringUtils.SeStringToPtr(str);
+                        //var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
+                        //str.Payloads.Insert(0, new TextPayload(_iconPrefix));
+                        name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole));
                         iconID = GetClassIcon(npObject.NamePlateInfo);
                     }
                     else
                     {
-                        name = SeStringUtils.emptyPtr;
+                        name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1);
                         iconID = GetClassIcon(npObject.NamePlateInfo);
                     }
                     break;
@@ -210,12 +269,12 @@ namespace PartyIcons.View
                 case NameplateMode.RoleLetters:
                     if (hasRole)
                     {
-                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
+                        name = GetStateNametext(-1, _configuration.ShowPlayerStatus ? _iconPrefix : null, _stylesheet.GetRolePlate(roleId));
                     }
                     else
                     {
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                        name = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
+                        name = GetStateNametext(-1, _configuration.ShowPlayerStatus ? _iconPrefix : null, _stylesheet.GetGenericRolePlate(genericRole));
                     }
 
                     fcName = SeStringUtils.emptyPtr;
@@ -224,25 +283,51 @@ namespace PartyIcons.View
             }
         }
 
-        private int GetClassIcon(XivApi.SafeNamePlateInfo info)
+        private int GetClassIcon(XivApi.SafeNamePlateInfo info, int def = -1)
         {
+            if (def != -1 && !nameables.Contains(def))
+                return def;
+        	
             var genericRole = JobExtensions.GetRole((Job)info.GetJobID());
             var iconSet = _stylesheet.GetGenericRoleIconset(genericRole);
             return _iconSet.GetJobIcon(iconSet, info.GetJobID());
         }
 
-        private IntPtr GetStateNametext(int iconId)
+        private bool IsIgnorableStatus(int statusIcon)
         {
-            var prefix = "   ";
-            return iconId switch
+            return statusIcon == -1 || nameables.Contains(statusIcon);
+        }
+
+        private int GetClassRoleColoredIcon(XivApi.SafeNamePlateInfo info, RoleId roleId, int def = -1)
+        {
+            if (!IsIgnorableStatus(def))
+                return def;
+
+            return _iconSet.GetJobIcon(_stylesheet.GetRoleIconset(roleId), info.GetJobID());
+        }
+
+        private SeString GetStateNametextS(int iconId, string? prefix = _iconPrefix, SeString? append = null)
+        {
+
+            SeString? val = iconId switch
             {
-                061523 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix)),
-                061540 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061543 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061542 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061547 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                _      => SeStringUtils.SeStringToPtr(SeStringUtils.Text(prefix + " "))
+                //061521 - party leader
+                //061522 - party member
+                061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
+                061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
+                061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
+                061543 => SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix),
+                061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
+                061547 => SeStringUtils.Icon(BitmapFontIcon.Returner, prefix),
+                _ => null
             };
+
+            return append == null ? val == null ? SeString.Empty : val : val == null ? prefix == null ? append : SeStringUtils.Text(_iconPrefix).Append(append) : val.Append(append);
+        }
+
+        private IntPtr GetStateNametext(int iconId, string? prefix = _iconPrefix, SeString? append = null)
+        {
+            return SeStringUtils.SeStringToPtr(GetStateNametextS(iconId, prefix, append));
         }
 
         private NameplateMode GetModeForNameplate(XivApi.SafeNamePlateObject npObject)

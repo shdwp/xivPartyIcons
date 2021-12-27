@@ -256,6 +256,25 @@ namespace PartyIcons.Api
                 Marshal.WriteInt16(iconXAdjustPtr, x);
                 Marshal.WriteInt16(iconYAdjustPtr, y);
             }
+
+            public void AdjustIconPosition(short x = 0, short y = 0)
+            {
+                if (x != 0)
+                {
+                    var iconXAdjustPtr = Pointer + Marshal.OffsetOf(typeof(AddonNamePlate.NamePlateObject), nameof(AddonNamePlate.NamePlateObject.IconXAdjust)).ToInt32();
+                    var val = Marshal.ReadInt16(iconXAdjustPtr);
+                    val += x;
+                    Marshal.WriteInt16(iconXAdjustPtr, val);
+                }
+
+                if (y != 0)
+                {
+                    var iconYAdjustPtr = Pointer + Marshal.OffsetOf(typeof(AddonNamePlate.NamePlateObject), nameof(AddonNamePlate.NamePlateObject.IconYAdjust)).ToInt32();
+                    var val = Marshal.ReadInt16(iconYAdjustPtr);
+                    val += y;
+                    Marshal.WriteInt16(iconYAdjustPtr, val);
+                }
+            }
         }
 
         public class SafeNamePlateInfo

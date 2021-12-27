@@ -176,6 +176,17 @@ namespace PartyIcons
             ImGui.Text("Hide own nameplate");
             ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
+            var showPlayerStatus = _configuration.ShowPlayerStatus;
+            if (ImGui.Checkbox("##showplayerstatus", ref showPlayerStatus))
+            {
+                _configuration.ShowPlayerStatus = showPlayerStatus;
+                _configuration.Save();
+            }
+
+            ImGui.SameLine();
+            ImGui.Text("Show player status");
+            ImGuiHelpTooltip("Display player status, or at least if it's a new adventurer or a mentor if possible");
+
             ImGui.Dummy(new Vector2(0f, 25f));
 
             var iconSetId = _configuration.IconSetId;
