@@ -65,9 +65,9 @@ namespace PartyIcons.View
                 case NameplateMode.SmallJobIconAndPartySlot:
                     if (_configuration.FramedSmallIcons)
                     {
-                        if (IsIgnorableStatus(oldIconID))
+                        if (!_configuration.ShowPlayerStatus || IsIgnorableStatus(oldIconID))
                         {
-                            npObject.AdjustIconPosition(14, 4);
+                            npObject.AdjustIconPosition(16, 4);
                             npObject.SetIconScale(0.75f);
                             npObject.SetNameScale(0.5f);
                         }
@@ -156,8 +156,7 @@ namespace PartyIcons.View
                     break;
 
                 case NameplateMode.SmallJobIcon:
-                    if(_configuration.ShowPlayerStatus)
-                        name = GetStateNametext(iconID, _iconPrefix, SeStringUtils.SeStringFromPtr(name));
+                    name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, SeStringUtils.SeStringFromPtr(name));
                     iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1, _configuration.FramedSmallIcons);
                     break;
 
@@ -203,10 +202,10 @@ namespace PartyIcons.View
                     break;
  
                 case NameplateMode.SmallJobIconOnly:
-                    name = (_configuration.ShowPlayerStatus) ? GetStateNametext(iconID) : SeStringUtils.emptyPtr;
+                    name = _configuration.ShowPlayerStatus ? GetStateNametext(iconID) : SeStringUtils.emptyPtr;
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
-                    iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1, _configuration.FramedSmallIcons);
+                    iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1, _configuration.FramedSmallIcons);
                     break;
 
                 case NameplateMode.SmallJobIconAndPartySlot:
@@ -221,12 +220,12 @@ namespace PartyIcons.View
                         else
                             name = GetStateNametext(-1, _iconPrefix, _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole));
 
-                        iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1, _configuration.FramedSmallIcons);
+                        iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1, _configuration.FramedSmallIcons);
                     }
                     else
                     {
-                        name = (_configuration.ShowPlayerStatus) ? GetStateNametext(iconID) : SeStringUtils.emptyPtr;
-                        iconID = GetClassIcon(npObject.NamePlateInfo, (_configuration.ShowPlayerStatus) ? iconID : -1, _configuration.FramedSmallIcons);
+                        name = _configuration.ShowPlayerStatus ? GetStateNametext(iconID) : SeStringUtils.emptyPtr;
+                        iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1, _configuration.FramedSmallIcons);
                     }
                     break;
 
@@ -295,20 +294,6 @@ namespace PartyIcons.View
                 return def;
 
             return _iconSet.GetJobIcon(_stylesheet.GetRoleIconset(roleId), info.GetJobID());
-        }
-
-        private IntPtr GetStateNametext(int iconId)
-        {
-            var prefix = "   ";
-            return iconId switch
-            {
-                061523 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix)),
-                061540 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061543 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061542 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061547 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                _      => SeStringUtils.SeStringToPtr(SeStringUtils.Text(prefix + " "))
-            };
         }
 
         private SeString GetStateNametextS(int iconId, string? prefix = _iconPrefix, SeString? append = null)
