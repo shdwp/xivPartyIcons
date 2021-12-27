@@ -28,7 +28,7 @@ namespace PartyIcons.View
 
         private readonly IconSet _iconSet;
         private const string _iconPrefix = "   ";
-        private readonly int[] nameables = { 061521, 061522, 061523, 061540, 061542, 061543, 061544, 061547 };
+        private readonly int[] ignorables = { 061521, 061522, 061523, 061540, 061542, 061543, 061544, 061547 };
 
         public NameplateMode PartyMode  { get; set; }
         public NameplateMode OthersMode { get; set; }
@@ -70,7 +70,7 @@ namespace PartyIcons.View
 
                     if (_configuration.IconSetId == IconSetId.Framed)
                     {
-                        if (oldIconId != -1 && !nameables.Contains(oldIconId))
+                        if (!IsIgnorableStatus(oldIconId))
                         {
                             SetupDefault(npObject);
                             npObject.AdjustIconPosition(10, 0);
@@ -174,7 +174,9 @@ namespace PartyIcons.View
                     break;
             }
 
-            if (GetModeForNameplate(npObject) < NameplateMode.RoleLetters && _configuration.IconSetId == IconSetId.Framed)
+            if (GetModeForNameplate(npObject) < NameplateMode.RoleLetters
+                && _configuration.IconSetId == IconSetId.Framed 
+                && (!_configuration.ShowPlayerStatus || IsIgnorableStatus(oldIconId)))
             {
                 iconScale *=  0.75f;
                 iconOffset.Y += 4;
@@ -257,8 +259,6 @@ namespace PartyIcons.View
                     if (partySlot != null)
                     {
                         var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                        //var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
-                        //str.Payloads.Insert(0, new TextPayload(_iconPrefix));
                         name = GetStateNametext(_configuration.ShowPlayerStatus ? iconID : -1, _iconPrefix, _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole));
                         iconID = GetClassIcon(npObject.NamePlateInfo, _configuration.ShowPlayerStatus ? iconID : -1);
                     }
@@ -288,7 +288,7 @@ namespace PartyIcons.View
 
         private int GetClassIcon(XivApi.SafeNamePlateInfo info, int def = -1)
         {
-            if (def != -1 && !nameables.Contains(def))
+            if (def != -1 && !ignorables.Contains(def))
                 return def;
         	
             var genericRole = JobExtensions.GetRole((Job)info.GetJobID());
@@ -298,7 +298,7 @@ namespace PartyIcons.View
 
         private bool IsIgnorableStatus(int statusIcon)
         {
-            return statusIcon == -1 || nameables.Contains(statusIcon);
+            return statusIcon == -1 || ignorables.Contains(statusIcon);
         }
 
         private int GetClassRoleColoredIcon(XivApi.SafeNamePlateInfo info, RoleId roleId, int def = -1)
