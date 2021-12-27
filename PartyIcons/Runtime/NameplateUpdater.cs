@@ -112,11 +112,11 @@ namespace PartyIcons.Runtime
                 return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
             }
 
-            var oldicon = iconID;
+            var oldIconId = iconID;
             _view.NameplateDataForPC(npObject, ref isPrefixTitle, ref displayTitle, ref title, ref name, ref fcName, ref iconID);
 
             var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
-            _view.SetupForPC(npObject, oldicon);
+            _view.SetupForPC(npObject, oldIconId);
 
             if (originalName != name)
             {

@@ -35,7 +35,7 @@ namespace PartyIcons.Runtime
                 while (!token.IsCancellationRequested)
                 {
                     RevertNPC();
-                    Task.Delay(100, token).Wait(token);
+                    Task.Delay(16, token).Wait(token);
                 }
             }
             catch (OperationCanceledException) { }

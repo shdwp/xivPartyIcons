@@ -40,7 +40,7 @@ namespace PartyIcons
             {
                 { NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png" },
                 { NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png" },
-                { NameplateMode.BigJobIconAndRole, "PartyIcons.Resources.3.png" },
+                { NameplateMode.BigJobIconAndPartySlot, "PartyIcons.Resources.3.png" },
                 { NameplateMode.BigRole, "PartyIcons.Resources.4.png" },
             };
 
@@ -270,15 +270,15 @@ namespace PartyIcons
         {
             return mode switch
             {
-                NameplateMode.Default               => "Game default",
-                NameplateMode.BigJobIcon            => "Big job icon",
-                NameplateMode.SmallJobIcon          => "Small job icon and name",
-                NameplateMode.BigJobIconAndRole     => "Big job icon and role number",
-                NameplateMode.BigRole               => "Role letters",
-                NameplateMode.SmallJobIconOnly      => "small job icon without name",
-                NameplateMode.SmallJobIconAndRole   => "small job icon and role number",
-                NameplateMode.SmallRole             => "small job role letters",
-                _                                   => throw new ArgumentException(),
+                NameplateMode.Default           => "Game default",
+                NameplateMode.BigJobIcon        => "Big job icon",
+                NameplateMode.SmallJobIcon      => "Small job icon and name",
+                NameplateMode.BigJobIconAndPartySlot => "Big job icon and party slot number",
+                NameplateMode.BigRole           => "Role letters",
+                NameplateMode.SmallJobIconOnly  => "small job icon without name",
+                NameplateMode.SmallJobIconAndPartySlot => "small job icon and slot number",
+                NameplateMode.SmallRole         => "small job role letters",
+                _                               => throw new ArgumentException(),
             };
         }
     }

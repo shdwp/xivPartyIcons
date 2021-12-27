@@ -111,7 +111,7 @@ namespace PartyIcons.Runtime
         {
             _suggestedRoles[PlayerId(name, world)] = roleId;
             OnRoleSuggested?.Invoke(name, roleId);
-            ToastGui.ShowQuest($"{roleId} is now suggested for {name}");
+            // ToastGui.ShowQuest($"{roleId} is now suggested for {name}");
         }
 
         public void ResetOccupations()

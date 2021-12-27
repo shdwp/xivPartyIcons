@@ -85,9 +85,8 @@ namespace PartyIcons.Runtime
 
         private bool GetAndRemovePartyNumberPrefix(XivChatType type, SeString sender, out string prefix)
         {
-            if (type == XivChatType.Party)
+            if (type == XivChatType.Party || type == XivChatType.Alliance)
             {
-
                 var playerNamePayload = sender.Payloads.FirstOrDefault(p => p is TextPayload) as TextPayload;
                 prefix = playerNamePayload.Text.Substring(0, 1);
                 playerNamePayload.Text = playerNamePayload.Text.Substring(1);
