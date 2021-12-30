@@ -178,11 +178,15 @@ namespace PartyIcons.View
                     break;
 
                 case NameplateMode.SmallJobIcon:
+                    var nameString = GetStateNametext(iconID, "");
+                    nameString.Append(playerCharacter.Name);
+
+                    name = SeStringUtils.SeStringToPtr(nameString);
                     iconID = GetClassIcon(npObject.NamePlateInfo);
                     break;
 
                 case NameplateMode.BigJobIcon:
-                    name = GetStateNametext(iconID);
+                    name = SeStringUtils.SeStringToPtr(GetStateNametext(iconID, "   "));
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
                     iconID = GetClassIcon(npObject.NamePlateInfo);
@@ -231,17 +235,20 @@ namespace PartyIcons.View
             return _iconSet.GetJobIcon(iconSet, info.GetJobID());
         }
 
-        private IntPtr GetStateNametext(int iconId)
+        private SeString GetStateNametext(int iconId, string prefix)
         {
-            var prefix = "   ";
             return iconId switch
             {
-                061523 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix)),
-                061540 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061543 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061542 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                061547 => SeStringUtils.SeStringToPtr(SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix)),
-                _      => SeStringUtils.SeStringToPtr(SeStringUtils.Text(prefix + " "))
+                //061521 - party leader
+                //061522 - party member
+
+                061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
+                061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
+                061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
+                061543 => SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix),
+                061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
+                061547 => SeStringUtils.Icon(BitmapFontIcon.Returner, prefix),
+                _      => SeStringUtils.Text(prefix + " ")
             };
         }
 
