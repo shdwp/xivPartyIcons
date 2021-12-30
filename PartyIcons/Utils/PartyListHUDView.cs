@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Text;
+using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Gui;
+using Dalamud.IoC;
 using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using PartyIcons.Entities;
@@ -11,6 +14,8 @@ namespace PartyIcons.Utils
 {
     public unsafe class PartyListHUDView : IDisposable
     {
+        [PluginService] public PartyList PartyList { get; set; }
+
         private readonly PlayerStylesheet _stylesheet;
         private readonly GameGui          _gameGui;
 
@@ -74,6 +79,35 @@ namespace PartyIcons.Utils
             return null;
         }
 
+        public void SetPartyMemberRole(string name, uint objectId, RoleId roleId)
+        {
+            var index = GetPartySlotIndex(objectId);
+
+            for (uint i = 0; i < 8; i++)
+            {
+                var memberStruct = GetPartyMemberStruct(i);
+                if (memberStruct.HasValue)
+                {
+                    var nameString = memberStruct.Value.Name->NodeText.ToString();
+                    var strippedName = StripSpecialCharactersFromName(nameString);
+
+                    if (name.Contains(strippedName))
+                    {
+                        if (!index.HasValue || index.Value != i)
+                        {
+                            PluginLog.Warning("PartyHUD and HUDAgent id's mismatch!");
+                            PluginLog.Warning(GetDebugInfo());
+                        }
+
+                        SetPartyMemberRole(i, roleId);
+                        return;
+                    }
+                }
+            }
+
+            PluginLog.Verbose($"Member struct by the name {name} not found.");
+        }
+
         public void SetPartyMemberRole(uint index, RoleId roleId)
         {
             var memberStructOptional = GetPartyMemberStruct(index);
@@ -113,17 +147,44 @@ namespace PartyIcons.Utils
             {
                 // hud->PartyMemberCount gives out special (?) value when in trust
                 PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
-                return "trust detected";
+                return null;
             }
 
             var result = new StringBuilder();
-            var list = (HudPartyMember*)hud->PartyMemberList;
+            result.AppendLine($"PARTY ({PartyList.Length}):");
+            foreach (var member in PartyList)
+            {
+                var index = GetPartySlotIndex(member.ObjectId);
+                result.AppendLine($"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");
+            }
+
+            result.AppendLine("STRUCTS:");
+            var memberList = (HudPartyMember*)hud->PartyMemberList;
             for (var i = 0; i < hud->PartyMemberCount; i++)
             {
                 var memberStruct = GetPartyMemberStruct((uint)i);
                 if (memberStruct.HasValue)
                 {
-                    result.AppendLine($"member index {i} name {memberStruct.Value.Name->NodeText}");
+                    /*
+                    for (var pi = 0; pi < memberStruct.Value.ClassJobIcon->PartsList->PartCount; pi++)
+                    {
+                        var part = memberStruct.Value.ClassJobIcon->PartsList->Parts[pi];
+                        result.Append($"icon {part.UldAsset->AtkTexture.Resource->TexFileResourceHandle->ResourceHandle.FileName}");
+                    }
+                    */
+
+                    var strippedName = StripSpecialCharactersFromName(memberStruct.Value.Name->NodeText.ToString());
+                    result.AppendLine($"PartyMemberStruct index {i} name '{strippedName}', id matched {memberList[i].ObjectId}");
+
+                    var byteCount = 0;
+                    while (byteCount < 16 && memberList[i].Name[byteCount++] != 0) { }
+
+                    var memberListName = Encoding.UTF8.GetString(memberList[i].Name, byteCount - 1);
+                    result.AppendLine($"HudPartyMember index {i} name {memberListName} {memberList[i].ObjectId}");
+                }
+                else
+                {
+                    result.AppendLine($"PartyMemberStruct null at {i}");
                 }
             }
 
@@ -153,5 +214,19 @@ namespace PartyIcons.Utils
             };
         }
 
+        private string StripSpecialCharactersFromName(string name)
+        {
+            var result = new StringBuilder();
+            for (var i = 0; i < name.Length; i++)
+            {
+                var ch = name[i];
+                if ((ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch == 45) || ch == 32 || ch == 39)
+                {
+                    result.Append(name[i]);
+                }
+            }
+
+            return result.ToString().Trim();
+        }
     }
 }

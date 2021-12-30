@@ -23,7 +23,10 @@ namespace PartyIcons.Runtime
         private readonly PartyListHUDView _view;
         private readonly RoleTracker      _roleTracker;
 
-        private bool _previousInParty = false;
+        private bool _displayingRoles = false;
+
+        private bool     _previousInParty = false;
+        private DateTime _lastUpdate      = DateTime.Today;
 
         public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Configuration configuration)
         {
@@ -37,18 +40,34 @@ namespace PartyIcons.Runtime
             _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
             Framework.Update += OnUpdate;
             GameNetwork.NetworkMessage += OnNetworkMessage;
+            _configuration.OnSave += OnConfigurationSave;
         }
 
         public void Dispose()
         {
+            _configuration.OnSave -= OnConfigurationSave;
             GameNetwork.NetworkMessage -= OnNetworkMessage;
             Framework.Update -= OnUpdate;
             _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
         }
 
+        private void OnConfigurationSave()
+        {
+            if (_displayingRoles)
+            {
+                PluginLog.Debug("PartyListHUDUpdater: reverting pary list before the update due to config change");
+                _view.RevertSlotNumbers();
+            }
+
+            PluginLog.Debug("PartyListHUDUpdater forcing update due to changes in the config");
+            PluginLog.Verbose(_view.GetDebugInfo());
+            UpdatePartyListHUD();
+        }
+
         private void OnAssignedRolesUpdated()
         {
             PluginLog.Debug("PartyListHUDUpdater forcing update due to assignments update");
+            PluginLog.Verbose(_view.GetDebugInfo());
             UpdatePartyListHUD();
         }
 
@@ -57,6 +76,7 @@ namespace PartyIcons.Runtime
             if (direction == NetworkMessageDirection.ZoneDown && opcode == 0x2ac && targetactorid == ClientState.LocalPlayer?.ObjectId)
             {
                 PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
+                PluginLog.Verbose(_view.GetDebugInfo());
                 UpdatePartyListHUD();
             }
         }
@@ -67,10 +87,17 @@ namespace PartyIcons.Runtime
             if (!inParty && _previousInParty)
             {
                 PluginLog.Debug("No longer in party, reverting party list HUD changes");
+                _displayingRoles = false;
                 _view.RevertSlotNumbers();
             }
 
             _previousInParty = inParty;
+
+            if (DateTime.Now - _lastUpdate > TimeSpan.FromSeconds(15))
+            {
+                UpdatePartyListHUD();
+                _lastUpdate = DateTime.Now;
+            }
         }
 
         private void UpdatePartyListHUD()
@@ -85,14 +112,14 @@ namespace PartyIcons.Runtime
                 return;
             }
 
-            PluginLog.Debug("Updating party list HUD");
+            PluginLog.Verbose("Updating party list HUD");
+            _displayingRoles = true;
             foreach (var member in PartyList)
             {
-                var index = _view.GetPartySlotIndex(member.ObjectId);
-                if (index != null && _roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var role))
+                if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
                 {
-                    PluginLog.Debug($"Updating party list hud: member {member.Name} index {index} to {role}");
-                    _view.SetPartyMemberRole(index.Value, role);
+                    PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
+                    _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
                 }
             }
         }

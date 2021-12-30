@@ -75,6 +75,7 @@ namespace PartyIcons
             SeStringUtils.Initialize();
 
             _partyHUDView = new PartyListHUDView(GameGui, _playerStylesheet);
+            Interface.Inject(_partyHUDView);
 
             _roleTracker = new RoleTracker(Configuration);
             Interface.Inject(_roleTracker);
@@ -168,12 +169,6 @@ namespace PartyIcons
             }
             else if (arguments == "dbg party")
             {
-                foreach (var member in PartyList)
-                {
-                    var index = _partyHUDView.GetPartySlotIndex(member.ObjectId);
-                    ChatGui.Print($"Party member index {index} name {member.Name} worldid {member.World.Id}");
-                }
-
                 ChatGui.Print(_partyHUDView.GetDebugInfo());
             }
         }

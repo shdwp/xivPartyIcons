@@ -161,7 +161,7 @@ namespace PartyIcons
             }
             ImGui.SameLine();
             ImGui.Text("Replace party numbers with role in Party List");
-            ImGuiHelpTooltip("EXPERIMENTAL. Only works when nameplates set to 'Role letters'.", true);
+            ImGuiHelpTooltip("EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).", true);
         }
 
         private void DrawNameplateSettings()
