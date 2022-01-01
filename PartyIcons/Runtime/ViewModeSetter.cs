@@ -65,47 +65,66 @@ namespace PartyIcons.Runtime
                 PluginLog.Information($"Content null {ClientState.TerritoryType}");
                 _nameplateView.PartyMode = _configuration.NameplateOverworld;
                 _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
-                return;
             }
-
-            if (_configuration.ChatContentMessage)
+            else
             {
-                ChatGui.Print($"Entering {content.Name}.");
+                if (_configuration.ChatContentMessage)
+                {
+                    ChatGui.Print($"Entering {content.Name}.");
+                }
+
+                var memberType = content.ContentMemberType.Row;
+                if (content.RowId == 16 || content.RowId == 15)
+                {
+                    // Praetorium and Castrum Meridianum
+                    memberType = 2;
+                }
+
+                if (content.RowId == 735 || content.RowId == 778)
+                {
+                    // Bozja
+                    memberType = 127;
+                }
+
+                PluginLog.Debug($"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
+
+                switch (memberType)
+                {
+                    case 2:
+                        _nameplateView.PartyMode = _configuration.NameplateDungeon;
+                        _nameplateView.OthersMode = _configuration.NameplateOthers;
+                        _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
+                        break;
+
+                    case 3:
+                        _nameplateView.PartyMode = _configuration.NameplateRaid;
+                        _nameplateView.OthersMode = _configuration.NameplateOthers;
+                        _chatNameUpdater.PartyMode = _configuration.ChatRaid;
+                        break;
+
+                    case 4:
+                        _nameplateView.PartyMode = _configuration.NameplateAllianceRaid;
+                        _nameplateView.OthersMode = _configuration.NameplateOthers;
+                        _chatNameUpdater.PartyMode = _configuration.ChatAllianceRaid;
+                        break;
+
+                    case 127:
+                        _nameplateView.PartyMode = _configuration.NameplateBozjaParty;
+                        _nameplateView.OthersMode = _configuration.NameplateBozjaOthers;
+                        _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
+                        break;
+
+                    default:
+                        _nameplateView.PartyMode = _configuration.NameplateDungeon;
+                        _nameplateView.OthersMode = _configuration.NameplateOthers;
+                        _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
+                        break;
+                }
             }
 
-            var memberType = content.ContentMemberType.Row;
-            if (content.RowId == 16 || content.RowId == 15)
-            {
-                // Praetorium and Castrum Meridianum
-                memberType = 2;
-            }
+            _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters || _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
-            PluginLog.Debug($"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
-
-            switch (memberType)
-            {
-                case 2:
-                    _nameplateView.PartyMode = _configuration.NameplateDungeon;
-                    _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
-                    break;
-
-                case 3:
-                    _nameplateView.PartyMode = _configuration.NameplateRaid;
-                    _chatNameUpdater.PartyMode = _configuration.ChatRaid;
-                    break;
-
-                case 4:
-                    _nameplateView.PartyMode = _configuration.NameplateAllianceRaid;
-                    _chatNameUpdater.PartyMode = _configuration.ChatAllianceRaid;
-                    break;
-
-                default:
-                    _nameplateView.PartyMode = _configuration.NameplateDungeon;
-                    _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
-                    break;
-            }
-
-            _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters;
+            PluginLog.Debug($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
         }
     }
 }

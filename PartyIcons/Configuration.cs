@@ -23,8 +23,10 @@ namespace PartyIcons
         public NameplateSizeMode SizeMode  { get; set; } = NameplateSizeMode.Medium;
 
         public NameplateMode NameplateOverworld    { get; set; } = NameplateMode.SmallJobIcon;
-        public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIcon;
-        public NameplateMode NameplateDungeon      { get; set; } = NameplateMode.BigJobIcon;
+        public NameplateMode NameplateAllianceRaid { get; set; } = NameplateMode.BigJobIconAndPartySlot;
+        public NameplateMode NameplateDungeon      { get; set; } = NameplateMode.BigJobIconAndPartySlot;
+        public NameplateMode NameplateBozjaParty   { get; set; } = NameplateMode.BigJobIconAndPartySlot;
+        public NameplateMode NameplateBozjaOthers  { get; set; } = NameplateMode.Default;
         public NameplateMode NameplateRaid         { get; set; } = NameplateMode.RoleLetters;
         public NameplateMode NameplateOthers       { get; set; } = NameplateMode.SmallJobIcon;
 

@@ -235,6 +235,13 @@ namespace PartyIcons
             ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid, (mode) => _configuration.ChatAllianceRaid = mode);
             ImGui.Dummy(new Vector2(0, 15f));
 
+            ImGui.Text("Bozja nameplates:");
+            ImGuiHelpTooltip("Chat will follow rules as it was in overworld.");
+            NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty, mode => _configuration.NameplateBozjaParty = mode, "Party:             ");
+            ImGui.SameLine();
+            NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers, mode => _configuration.NameplateBozjaOthers = mode, "Others:         ");
+            ImGui.Dummy(new Vector2(0, 15f));
+
             ImGui.Text("Overworld party:");
             ImGuiHelpTooltip("Modes used for your party while not in duty.");
             NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld, (mode) => _configuration.NameplateOverworld = mode);
@@ -242,7 +249,7 @@ namespace PartyIcons
             ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld, (mode) => _configuration.ChatOverworld = mode);
             ImGui.Dummy(new Vector2(0, 15f));
 
-            ImGui.Text("Other player characters:");
+            ImGui.Text("Overworld other players:");
             ImGuiHelpTooltip("Modes used for non-party players.");
             NameplateModeSection("##np_others", () => _configuration.NameplateOthers, (mode) => _configuration.NameplateOthers = mode);
             ImGui.SameLine();
@@ -262,7 +269,7 @@ namespace PartyIcons
 
         private void DrawStaticAssignmentsSettings()
         {
-            ImGui.TextWrapped("Name should include world name, separated by @. Experimental option.");
+            ImGui.TextWrapped("Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
             ImGui.Dummy(new Vector2(0f, 25f));
 
             foreach (var kv in new Dictionary<string, RoleId>(_configuration.StaticAssignments))
@@ -316,7 +323,7 @@ namespace PartyIcons
             }
 
             ImGui.SameLine();
-            ImGui.InputText("##new_role_name", ref _occupationNewName, 32);
+            ImGui.InputText("##new_role_name", ref _occupationNewName, 64);
         }
 
         private void CollapsibleExampleImage(NameplateMode mode, TextureWrap tex)
@@ -377,9 +384,9 @@ namespace PartyIcons
             };
         }
 
-        private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter)
+        private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter, string title = "Nameplate: ")
         {
-            ImGui.Text("Nameplate: ");
+            ImGui.Text(title);
             ImGui.SameLine();
             ImGui.SetNextItemWidth(400f);
             if (ImGui.BeginCombo(label, NameplateModeToString(getter())))
@@ -411,10 +418,12 @@ namespace PartyIcons
             return mode switch
             {
                 NameplateMode.Default                => "Game default",
+                NameplateMode.Hide                   => "Hide",
                 NameplateMode.BigJobIcon             => "Big job icon",
                 NameplateMode.SmallJobIcon           => "Small job icon and name",
+                NameplateMode.SmallJobIconAndRole    => "Small job icon, role and name",
                 NameplateMode.BigJobIconAndPartySlot => "Big job icon and party number",
-                NameplateMode.RoleLetters                => "Role letters",
+                NameplateMode.RoleLetters            => "Role letters",
                 _                                    => throw new ArgumentException(),
             };
         }

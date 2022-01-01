@@ -61,8 +61,14 @@ namespace PartyIcons.View
             {
                 case NameplateMode.Default:
                 case NameplateMode.SmallJobIcon:
+                case NameplateMode.SmallJobIconAndRole:
                     SetupDefault(npObject);
                     return;
+
+                case NameplateMode.Hide:
+                    nameScale = 0f;
+                    iconScale = 0f;
+                    break;
 
                 case NameplateMode.BigJobIcon:
                     nameScale = 0.75f;
@@ -143,6 +149,7 @@ namespace PartyIcons.View
                 switch (mode)
                 {
                     case NameplateMode.Default:
+                    case NameplateMode.Hide:
                     case NameplateMode.SmallJobIcon:
                     case NameplateMode.BigJobIcon:
                     case NameplateMode.BigJobIconAndPartySlot:
@@ -175,11 +182,28 @@ namespace PartyIcons.View
             switch (mode)
             {
                 case NameplateMode.Default:
+                case NameplateMode.Hide:
                     break;
 
                 case NameplateMode.SmallJobIcon:
                     var nameString = GetStateNametext(iconID, "");
-                    nameString.Append(playerCharacter.Name);
+                    var originalName = SeStringUtils.SeStringFromPtr(name);
+                    nameString.Append(originalName);
+
+                    name = SeStringUtils.SeStringToPtr(nameString);
+                    iconID = GetClassIcon(npObject.NamePlateInfo);
+                    break;
+
+                case NameplateMode.SmallJobIconAndRole:
+                    nameString = new SeString();
+                    if (hasRole)
+                    {
+                        nameString.Append(_stylesheet.GetRolePlate(roleId));
+                        nameString.Append(" ");
+                    }
+
+                    originalName = SeStringUtils.SeStringFromPtr(name);
+                    nameString.Append(originalName);
 
                     name = SeStringUtils.SeStringToPtr(nameString);
                     iconID = GetClassIcon(npObject.NamePlateInfo);
