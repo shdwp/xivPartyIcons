@@ -6,7 +6,7 @@
     <Description>PartyIcons plugin</Description>
     <Copyright>shdwp 2021</Copyright>
     <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
-    <AssemblyVersion>1.0.3.1</AssemblyVersion>
+    <AssemblyVersion>1.0.3.3</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,9 +21,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\Data\PartyIcons.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <EmbeddedResource Include="Resources/1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -74,5 +71,12 @@
       <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
       <Private>false</Private>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Data\PartyIcons.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>PartyIcons.json</Link>
+    </Content>
   </ItemGroup>
 </Project>

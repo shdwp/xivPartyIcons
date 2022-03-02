@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Numerics;
 using System.Reflection;
+using System.Threading.Tasks;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
@@ -26,6 +31,10 @@ namespace PartyIcons
         private string  _occupationNewName = "Character Name@World";
         private RoleId  _occupationNewRole = RoleId.Undefined;
 
+        private HttpClient _httpClient;
+        private string _noticeString;
+        private string _noticeUrl;
+
         public bool SettingsVisible
         {
             get { return this._settingsVisible; }
@@ -38,6 +47,7 @@ namespace PartyIcons
         {
             this._configuration = configuration;
             _stylesheet = stylesheet;
+            _httpClient = new HttpClient();
         }
 
         public void Initialize()
@@ -67,8 +77,50 @@ namespace PartyIcons
 
                 _nameplateExamples[kv.Key] = Interface.UiBuilder.LoadImage(memoryStream.ToArray());
             }
+
+            this.DownloadAndParseNotice();
         }
 
+        private void DownloadAndParseNotice()
+        {
+            try
+            {
+                Task<string> stringAsync = _httpClient.GetStringAsync("https://shdwp.github.io/ukraine/xiv_notice.txt");
+                stringAsync.Wait();
+                string[] strArray = stringAsync.Result.Split('|');
+                if ((uint) strArray.Length > 0U)
+                    _noticeString = strArray[0];
+                if (strArray.Length <= 1)
+                    return;
+                _noticeUrl = strArray[1];
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private void DisplayNotice()
+        {
+            ImGui.Dummy(new Vector2(0.0f, 15f));
+            ImGui.PushStyleColor((ImGuiCol) 0, ImGuiColors.DPSRed);
+            ImGuiHelpers.SafeTextWrapped(_noticeString);
+            if (ImGui.Button(_noticeUrl))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = _noticeUrl,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex) { }
+            }
+
+            ImGui.PopStyleColor();
+        }
+        
+        
         public void Dispose()
         {
         }
@@ -162,6 +214,7 @@ namespace PartyIcons
             ImGui.SameLine();
             ImGui.Text("Replace party numbers with role in Party List");
             ImGuiHelpTooltip("EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).", true);
+            DisplayNotice();
         }
 
         private void DrawNameplateSettings()
