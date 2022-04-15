@@ -40,7 +40,6 @@ namespace PartyIcons
 
         private readonly PartyListHUDView  _partyHUDView;
         private readonly PartyListHUDUpdater   _partyListHudUpdater;
-        private readonly PlayerContextMenu _contextMenu;
         private readonly PluginUI          _ui;
         private readonly NameplateUpdater  _nameplateUpdater;
         private readonly NPCNameplateFixer _npcNameplateFixer;
@@ -69,7 +68,7 @@ namespace PartyIcons
             _ui = new PluginUI(Configuration, _playerStylesheet);
             Interface.Inject(_ui);
 
-            Base = new XivCommonBase(Hooks.ContextMenu);
+            Base = new XivCommonBase();
             XivApi.Initialize(this, Address);
 
             SeStringUtils.Initialize();
@@ -92,8 +91,6 @@ namespace PartyIcons
             _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, Base);
             _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
-            _contextMenu = new PlayerContextMenu(Base, _roleTracker, _playerStylesheet);
-            Interface.Inject(_contextMenu);
 
             _ui.Initialize();
             Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
@@ -110,7 +107,6 @@ namespace PartyIcons
             _nameplateUpdater.Enable();
             _npcNameplateFixer.Enable();
             _chatNameUpdater.Enable();
-            _contextMenu.Enable();
         }
 
         public void Dispose()
@@ -120,7 +116,6 @@ namespace PartyIcons
             _partyHUDView.Dispose();
             _partyListHudUpdater.Dispose();
             _chatNameUpdater.Dispose();
-            _contextMenu.Dispose();
             _nameplateUpdater.Dispose();
             _npcNameplateFixer.Dispose();
             _roleTracker.Dispose();
