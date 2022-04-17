@@ -48,21 +48,33 @@ public sealed class PartyListHUDUpdater : IDisposable
         Framework.Update += OnUpdate;
         GameNetwork.NetworkMessage += OnNetworkMessage;
         _configuration.OnSave += OnConfigurationSave;
+        ClientState.EnterPvP += OnEnterPvP;
     }
 
     public void Dispose()
     {
+        ClientState.EnterPvP -= OnEnterPvP;
         _configuration.OnSave -= OnConfigurationSave;
         GameNetwork.NetworkMessage -= OnNetworkMessage;
         Framework.Update -= OnUpdate;
         _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
     }
 
+    private void OnEnterPvP()
+    {
+        if (_displayingRoles)
+        {
+            PluginLog.Debug("PartyListHUDUpdater: reverting party list due to entering a PvP zone");
+            _displayingRoles = false;
+            _view.RevertSlotNumbers();
+        }
+    }
+
     private void OnConfigurationSave()
     {
         if (_displayingRoles)
         {
-            PluginLog.Debug("PartyListHUDUpdater: reverting pary list before the update due to config change");
+            PluginLog.Debug("PartyListHUDUpdater: reverting party list before the update due to config change");
             _view.RevertSlotNumbers();
         }
 
@@ -118,6 +130,11 @@ public sealed class PartyListHUDUpdater : IDisposable
         }
 
         if (!UpdateHUD)
+        {
+            return;
+        }
+
+        if (ClientState.IsPvP)
         {
             return;
         }

@@ -107,6 +107,8 @@ public sealed class Plugin : IDalamudPlugin
         Interface.Inject(_partyListHudUpdater);
 
         _nameplateUpdater = new NameplateUpdater(Address, _nameplateView);
+        Interface.Inject(_nameplateUpdater);
+
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
         // _contextMenu = new PlayerContextMenu(Base, _roleTracker, _playerStylesheet);

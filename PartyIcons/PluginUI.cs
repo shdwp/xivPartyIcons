@@ -359,6 +359,9 @@ internal class PluginUI : IDisposable
         ChatModeSection("##chat_others", () => _configuration.ChatOthers,
             (mode) => _configuration.ChatOthers = mode);
 
+        ImGui.Text("PvP:");
+        ImGui.TextDisabled("This plugin is intentionally automatically disabled during PvP matches.");
+
         ImGui.Dummy(new Vector2(0, 25f));
         ImGui.TextWrapped(
             "Please note that it usually takes a some time for nameplates to reload, especially for own character nameplate.");

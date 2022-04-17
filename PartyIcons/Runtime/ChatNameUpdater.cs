@@ -50,6 +50,11 @@ public sealed class ChatNameUpdater : IDisposable
     private void OnChatMessage(XivChatType type, uint senderid, ref SeString sender, ref SeString message,
         ref bool ishandled)
     {
+        if (ClientState.IsPvP)
+        {
+            return;
+        }
+
         if (type == XivChatType.Say || type == XivChatType.Party || type == XivChatType.Alliance ||
             type == XivChatType.Shout || type == XivChatType.Yell)
         {

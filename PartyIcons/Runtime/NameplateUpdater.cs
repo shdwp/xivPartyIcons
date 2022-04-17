@@ -1,5 +1,7 @@
 ﻿using System;
+using Dalamud.Game.ClientState;
 using Dalamud.Hooking;
+using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Entities;
@@ -10,9 +12,12 @@ namespace PartyIcons.Runtime;
 
 public sealed class NameplateUpdater : IDisposable
 {
-    private NameplateView _view;
-    private PluginAddressResolver _address;
-    private Hook<SetNamePlateDelegate> _hook;
+    [PluginService]
+    private ClientState ClientState { get; set; }
+
+    private readonly NameplateView _view;
+    private readonly PluginAddressResolver _address;
+    private readonly Hook<SetNamePlateDelegate> _hook;
 
     public NameplateUpdater(PluginAddressResolver address, NameplateView view)
     {
@@ -73,6 +78,12 @@ public sealed class NameplateUpdater : IDisposable
         //         PluginLog.Debug("Disabled force redraw");
         //     }
         // }
+
+        if (ClientState.IsPvP)
+        {
+            // disable in PvP
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+        }
 
         var originalTitle = title;
         var originalName = name;
