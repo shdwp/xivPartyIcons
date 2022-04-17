@@ -473,6 +473,17 @@ internal class PluginUI : IDisposable
         ImGui.SameLine();
         ImGui.SetNextItemWidth(400f);
 
+        // hack to fix incorrect configurations
+        try
+        {
+            getter();
+        }
+        catch (ArgumentException ex)
+        {
+            setter(ChatMode.GameDefault);
+            _configuration.Save();
+        }
+
         if (ImGui.BeginCombo(label, ChatModeToString(getter())))
         {
             foreach (var mode in Enum.GetValues<ChatMode>())
@@ -506,6 +517,17 @@ internal class PluginUI : IDisposable
         ImGui.Text(title);
         ImGui.SameLine();
         ImGui.SetNextItemWidth(400f);
+
+        // hack to fix incorrect configurations
+        try
+        {
+            getter();
+        }
+        catch (ArgumentException ex)
+        {
+            setter(NameplateMode.Default);
+            _configuration.Save();
+        }
 
         if (ImGui.BeginCombo(label, NameplateModeToString(getter())))
         {
