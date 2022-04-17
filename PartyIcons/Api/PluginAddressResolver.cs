@@ -44,7 +44,7 @@ namespace PartyIcons.Api
         private const string AtkResNode_SetPositionShortSignature = "48 85 C9 74 4A 41 0F BF C0 66 0F 6E C8 0F BF C2 0F 5B C9 66 0F 6E D0";
         public        IntPtr AtkResNode_SetPositionShortPtr;
 
-        private const string Framework_GetUIModuleSignature = "E8 ?? ?? ?? ?? 48 8B C8 48 8B 10 FF 92 ?? ?? ?? ?? 48 8B C8 BA ?? ?? ?? ??";
+        private const string Framework_GetUIModuleSignature = "E8 ?? ?? ?? ?? 80 7B 1D 01";
         public        IntPtr Framework_GetUIModulePtr;
 
         private const string GroupManagerSignature = "48 8D 0D ?? ?? ?? ?? 44 8B E7";

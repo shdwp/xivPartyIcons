@@ -1,10 +1,10 @@
-﻿using System;
+﻿// todo: this whole thing is disabled for now, needs to be ported to Dalamud's context menu API
+/*
+using System;
 using Dalamud.Logging;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
-using XivCommon;
-using XivCommon.Functions.ContextMenu;
 
 namespace PartyIcons.View
 {
@@ -106,3 +106,4 @@ namespace PartyIcons.View
         }
     }
 }
+*/

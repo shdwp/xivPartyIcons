@@ -5,7 +5,6 @@ using PartyIcons.Api;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
 using PartyIcons.View;
-using XivCommon;
 
 namespace PartyIcons.Runtime
 {
@@ -14,14 +13,11 @@ namespace PartyIcons.Runtime
         private NameplateView              _view;
         private PluginAddressResolver      _address;
         private Hook<SetNamePlateDelegate> _hook;
-        private XivCommonBase              _base;
-        private int                        _forceRedrawCount = 0;
 
-        public NameplateUpdater(PluginAddressResolver address, NameplateView view, XivCommonBase @base)
+        public NameplateUpdater(PluginAddressResolver address, NameplateView view)
         {
             _address = address;
             _view = view;
-            _base = @base;
             _hook = new Hook<SetNamePlateDelegate>(_address.AddonNamePlate_SetNamePlatePtr, SetNamePlateDetour);
         }
 
@@ -30,12 +26,12 @@ namespace PartyIcons.Runtime
             _hook.Enable();
         }
 
-        public void ForceRefresh()
-        {
-            PluginLog.Debug("Enabled force redrawing nameplates");
-            _base.Functions.NamePlates.ForceRedraw = true;
-            _forceRedrawCount = 0;
-        }
+        // public void ForceRefresh()
+        // {
+        //     PluginLog.Debug("Enabled force redrawing nameplates");
+        //     _base.Functions.NamePlates.ForceRedraw = true;
+        //     _forceRedrawCount = 0;
+        // }
 
         public void Disable()
         {
@@ -56,23 +52,24 @@ namespace PartyIcons.Runtime
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, $"SetNamePlateDetour encountered a critical error");
+                PluginLog.Error(ex, "SetNamePlateDetour encountered a critical error");
                 return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
             }
         }
 
         public IntPtr SetNamePlate(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title, IntPtr name, IntPtr fcName, int iconID)
         {
-            if (_base.Functions.NamePlates.ForceRedraw)
-            {
-                _forceRedrawCount++;
-
-                if (_forceRedrawCount > 200)
-                {
-                    _base.Functions.NamePlates.ForceRedraw = false;
-                    PluginLog.Debug("Disabled force redraw");
-                }
-            }
+            // todo: this wasn't working properly anyways, but still here as a reminder to fix it later
+            // if (_base.Functions.NamePlates.ForceRedraw)
+            // {
+            //     _forceRedrawCount++;
+            //
+            //     if (_forceRedrawCount > 200)
+            //     {
+            //         _base.Functions.NamePlates.ForceRedraw = false;
+            //         PluginLog.Debug("Disabled force redraw");
+            //     }
+            // }
 
             var originalTitle = title;
             var originalName = name;
