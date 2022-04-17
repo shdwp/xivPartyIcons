@@ -1,9 +1,8 @@
-﻿namespace PartyIcons.View
+﻿namespace PartyIcons.View;
+
+public enum IconSetId
 {
-    public enum IconSetId
-    {
-        GlowingColored,
-        GlowingGold,
-        Framed,
-    }
+    GlowingColored,
+    GlowingGold,
+    Framed
 }

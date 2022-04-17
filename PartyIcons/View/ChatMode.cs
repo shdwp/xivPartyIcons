@@ -1,10 +1,9 @@
-﻿namespace PartyIcons.View
+﻿namespace PartyIcons.View;
+
+public enum ChatMode
 {
-    public enum ChatMode
-    {
-        GameDefault,
-        OnlyColor,
-        Role,
-        Job,
-    }
+    GameDefault,
+    OnlyColor,
+    Role,
+    Job
 }

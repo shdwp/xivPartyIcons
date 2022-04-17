@@ -1,13 +1,12 @@
-﻿namespace PartyIcons.View
+﻿namespace PartyIcons.View;
+
+public enum NameplateMode
 {
-    public enum NameplateMode
-    {
-        Default,
-        Hide,
-        SmallJobIcon,
-        SmallJobIconAndRole,
-        BigJobIcon,
-        BigJobIconAndPartySlot,
-        RoleLetters,
-    }
+    Default,
+    Hide,
+    SmallJobIcon,
+    SmallJobIconAndRole,
+    BigJobIcon,
+    BigJobIconAndPartySlot,
+    RoleLetters
 }
