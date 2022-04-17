@@ -121,9 +121,9 @@ public sealed class ChatNameUpdater : IDisposable
         str.Payloads.RemoveAll(p => p.Type == PayloadType.UIForeground);
     }
 
-    private ClassJob FindSenderJob(PlayerPayload playerPayload)
+    private ClassJob? FindSenderJob(PlayerPayload playerPayload)
     {
-        ClassJob senderJob = null;
+        ClassJob? senderJob = null;
 
         foreach (var member in PartyList)
         {
@@ -176,7 +176,7 @@ public sealed class ChatNameUpdater : IDisposable
         {
             var senderJob = FindSenderJob(playerPayload);
 
-            if (senderJob.RowId == 0)
+            if (senderJob == null || senderJob.RowId == 0)
             {
                 return;
             }
