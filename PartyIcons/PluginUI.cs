@@ -33,8 +33,8 @@ internal class PluginUI : IDisposable
     private RoleId _occupationNewRole = RoleId.Undefined;
 
     private HttpClient _httpClient;
-    private string _noticeString;
-    private string _noticeUrl;
+    private string? _noticeString;
+    private string? _noticeUrl;
 
     public bool SettingsVisible
     {
@@ -103,27 +103,41 @@ internal class PluginUI : IDisposable
             }
 
             _noticeUrl = strArray[1];
+
+            if (!(_noticeUrl.StartsWith("http://") || _noticeUrl.StartsWith("https://")))
+            {
+                PluginLog.Warning($"Received invalid noticeUrl {_noticeUrl}, ignoring");
+                _noticeUrl = null;
+            }
         }
         catch (Exception ex) { }
     }
 
     private void DisplayNotice()
     {
+        if (_noticeString == null)
+        {
+            return;
+        }
+
         ImGui.Dummy(new Vector2(0.0f, 15f));
         ImGui.PushStyleColor((ImGuiCol) 0, ImGuiColors.DPSRed);
         ImGuiHelpers.SafeTextWrapped(_noticeString);
 
-        if (ImGui.Button(_noticeUrl))
+        if (_noticeUrl != null)
         {
-            try
+            if (ImGui.Button(_noticeUrl))
             {
-                Process.Start(new ProcessStartInfo
+                try
                 {
-                    FileName = _noticeUrl,
-                    UseShellExecute = true
-                });
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = _noticeUrl,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex) { }
             }
-            catch (Exception ex) { }
         }
 
         ImGui.PopStyleColor();
