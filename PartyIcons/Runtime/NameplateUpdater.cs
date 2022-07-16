@@ -30,14 +30,7 @@ public sealed class NameplateUpdater : IDisposable
     {
         _hook.Enable();
     }
-
-    // public void ForceRefresh()
-    // {
-    //     PluginLog.Debug("Enabled force redrawing nameplates");
-    //     _base.Functions.NamePlates.ForceRedraw = true;
-    //     _forceRedrawCount = 0;
-    // }
-
+    
     public void Disable()
     {
         _hook.Disable();
@@ -67,18 +60,6 @@ public sealed class NameplateUpdater : IDisposable
     public IntPtr SetNamePlate(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title,
         IntPtr name, IntPtr fcName, int iconID)
     {
-        // todo: this wasn't working properly anyways, but still here as a reminder to fix it later
-        // if (_base.Functions.NamePlates.ForceRedraw)
-        // {
-        //     _forceRedrawCount++;
-        //
-        //     if (_forceRedrawCount > 200)
-        //     {
-        //         _base.Functions.NamePlates.ForceRedraw = false;
-        //         PluginLog.Debug("Disabled force redraw");
-        //     }
-        // }
-
         if (ClientState.IsPvP)
         {
             // disable in PvP

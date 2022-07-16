@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Network;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Newtonsoft.Json;
+using PartyIcons.Entities;
 using PartyIcons.Utils;
 
 namespace PartyIcons.Runtime;
@@ -14,17 +19,10 @@ public sealed class PartyListHUDUpdater : IDisposable
 {
     public bool UpdateHUD = false;
 
-    [PluginService]
-    public PartyList PartyList { get; set; }
-
-    [PluginService]
-    public Framework Framework { get; set; }
-
-    [PluginService]
-    public GameNetwork GameNetwork { get; set; }
-
-    [PluginService]
-    public ClientState ClientState { get; set; }
+    [PluginService] public PartyList PartyList { get; set; }
+    [PluginService] public Framework Framework { get; set; }
+    [PluginService] public GameNetwork GameNetwork { get; set; }
+    [PluginService] public ClientState ClientState { get; set; }
 
     private readonly Configuration _configuration;
     private readonly PartyListHUDView _view;
@@ -33,13 +31,19 @@ public sealed class PartyListHUDUpdater : IDisposable
     private bool _displayingRoles = false;
 
     private bool _previousInParty = false;
+    private bool _previousTesting = false;
     private DateTime _lastUpdate = DateTime.Today;
+
+    private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
+    private List<int> _prepareZoningOpcodes = new();
 
     public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Configuration configuration)
     {
         _view = view;
         _roleTracker = roleTracker;
         _configuration = configuration;
+
+        Task.WaitAll(new[] { DownloadOpcodes() });
     }
 
     public void Enable()
@@ -58,6 +62,30 @@ public sealed class PartyListHUDUpdater : IDisposable
         GameNetwork.NetworkMessage -= OnNetworkMessage;
         Framework.Update -= OnUpdate;
         _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
+    }
+
+    private async Task DownloadOpcodes()
+    {
+        var client = new HttpClient();
+        var data = await client.GetStringAsync(OpcodesUrl);
+        dynamic json = JsonConvert.DeserializeObject(data);
+
+        foreach (var clientType in json)
+        {
+            if (clientType.region == "Global")
+            {
+                foreach (var record in clientType["lists"]["ServerZoneIpcType"])
+                {
+                    var name = record.name.ToString();
+                    var opcode = (int)record.opcode;
+                    if (name == "PrepareZoning")
+                    {
+                        _prepareZoningOpcodes.Add(opcode);
+                        PluginLog.Debug($"Adding zoning opcode - {record.name} ({record.opcode})");
+                    }
+                }
+            }
+        }
     }
 
     private void OnEnterPvP()
@@ -93,7 +121,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid,
         NetworkMessageDirection direction)
     {
-        if (direction == NetworkMessageDirection.ZoneDown && opcode == 0x2ac &&
+        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) &&
             targetactorid == ClientState.LocalPlayer?.ObjectId)
         {
             PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
@@ -106,14 +134,15 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         var inParty = PartyList.Any();
 
-        if (!inParty && _previousInParty)
+        if ((!inParty && _previousInParty) || (!_configuration.TestingMode && _previousTesting))
         {
-            PluginLog.Debug("No longer in party, reverting party list HUD changes");
+            PluginLog.Debug("No longer in party/testing mode, reverting party list HUD changes");
             _displayingRoles = false;
             _view.RevertSlotNumbers();
         }
 
         _previousInParty = inParty;
+        _previousTesting = _configuration.TestingMode;
 
         if (DateTime.Now - _lastUpdate > TimeSpan.FromSeconds(15))
         {
@@ -127,6 +156,12 @@ public sealed class PartyListHUDUpdater : IDisposable
         if (!_configuration.DisplayRoleInPartyList)
         {
             return;
+        }
+
+        if (_configuration.TestingMode)
+        {
+            var localPlayer = ClientState.LocalPlayer;
+            _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.M1);
         }
 
         if (!UpdateHUD)

@@ -1,6 +1,6 @@
-﻿// todo: this whole thing is disabled for now, needs to be ported to Dalamud's context menu API
-/*
-using System;
+﻿using System;
+using Dalamud.Game.Gui.ContextMenus;
+using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
@@ -10,25 +10,25 @@ namespace PartyIcons.View
 {
     public sealed class PlayerContextMenu : IDisposable
     {
-        private readonly XivCommonBase    _base;
-        private readonly RoleTracker      _roleTracker;
+        [PluginService] private ContextMenu ContextMenu { get; set; }
+
+        private readonly RoleTracker _roleTracker;
         private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(XivCommonBase @base, RoleTracker roleTracker, PlayerStylesheet stylesheet)
+        public PlayerContextMenu(RoleTracker roleTracker, PlayerStylesheet stylesheet)
         {
-            _base = @base;
             _roleTracker = roleTracker;
             _stylesheet = stylesheet;
         }
 
         public void Enable()
         {
-            _base.Functions.ContextMenu.OpenContextMenu += OnOpenContextMenu;
+            ContextMenu.ContextMenuOpened += OnOpenContextMenu;
         }
 
         public void Disable()
         {
-            _base.Functions.ContextMenu.OpenContextMenu -= OnOpenContextMenu;
+            ContextMenu.ContextMenuOpened -= OnOpenContextMenu;
         }
 
         public void Dispose()
@@ -36,38 +36,40 @@ namespace PartyIcons.View
             Disable();
         }
 
-        private void OnOpenContextMenu(ContextMenuOpenArgs args)
+        private void OnOpenContextMenu(ContextMenuOpenedArgs args)
         {
             if (!IsMenuValid(args))
             {
                 return;
             }
 
-            PluginLog.Debug($"Opening submenu for {args.ObjectId}");
+            var playerName = args.GameObjectContext.Name;
+            var playerWorld = args.GameObjectContext.WorldId.Value;
+            PluginLog.Debug($"Opening submenu for {playerName}");
 
-            if (_roleTracker.TryGetSuggestedRole(args.Text.TextValue, args.ObjectWorld, out var role))
+            if (_roleTracker.TryGetSuggestedRole(playerName, playerWorld, out var role))
             {
                 var roleName = _stylesheet.GetRoleName(role);
-                args.Items.Add(new NormalContextMenuItem($"Assign to {roleName} (suggested)", (args) => OnAssignRole(args, role)));
+                args.AddCustomItem($"Assign to {roleName} (suggested)", args => OnAssignRole(args, role));
             }
 
-            if (_roleTracker.TryGetAssignedRole(args.Text.TextValue, args.ObjectWorld, out var currentRole))
+            if (_roleTracker.TryGetAssignedRole(playerName, playerWorld, out var currentRole))
             {
                 var swappedRole = RoleIdUtils.Counterpart(currentRole);
                 var swappedRoleName = _stylesheet.GetRoleName(swappedRole);
-                args.Items.Add(new NormalContextMenuItem($"Party role swap to {swappedRoleName}", (args) => OnAssignRole(args, swappedRole)));
+                args.AddCustomItem($"Party role swap to {swappedRoleName}", args => OnAssignRole(args, swappedRole));
             }
 
-            args.Items.Add(new NormalContextSubMenuItem("Party role assign ", OnAssignSubMenuOpen));
+            args.AddCustomSubMenu("Party role assign ", OnAssignSubMenuOpen);
         }
 
-        private void OnAssignRole(ContextMenuItemSelectedArgs args, RoleId roleId)
+        private void OnAssignRole(CustomContextMenuItemSelectedArgs args, RoleId roleId)
         {
-            _roleTracker.OccupyRole(args.Text.TextValue, args.ObjectWorld, roleId);
+            _roleTracker.OccupyRole(args.ContextMenuOpenedArgs.GameObjectContext.Name, args.ContextMenuOpenedArgs.GameObjectContext.WorldId.Value, roleId);
             _roleTracker.CalculateUnassignedPartyRoles();
         }
 
-        private void OnAssignSubMenuOpen(ContextMenuOpenArgs args)
+        private void OnAssignSubMenuOpen(ContextMenuOpenedArgs args)
         {
             foreach (var role in Enum.GetValues<RoleId>())
             {
@@ -76,13 +78,13 @@ namespace PartyIcons.View
                     continue;
                 }
 
-                args.Items.Add(new NormalContextMenuItem(_stylesheet.GetRoleName(role), (args) => OnAssignRole(args, role)));
+                args.AddCustomItem(_stylesheet.GetRoleName(role), (args) => OnAssignRole(args, role));
             }
 
-            args.Items.Add(new NormalContextMenuItem("Return", (args) => { }));
+            args.AddCustomItem("Return", _ => { });
         }
 
-        private bool IsMenuValid(BaseContextMenuArgs args)
+        private bool IsMenuValid(ContextMenuOpenedArgs args)
         {
             switch (args.ParentAddonName)
             {
@@ -98,7 +100,8 @@ namespace PartyIcons.View
                 case "LinkShell":
                 case "CrossWorldLinkshell":
                 case "ContentMemberList": // Eureka/Bozja/...
-                    return args.Text != null && args.ObjectWorld != 0 && args.ObjectWorld != 65535;
+                    return args.GameObjectContext.Name != null && args.GameObjectContext.WorldId != 0 &&
+                           args.GameObjectContext.WorldId != 65535;
 
                 default:
                     return false;
@@ -106,7 +109,3 @@ namespace PartyIcons.View
         }
     }
 }
-*/
-
-
-

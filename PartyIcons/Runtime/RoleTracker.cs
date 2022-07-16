@@ -24,23 +24,17 @@ public sealed class RoleTracker : IDisposable
     public event Action<string, RoleId> OnRoleSuggested;
     public event Action OnAssignedRolesUpdated;
 
-    [PluginService]
-    private Framework Framework { get; set; }
+    [PluginService] private Framework Framework { get; set; }
 
-    [PluginService]
-    private ChatGui ChatGui { get; set; }
+    [PluginService] private ChatGui ChatGui { get; set; }
 
-    [PluginService]
-    private ClientState ClientState { get; set; }
+    [PluginService] private ClientState ClientState { get; set; }
 
-    [PluginService]
-    private Condition Condition { get; set; }
+    [PluginService] private Condition Condition { get; set; }
 
-    [PluginService]
-    private PartyList PartyList { get; set; }
+    [PluginService] private PartyList PartyList { get; set; }
 
-    [PluginService]
-    private ToastGui ToastGui { get; set; }
+    [PluginService] private ToastGui ToastGui { get; set; }
 
     private readonly Configuration _configuration;
 
@@ -115,7 +109,7 @@ public sealed class RoleTracker : IDisposable
 
         _occupiedRoles[PlayerId(name, world)] = roleId;
         OnRoleOccupied?.Invoke(name, roleId);
-        ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions {DisplayCheckmark = true});
+        ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions { DisplayCheckmark = true });
     }
 
     public void SuggestRole(string name, uint world, RoleId roleId)
@@ -266,7 +260,7 @@ public sealed class RoleTracker : IDisposable
         {
             unchecked
             {
-                partyHash = partyHash * 23 + (int) member.ObjectId;
+                partyHash = partyHash * 23 + (int)member.ObjectId;
             }
         }
 
@@ -295,19 +289,19 @@ public sealed class RoleTracker : IDisposable
         switch (role)
         {
             case GenericRole.Tank:
-                return new[] {RoleId.MT, RoleId.OT};
+                return new[] { RoleId.MT, RoleId.OT };
 
             case GenericRole.Melee:
-                return new[] {RoleId.M1, RoleId.M2, RoleId.R1, RoleId.R2};
+                return new[] { RoleId.M1, RoleId.M2, RoleId.R1, RoleId.R2 };
 
             case GenericRole.Ranged:
-                return new[] {RoleId.R1, RoleId.R2, RoleId.M1, RoleId.M2};
+                return new[] { RoleId.R1, RoleId.R2, RoleId.M1, RoleId.M2 };
 
             case GenericRole.Healer:
-                return new[] {RoleId.H1, RoleId.H2};
+                return new[] { RoleId.H1, RoleId.H2 };
 
             default:
-                return new[] {RoleId.Undefined};
+                return new[] { RoleId.Undefined };
         }
     }
 

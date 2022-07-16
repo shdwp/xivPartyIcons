@@ -8,7 +8,6 @@ using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using PartyIcons.Api;
-using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
@@ -22,32 +21,23 @@ public sealed class Plugin : IDalamudPlugin
     public string Name => "PartyIcons";
     private const string commandName = "/ppi";
 
-    [PluginService]
-    public DalamudPluginInterface Interface { get; set; }
+    [PluginService] public DalamudPluginInterface Interface { get; set; }
 
-    [PluginService]
-    public ClientState ClientState { get; set; }
+    [PluginService] public ClientState ClientState { get; set; }
 
-    [PluginService]
-    public Framework Framework { get; set; }
+    [PluginService] public Framework Framework { get; set; }
 
-    [PluginService]
-    public CommandManager CommandManager { get; set; }
+    [PluginService] public CommandManager CommandManager { get; set; }
 
-    [PluginService]
-    public ObjectTable ObjectTable { get; set; }
+    [PluginService] public ObjectTable ObjectTable { get; set; }
 
-    [PluginService]
-    public GameGui GameGui { get; set; }
+    [PluginService] public GameGui GameGui { get; set; }
 
-    [PluginService]
-    public ChatGui ChatGui { get; set; }
+    [PluginService] public ChatGui ChatGui { get; set; }
 
-    [PluginService]
-    public PartyList PartyList { get; set; }
+    [PluginService] public PartyList PartyList { get; set; }
 
-    [PluginService]
-    public SigScanner SigScanner { get; set; }
+    [PluginService] public SigScanner SigScanner { get; set; }
 
     public PluginAddressResolver Address { get; }
 
@@ -57,7 +47,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private readonly PartyListHUDUpdater _partyListHudUpdater;
 
-    // private readonly PlayerContextMenu _contextMenu;
+    private readonly PlayerContextMenu _contextMenu;
     private readonly PluginUI _ui;
     private readonly NameplateUpdater _nameplateUpdater;
     private readonly NPCNameplateFixer _npcNameplateFixer;
@@ -76,7 +66,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {
             HelpMessage =
-                "opens configuration window; \"reset\" or \"r\" resets all assignments; \"debug\" prints debugging info."
+                "opens configuration window; \"reset\" or \"r\" resets all assignments; \"debug\" prints debugging info"
         });
 
         Address = new PluginAddressResolver();
@@ -111,8 +101,8 @@ public sealed class Plugin : IDalamudPlugin
 
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
-        // _contextMenu = new PlayerContextMenu(Base, _roleTracker, _playerStylesheet);
-        // Interface.Inject(_contextMenu);
+        _contextMenu = new PlayerContextMenu(_roleTracker, _playerStylesheet);
+        Interface.Inject(_contextMenu);
 
         _ui.Initialize();
         Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
@@ -129,7 +119,7 @@ public sealed class Plugin : IDalamudPlugin
         _nameplateUpdater.Enable();
         _npcNameplateFixer.Enable();
         _chatNameUpdater.Enable();
-        // _contextMenu.Enable();
+        _contextMenu.Enable();
     }
 
     public void Dispose()
@@ -139,7 +129,7 @@ public sealed class Plugin : IDalamudPlugin
         _partyHUDView.Dispose();
         _partyListHudUpdater.Dispose();
         _chatNameUpdater.Dispose();
-        // _contextMenu.Dispose();
+        _contextMenu.Dispose();
         _nameplateUpdater.Dispose();
         _npcNameplateFixer.Dispose();
         _roleTracker.Dispose();
@@ -158,12 +148,10 @@ public sealed class Plugin : IDalamudPlugin
     private void OnConfigurationSave()
     {
         _modeSetter.ForceRefresh();
-        // _nameplateUpdater.ForceRefresh();
     }
 
     private void OnAssignedRolesUpdated()
     {
-        // _nameplateUpdater.ForceRefresh();
     }
 
     private void OnCommand(string command, string arguments)

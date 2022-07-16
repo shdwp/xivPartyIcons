@@ -14,7 +14,7 @@
         <TargetFramework>net5.0-windows</TargetFramework>
         <Platforms>x64</Platforms>
         <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>10</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -39,8 +39,13 @@
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <OutputPath>C:\Users\shdwp\AppData\Roaming\XIVLauncher\devPlugins\PartyIcons</OutputPath>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.7"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.7" />
+        <PackageReference Include="XivCommon" Version="5.0.0" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
