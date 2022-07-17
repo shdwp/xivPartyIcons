@@ -125,6 +125,10 @@ public sealed class PlayerStylesheet
         {
             RoleId.MT => "MT",
             RoleId.OT => _configuration.EasternNamingConvention ? "ST" : "OT",
+            RoleId.M1 => _configuration.EasternNamingConvention ? "D1" : "M1",
+            RoleId.M2 => _configuration.EasternNamingConvention ? "D2" : "M2",
+            RoleId.R1 => _configuration.EasternNamingConvention ? "D3" : "R1",
+            RoleId.R2 => _configuration.EasternNamingConvention ? "D4" : "R2",
             _ => roleId.ToString()
         };
     }
