@@ -7,7 +7,7 @@
         <Description>PartyIcons plugin</Description>
         <Copyright>shdwp 2021</Copyright>
         <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
-        <AssemblyVersion>1.0.6</AssemblyVersion>
+        <AssemblyVersion>1.0.7.0</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup>
