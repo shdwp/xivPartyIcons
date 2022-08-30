@@ -1,0 +1,24 @@
+[
+	{
+		"Author": "ItsANoBrainer",
+		"Name": "xivPartyIcons2",
+		"InternalName": "xivPartyIcons2",
+		"AssemblyVersion": "2.1.1.2",
+		"Description": "Temp update for xivPartyIcons",
+		"ApplicableVersion": "any",
+		"Tags": [
+			"UI",
+			"Roleplay",
+			"RP",
+			"Bubbles",
+			"Chat"
+		],
+		"DalamudApiLevel": 7,
+		"LoadPriority": 0,
+		"Punchline": "Temp update for xivPartyIcons",
+		"IsHide": "False",
+		"IsTestingExclusive": "False",
+		"DownloadLinkInstall": "https://github.com/ItsANoBrainer/xivPartyIcons/archive/refs/heads/main.zip",
+		"DownloadLinkUpdate": "https://github.com/ItsANoBrainer/xivPartyIcons/archive/refs/heads/main.zip"
+	}
+]
