@@ -7,7 +7,7 @@
         <Description>PartyIcons plugin</Description>
         <Copyright>shdwp 2021</Copyright>
         <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
-        <AssemblyVersion>1.0.7.0</AssemblyVersion>
+        <AssemblyVersion>1.0.8.0</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -19,6 +19,7 @@
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -46,8 +47,8 @@
 
     <ItemGroup>
         <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
-        <PackageReference Include="DalamudPackager" Version="2.1.7" />
-        <PackageReference Include="XivCommon" Version="5.0.0" />
+        <PackageReference Include="DalamudPackager" Version="2.1.8" />
+        <PackageReference Include="XivCommon" Version="6.0.2" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
