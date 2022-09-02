@@ -1,16 +1,20 @@
 ﻿using System;
-using Dalamud.Game.Gui.ContextMenus;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
+using Dalamud.ContextMenu;
 
 namespace PartyIcons.View
 {
     public sealed class PlayerContextMenu : IDisposable
     {
-        [PluginService] private ContextMenu ContextMenu { get; set; }
+        [PluginService] private DalamudContextMenu ContextMenu { get; } = new();
+
+        // Whether to indicate context menu items are from Dalamud.
+        // Setting this to true at least sets apart the menu items given that submenus are not currently supported in Dalamud.ContextMenu.
+        private static bool _useDalamudIndicator = true;
 
         private readonly RoleTracker _roleTracker;
         private readonly PlayerStylesheet _stylesheet;
@@ -23,53 +27,67 @@ namespace PartyIcons.View
 
         public void Enable()
         {
-            ContextMenu.ContextMenuOpened += OnOpenContextMenu;
+            ContextMenu.OnOpenGameObjectContextMenu += OnOpenContextMenu;
         }
 
         public void Disable()
         {
-            ContextMenu.ContextMenuOpened -= OnOpenContextMenu;
+            ContextMenu.OnOpenGameObjectContextMenu -= OnOpenContextMenu;
         }
 
         public void Dispose()
         {
             Disable();
         }
-
-        private void OnOpenContextMenu(ContextMenuOpenedArgs args)
+        
+        private void OnOpenContextMenu(GameObjectContextMenuOpenArgs args)
         {
-            if (!IsMenuValid(args))
+            if (args.Text == null || !IsMenuValid(args))
             {
                 return;
             }
 
-            var playerName = args.GameObjectContext.Name;
-            var playerWorld = args.GameObjectContext.WorldId.Value;
+            var playerName = args.Text.TextValue;
+            var playerWorld = args.ObjectWorld;
+
             PluginLog.Debug($"Opening submenu for {playerName}");
 
+            AddSuggestedRoleMenuItem(playerName, playerWorld, args);
+            AddSwapRoleMenuItem(playerName, playerWorld, args);
+            AddAssignPartyRoleMenuItems(playerName, playerWorld, args);
+        }
+        private void AddSuggestedRoleMenuItem(string playerName, ushort playerWorld, GameObjectContextMenuOpenArgs args)
+        {
             if (_roleTracker.TryGetSuggestedRole(playerName, playerWorld, out var role))
             {
                 var roleName = _stylesheet.GetRoleName(role);
-                args.AddCustomItem($"Assign to {roleName} (suggested)", args => OnAssignRole(args, role));
-            }
 
+                var contextMenuItem = new GameObjectContextMenuItem(
+                    $"Assign {roleName} (suggested)",
+                    _ => OnAssignRole(playerName, playerWorld, role),
+                    _useDalamudIndicator);
+
+                args.AddCustomItem(contextMenuItem);
+            }
+        }
+
+        private void AddSwapRoleMenuItem(string playerName, ushort playerWorld, GameObjectContextMenuOpenArgs args)
+        {
             if (_roleTracker.TryGetAssignedRole(playerName, playerWorld, out var currentRole))
             {
                 var swappedRole = RoleIdUtils.Counterpart(currentRole);
                 var swappedRoleName = _stylesheet.GetRoleName(swappedRole);
-                args.AddCustomItem($"Party role swap to {swappedRoleName}", args => OnAssignRole(args, swappedRole));
+
+                var contextMenuItem = new GameObjectContextMenuItem(
+                    $"Swap to {swappedRoleName}",
+                    _ => OnAssignRole(playerName, playerWorld, swappedRole),
+                    _useDalamudIndicator);
+
+                args.AddCustomItem(contextMenuItem);
             }
-
-            args.AddCustomSubMenu("Party role assign ", OnAssignSubMenuOpen);
         }
 
-        private void OnAssignRole(CustomContextMenuItemSelectedArgs args, RoleId roleId)
-        {
-            _roleTracker.OccupyRole(args.ContextMenuOpenedArgs.GameObjectContext.Name, args.ContextMenuOpenedArgs.GameObjectContext.WorldId.Value, roleId);
-            _roleTracker.CalculateUnassignedPartyRoles();
-        }
-
-        private void OnAssignSubMenuOpen(ContextMenuOpenedArgs args)
+        private void AddAssignPartyRoleMenuItems(string playerName, ushort playerWorld, GameObjectContextMenuOpenArgs args)
         {
             foreach (var role in Enum.GetValues<RoleId>())
             {
@@ -78,30 +96,36 @@ namespace PartyIcons.View
                     continue;
                 }
 
-                args.AddCustomItem(_stylesheet.GetRoleName(role), (args) => OnAssignRole(args, role));
-            }
+                var contextMenuItem = new GameObjectContextMenuItem(
+                    $"Assign {_stylesheet.GetRoleName(role)}",
+                    _ => OnAssignRole(playerName, playerWorld, role),
+                    _useDalamudIndicator);
 
-            args.AddCustomItem("Return", _ => { });
+                args.AddCustomItem(contextMenuItem);
+            }
         }
 
-        private bool IsMenuValid(ContextMenuOpenedArgs args)
+        private void OnAssignRole(string playerName, ushort playerWorld, RoleId role)
         {
+            _roleTracker.OccupyRole(playerName, playerWorld, role);
+
+            _roleTracker.CalculateUnassignedPartyRoles();
+        }
+
+        private bool IsMenuValid(GameObjectContextMenuOpenArgs args)
+        {
+            PluginLog.LogDebug($"ParentAddonName {args.ParentAddonName}");
+
             switch (args.ParentAddonName)
             {
                 case null: // Nameplate/Model menu
-                case "LookingForGroup":
                 case "PartyMemberList":
-                case "FriendList":
-                case "FreeCompany":
-                case "SocialList":
-                case "ContactList":
                 case "ChatLog":
                 case "_PartyList":
-                case "LinkShell":
-                case "CrossWorldLinkshell":
                 case "ContentMemberList": // Eureka/Bozja/...
-                    return args.GameObjectContext.Name != null && args.GameObjectContext.WorldId != 0 &&
-                           args.GameObjectContext.WorldId != 65535;
+                    return args.Text != null &&
+                           args.ObjectWorld != 0 && // Player
+                           args.ObjectWorld != 65535;
 
                 default:
                     return false;
