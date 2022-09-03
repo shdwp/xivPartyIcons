@@ -18,6 +18,7 @@ public class Configuration : IPluginConfiguration
     public bool TestingMode = true;
     public bool EasternNamingConvention = false;
     public bool DisplayRoleInPartyList = false;
+    public bool UseContextMenu = false;
 
     public IconSetId IconSetId { get; set; } = IconSetId.GlowingColored;
     public NameplateSizeMode SizeMode { get; set; } = NameplateSizeMode.Medium;

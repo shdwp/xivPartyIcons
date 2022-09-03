@@ -15,12 +15,14 @@ namespace PartyIcons.View
         // Whether to indicate context menu items are from Dalamud.
         // Setting this to true at least sets apart the menu items given that submenus are not currently supported in Dalamud.ContextMenu.
         private static bool _useDalamudIndicator = true;
-
+        
         private readonly RoleTracker _roleTracker;
+        private readonly Configuration _configuration;
         private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(RoleTracker roleTracker, PlayerStylesheet stylesheet)
+        public PlayerContextMenu(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet)
         {
+            _configuration = configuration;
             _roleTracker = roleTracker;
             _stylesheet = stylesheet;
         }
@@ -42,7 +44,7 @@ namespace PartyIcons.View
         
         private void OnOpenContextMenu(GameObjectContextMenuOpenArgs args)
         {
-            if (args.Text == null || !IsMenuValid(args))
+            if (!_configuration.UseContextMenu || args.Text == null || !IsMenuValid(args))
             {
                 return;
             }
@@ -56,6 +58,7 @@ namespace PartyIcons.View
             AddSwapRoleMenuItem(playerName, playerWorld, args);
             AddAssignPartyRoleMenuItems(playerName, playerWorld, args);
         }
+        
         private void AddSuggestedRoleMenuItem(string playerName, ushort playerWorld, GameObjectContextMenuOpenArgs args)
         {
             if (_roleTracker.TryGetSuggestedRole(playerName, playerWorld, out var role))

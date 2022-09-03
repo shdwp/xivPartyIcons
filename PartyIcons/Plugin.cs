@@ -101,7 +101,7 @@ public sealed class Plugin : IDalamudPlugin
 
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
-        _contextMenu = new PlayerContextMenu(_roleTracker, _playerStylesheet);
+        _contextMenu = new PlayerContextMenu(_roleTracker, Configuration, _playerStylesheet);
         Interface.Inject(_contextMenu);
 
         _ui.Initialize();

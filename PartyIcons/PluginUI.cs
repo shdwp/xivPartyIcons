@@ -198,7 +198,7 @@ internal class PluginUI : IDisposable
     private void DrawGeneralSettings()
     {
         var testingMode = _configuration.TestingMode;
-
+        
         if (ImGui.Checkbox("##testingMode", ref testingMode))
         {
             _configuration.TestingMode = testingMode;
@@ -246,6 +246,19 @@ internal class PluginUI : IDisposable
         ImGuiHelpTooltip(
             "EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).",
             true);
+        
+        var useContextMenu = _configuration.UseContextMenu;
+        
+        if (ImGui.Checkbox("##useContextMenu", ref useContextMenu))
+        {
+            _configuration.UseContextMenu = useContextMenu;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Add context menu commands to assign roles");
+        ImGuiHelpTooltip("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
+
         DisplayNotice();
     }
 
