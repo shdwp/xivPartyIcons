@@ -145,9 +145,14 @@ internal class PluginUI : IDisposable
 
     public void Dispose() { }
 
-    public void OpenSettings()
+    public void OpenSettingsWindow()
     {
         SettingsVisible = true;
+    }
+    
+    public void ToggleSettingsWindow()
+    {
+        SettingsVisible = !SettingsVisible;
     }
 
     public void DrawSettingsWindow()

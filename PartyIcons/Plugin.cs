@@ -106,7 +106,7 @@ public sealed class Plugin : IDalamudPlugin
 
         _ui.Initialize();
         Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
-        Interface.UiBuilder.OpenConfigUi += _ui.OpenSettings;
+        Interface.UiBuilder.OpenConfigUi += _ui.OpenSettingsWindow;
 
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
 
@@ -135,7 +135,7 @@ public sealed class Plugin : IDalamudPlugin
         _roleTracker.Dispose();
         _modeSetter.Dispose();
         Interface.UiBuilder.Draw -= _ui.DrawSettingsWindow;
-        Interface.UiBuilder.OpenConfigUi -= _ui.OpenSettings;
+        Interface.UiBuilder.OpenConfigUi -= _ui.OpenSettingsWindow;
         _ui.Dispose();
 
         SeStringUtils.Dispose();
@@ -160,7 +160,7 @@ public sealed class Plugin : IDalamudPlugin
 
         if (arguments == "" || arguments == "config")
         {
-            _ui.OpenSettings();
+            _ui.ToggleSettingsWindow();
         }
         else if (arguments == "reset" || arguments == "r")
         {
