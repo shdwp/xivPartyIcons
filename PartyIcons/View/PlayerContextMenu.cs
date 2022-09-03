@@ -22,8 +22,8 @@ namespace PartyIcons.View
 
         public PlayerContextMenu(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet)
         {
-            _configuration = configuration;
             _roleTracker = roleTracker;
+            _configuration = configuration;
             _stylesheet = stylesheet;
         }
 
@@ -52,7 +52,7 @@ namespace PartyIcons.View
             var playerName = args.Text.TextValue;
             var playerWorld = args.ObjectWorld;
 
-            PluginLog.Debug($"Opening submenu for {playerName}");
+            PluginLog.Debug($"Opening menu for {playerName}");
 
             AddSuggestedRoleMenuItem(playerName, playerWorld, args);
             AddSwapRoleMenuItem(playerName, playerWorld, args);

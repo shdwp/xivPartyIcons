@@ -7,7 +7,7 @@
         <Description>PartyIcons plugin</Description>
         <Copyright>shdwp 2021</Copyright>
         <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
-        <Version>1.0.8.1</Version>
+        <Version>1.0.8.2</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -41,9 +41,6 @@
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <OutputPath>C:\Users\shdwp\AppData\Roaming\XIVLauncher\devPlugins\PartyIcons</OutputPath>
-    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
