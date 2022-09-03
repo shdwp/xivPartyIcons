@@ -28,7 +28,6 @@ internal class PluginUI : IDisposable
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
-    private Vector2 _windowSize;
     private string _occupationNewName = "Character Name@World";
     private RoleId _occupationNewRole = RoleId.Undefined;
 
@@ -158,12 +157,7 @@ internal class PluginUI : IDisposable
             return;
         }
 
-        if (_windowSize == default)
-        {
-            _windowSize = new Vector2(1200, 1400);
-        }
-
-        ImGui.SetNextWindowSize(_windowSize, ImGuiCond.Always);
+        SetSettingsWindowSizeAndPosition();
 
         if (ImGui.Begin("PartyIcons", ref _settingsVisible))
         {
@@ -191,8 +185,20 @@ internal class PluginUI : IDisposable
             }
         }
 
-        _windowSize = ImGui.GetWindowSize();
         ImGui.End();
+    }
+
+    private static void SetSettingsWindowSizeAndPosition()
+    {
+        Vector2 initialSize = ImGuiHelpers.MainViewport.Size / 2f;
+        Vector2 minimumSize = initialSize / 2f;
+        Vector2 initialPosition = ImGuiHelpers.MainViewport.Size / 5f;
+
+        ImGui.SetNextWindowSize(initialSize, ImGuiCond.FirstUseEver);
+        
+        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(initialPosition, ImGuiCond.FirstUseEver);
+
+        ImGui.SetNextWindowSizeConstraints(minimumSize, new Vector2(float.MaxValue));
     }
 
     private void DrawGeneralSettings()
