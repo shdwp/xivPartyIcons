@@ -270,6 +270,18 @@ internal class PluginUI : IDisposable
         ImGui.Text("Add context menu commands to assign roles");
         ImGuiHelpTooltip("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
 
+        var assignFromChat = _configuration.AssignFromChat;
+
+        if (ImGui.Checkbox("##assignFromChat", ref assignFromChat))
+        {
+            _configuration.AssignFromChat = assignFromChat;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Allow party to self-assign role");
+        ImGuiHelpTooltip("Allows party members to assign themselves a role. i.e. saying 'h1' in party chat will give that player the healer 1 role.");
+
         DisplayNotice();
     }
 

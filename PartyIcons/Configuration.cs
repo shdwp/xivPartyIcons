@@ -19,6 +19,7 @@ public class Configuration : IPluginConfiguration
     public bool EasternNamingConvention = false;
     public bool DisplayRoleInPartyList = false;
     public bool UseContextMenu = false;
+    public bool AssignFromChat = true;
 
     public IconSetId IconSetId { get; set; } = IconSetId.GlowingColored;
     public NameplateSizeMode SizeMode { get; set; } = NameplateSizeMode.Medium;

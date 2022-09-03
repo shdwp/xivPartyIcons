@@ -308,7 +308,7 @@ public sealed class RoleTracker : IDisposable
     private void OnChatMessage(XivChatType type, uint senderid, ref SeString sender, ref SeString message,
         ref bool ishandled)
     {
-        if (type == XivChatType.Party || type == XivChatType.CrossParty || type == XivChatType.Say)
+        if (_configuration.AssignFromChat && (type == XivChatType.Party || type == XivChatType.CrossParty || type == XivChatType.Say))
         {
             string? playerName = null;
             uint? playerWorld = null;
