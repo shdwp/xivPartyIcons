@@ -73,17 +73,11 @@ public class XivApi : IDisposable
         {
             if (_RaptureAtkModulePtr == IntPtr.Zero)
             {
-                var frameworkPtr = _plugin.Framework.Address.BaseAddress;
-                var uiModulePtr = Instance.GetUIModule(frameworkPtr);
-
                 unsafe
                 {
-                    var uiModule = *(UIModule*) uiModulePtr;
-                    var UIModule_GetRaptureAtkModuleAddress = new IntPtr(uiModule.vfunc[7]);
-                    var GetRaptureAtkModule =
-                        Marshal.GetDelegateForFunctionPointer<UIModule_GetRaptureAtkModuleDelegate>(
-                            UIModule_GetRaptureAtkModuleAddress);
-                    _RaptureAtkModulePtr = GetRaptureAtkModule(uiModulePtr);
+                    var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+
+                    _RaptureAtkModulePtr = new IntPtr(framework->GetUiModule()->GetRaptureAtkModule());
                 }
             }
 
