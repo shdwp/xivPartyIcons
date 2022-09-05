@@ -6,6 +6,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace PartyIcons.Api;
@@ -75,9 +76,10 @@ public class XivApi : IDisposable
             {
                 unsafe
                 {
-                    var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+                    var framework = Framework.Instance();
+                    var uiModule = framework->GetUiModule();
 
-                    _RaptureAtkModulePtr = new IntPtr(framework->GetUiModule()->GetRaptureAtkModule());
+                    _RaptureAtkModulePtr = new IntPtr(uiModule->GetRaptureAtkModule());
                 }
             }
 
