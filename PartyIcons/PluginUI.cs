@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Reflection;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
@@ -93,7 +95,7 @@ internal class PluginUI : IDisposable
 
             if ((uint) strArray.Length > 0U)
             {
-                _noticeString = strArray[0];
+                _noticeString = Regex.Replace(strArray[0], "\n", "\n\n");
             }
 
             if (strArray.Length <= 1)
@@ -141,8 +143,7 @@ internal class PluginUI : IDisposable
 
         ImGui.PopStyleColor();
     }
-
-
+    
     public void Dispose() { }
 
     public void OpenSettingsWindow()
@@ -179,8 +180,14 @@ internal class PluginUI : IDisposable
                     DrawNameplateSettings();
                     ImGui.EndTabItem();
                 }
+                
+                if (ImGui.BeginTabItem("Chat Names"))
+                {
+                    DrawChatNameSettings();
+                    ImGui.EndTabItem();
+                }
 
-                if (ImGui.BeginTabItem("Static Assignments##static_assignments"))
+                if (ImGui.BeginTabItem("Static Roles##static_assignments"))
                 {
                     DrawStaticAssignmentsSettings();
                     ImGui.EndTabItem();
@@ -218,7 +225,7 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Enable testing mode");
-        ImGuiHelpTooltip("Applies settings to any player, contrary to only the ones that are in the party.");
+        ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 
         var chatContentMessage = _configuration.ChatContentMessage;
 
@@ -230,7 +237,7 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Display chat message when entering duty");
-        ImGuiHelpTooltip("Can be used to determine the duty type before fully loading in.");
+        ImGuiComponents.HelpMarker("Can be used to determine the duty type before fully loading in.");
 
         var easternNamingConvention = _configuration.EasternNamingConvention;
 
@@ -242,7 +249,7 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Eastern role naming convention");
-        ImGuiHelpTooltip("Use japanese data center role naming convention (MT ST D1-D4 H1-2).");
+        ImGuiComponents.HelpMarker("Use japanese data center role naming convention (MT ST D1-D4 H1-2).");
 
         var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
 
@@ -268,7 +275,7 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Add context menu commands to assign roles");
-        ImGuiHelpTooltip("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
+        ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
 
         var assignFromChat = _configuration.AssignFromChat;
 
@@ -280,32 +287,17 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Allow party to self-assign role");
-        ImGuiHelpTooltip("Allows party members to assign themselves a role. i.e. saying 'h1' in party chat will give that player the healer 1 role.");
+        ImGuiComponents.HelpMarker("Allows party members to assign themselves a role. i.e. saying 'h1' in party chat will give that player the healer 1 role.");
 
         DisplayNotice();
     }
-
+    
     private void DrawNameplateSettings()
     {
-        var hideLocalNameplate = _configuration.HideLocalPlayerNameplate;
-
-        if (ImGui.Checkbox("##hidelocal", ref hideLocalNameplate))
-        {
-            _configuration.HideLocalPlayerNameplate = hideLocalNameplate;
-            _configuration.Save();
-        }
-
-        ImGui.SameLine();
-        ImGui.Text("Hide own nameplate");
-        ImGuiHelpTooltip(
-            "You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
-
-        ImGui.Dummy(new Vector2(0f, 25f));
-
         var iconSetId = _configuration.IconSetId;
         ImGui.Text("Icon set:");
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(300);
+        SetComboWidth(Enum.GetValues<IconSetId>().Select(IconSetIdToString));
 
         if (ImGui.BeginCombo("##icon_set", IconSetIdToString(iconSetId)))
         {
@@ -324,7 +316,7 @@ internal class PluginUI : IDisposable
         var iconSizeMode = _configuration.SizeMode;
         ImGui.Text("Nameplate size:");
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(300);
+        SetComboWidth(Enum.GetValues<NameplateSizeMode>().Select(x => x.ToString()));
 
         if (ImGui.BeginCombo("##icon_size", iconSizeMode.ToString()))
         {
@@ -341,73 +333,111 @@ internal class PluginUI : IDisposable
         }
 
         ImGuiHelpTooltip("Affects all presets, except Game Default and Small Job Icon.");
+        
+        var hideLocalNameplate = _configuration.HideLocalPlayerNameplate;
 
-        ImGui.Dummy(new Vector2(0, 25f));
-        ImGui.Text("Dungeon:");
-        ImGuiHelpTooltip("Modes used for your party while in dungeon.");
-        NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon,
-            (mode) => _configuration.NameplateDungeon = mode);
+        if (ImGui.Checkbox("##hidelocal", ref hideLocalNameplate))
+        {
+            _configuration.HideLocalPlayerNameplate = hideLocalNameplate;
+            _configuration.Save();
+        }
+
         ImGui.SameLine();
-        ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon,
-            (mode) => _configuration.ChatDungeon = mode);
-        ImGui.Dummy(new Vector2(0, 15f));
+        ImGui.Text("Hide own nameplate");
+        ImGuiHelpTooltip(
+            "You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
-        ImGui.Text("Raid:");
-        ImGuiHelpTooltip("Modes used for your party while in raid.");
-        NameplateModeSection("##np_raid", () => _configuration.NameplateRaid,
-            (mode) => _configuration.NameplateRaid = mode);
-        ImGui.SameLine();
-        ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode);
-        ImGui.Dummy(new Vector2(0, 15f));
+        ImGui.Dummy(new Vector2(0f, 10f));
 
-        ImGui.Text("Alliance Raid party:");
-        ImGuiHelpTooltip("Modes used for your party while in alliance raid.");
-        NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
-            (mode) => _configuration.NameplateAllianceRaid = mode);
-        ImGui.SameLine();
-        ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
-            (mode) => _configuration.ChatAllianceRaid = mode);
-        ImGui.Dummy(new Vector2(0, 15f));
+        if (ImGui.CollapsingHeader("Overworld", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld,
+                (mode) => _configuration.NameplateOverworld = mode,
+                "Party:");
 
-        ImGui.Text("Bozja nameplates:");
-        ImGuiHelpTooltip("Chat will follow rules as it was in overworld.");
-        NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty,
-            mode => _configuration.NameplateBozjaParty = mode, "Party:             ");
-        ImGui.SameLine();
-        NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers,
-            mode => _configuration.NameplateBozjaOthers = mode, "Others:         ");
-        ImGui.Dummy(new Vector2(0, 15f));
+            NameplateModeSection("##np_others", () => _configuration.NameplateOthers,
+                (mode) => _configuration.NameplateOthers = mode,
+                "Others:");
+            
+            ImGui.Dummy(new Vector2(0, 10f));
+        }
+        
+        if (ImGui.CollapsingHeader("Instances", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon,
+                (mode) => _configuration.NameplateDungeon = mode,
+                "Dungeon:");
 
-        ImGui.Text("Overworld party:");
-        ImGuiHelpTooltip("Modes used for your party while not in duty.");
-        NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld,
-            (mode) => _configuration.NameplateOverworld = mode);
-        ImGui.SameLine();
-        ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld,
-            (mode) => _configuration.ChatOverworld = mode);
-        ImGui.Dummy(new Vector2(0, 15f));
+            NameplateModeSection("##np_raid", () => _configuration.NameplateRaid,
+                (mode) => _configuration.NameplateRaid = mode,
+                "Raid:");
 
-        ImGui.Text("Overworld other players:");
-        ImGuiHelpTooltip("Modes used for non-party players.");
-        NameplateModeSection("##np_others", () => _configuration.NameplateOthers,
-            (mode) => _configuration.NameplateOthers = mode);
-        ImGui.SameLine();
-        ChatModeSection("##chat_others", () => _configuration.ChatOthers,
-            (mode) => _configuration.ChatOthers = mode);
+            NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
+                (mode) => _configuration.NameplateAllianceRaid = mode,
+                "Alliance:");
+            
+            ImGui.Dummy(new Vector2(0, 10f));
+        }
+        
+        if (ImGui.CollapsingHeader("Bozja", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty,
+                mode => _configuration.NameplateBozjaParty = mode, "Party:");
+            
+            NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers,
+                mode => _configuration.NameplateBozjaOthers = mode, "Others:");
+            
+            ImGui.Dummy(new Vector2(0, 10f));
+        }
 
-        ImGui.Text("PvP:");
-        ImGui.TextDisabled("This plugin is intentionally automatically disabled during PvP matches.");
+        if (ImGui.CollapsingHeader("PvP", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGui.TextDisabled("This plugin is intentionally automatically disabled during PvP matches.");
+            
+            ImGui.Dummy(new Vector2(0, 10f));
+        }
 
-        ImGui.Dummy(new Vector2(0, 25f));
         ImGui.TextWrapped(
             "Please note that it usually takes a some time for nameplates to reload, especially for own character nameplate.");
 
-        ImGui.Dummy(new Vector2(0, 15f));
-        ImGui.Text("Nameplate examples:");
+        ImGui.Dummy(new Vector2(0, 10f));
 
-        foreach (var kv in _nameplateExamples)
+        if (ImGui.CollapsingHeader("Examples"))
         {
-            CollapsibleExampleImage(kv.Key, kv.Value);
+            foreach (var kv in _nameplateExamples)
+            {
+                CollapsibleExampleImage(kv.Key, kv.Value);
+            }
+        }
+    }
+    
+    private void DrawChatNameSettings()
+    {
+        if (ImGui.CollapsingHeader("Overworld", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld,
+                (mode) => _configuration.ChatOverworld = mode,
+                "Party:");
+            
+            ChatModeSection("##chat_others", () => _configuration.ChatOthers,
+                (mode) => _configuration.ChatOthers = mode,
+                "Others:");
+            ImGui.Dummy(new Vector2(0, 15f));
+        }
+        
+        if (ImGui.CollapsingHeader("Instances", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon,
+                (mode) => _configuration.ChatDungeon = mode,
+                "Dungeon:");
+
+            ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode,
+                "Raid:");
+
+            ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
+                (mode) => _configuration.ChatAllianceRaid = mode,
+                "Alliance:");
+            ImGui.Dummy(new Vector2(0, 15f));
         }
     }
 
@@ -428,7 +458,7 @@ internal class PluginUI : IDisposable
             }
 
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(200);
+            SetComboWidth(Enum.GetValues<RoleId>().Select(x => _stylesheet.GetRoleName(x)));
 
             if (ImGui.BeginCombo("##role_combo_" + kv.Key,
                     _stylesheet.GetRoleName(_configuration.StaticAssignments[kv.Key])))
@@ -457,7 +487,7 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(200);
+        SetComboWidth(Enum.GetValues<RoleId>().Select(x => _stylesheet.GetRoleName(x)));
 
         if (ImGui.BeginCombo("##new_role_combo", _stylesheet.GetRoleName(_occupationNewRole)))
         {
@@ -503,11 +533,11 @@ internal class PluginUI : IDisposable
         }
     }
 
-    private void ChatModeSection(string label, Func<ChatMode> getter, Action<ChatMode> setter)
+    private void ChatModeSection(string label, Func<ChatMode> getter, Action<ChatMode> setter, string title = "Chat name: ")
     {
-        ImGui.Text("Chat name: ");
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(400f);
+        ImGui.Text(title);
+        ImGui.SameLine(85f);
+        SetComboWidth(Enum.GetValues<ChatMode>().Select(ChatModeToString));
 
         // hack to fix incorrect configurations
         try
@@ -550,9 +580,10 @@ internal class PluginUI : IDisposable
     private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter,
         string title = "Nameplate: ")
     {
+        // ImGui.SetNextItemWidth(100f);
         ImGui.Text(title);
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(400f);
+        ImGui.SameLine(85f);
+        SetComboWidth(Enum.GetValues<NameplateMode>().Select(x => x.ToString()));
 
         // hack to fix incorrect configurations
         try
@@ -603,5 +634,19 @@ internal class PluginUI : IDisposable
             NameplateMode.RoleLetters => "Role letters",
             _ => throw new ArgumentException()
         };
+    }
+    
+    private void SetComboWidth(IEnumerable<string> values)
+    {
+        const float paddingMultiplier = 1.05f; 
+        float maxItemWidth = float.MinValue;
+
+        foreach (var text in values)
+        {
+            var itemWidth = ImGui.CalcTextSize(text).X + ImGui.GetStyle().ScrollbarSize * 3f;
+            maxItemWidth = Math.Max(maxItemWidth, itemWidth);
+        }
+
+        ImGui.SetNextItemWidth(maxItemWidth * paddingMultiplier);
     }
 }
