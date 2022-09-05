@@ -215,6 +215,8 @@ internal class PluginUI : IDisposable
 
     private void DrawGeneralSettings()
     {
+        ImGui.Dummy(new Vector2(0, 2f));
+
         var testingMode = _configuration.TestingMode;
         
         if (ImGui.Checkbox("##testingMode", ref testingMode))
@@ -294,6 +296,12 @@ internal class PluginUI : IDisposable
     
     private void DrawNameplateSettings()
     {
+        const float separatorPadding = 2f;
+        
+        ImGui.Dummy(new Vector2(0, 1f));
+        ImGui.TextDisabled("Please note, it usually takes time for nameplates to reload.");
+        ImGui.Dummy(new Vector2(0, 10f));
+        
         var iconSetId = _configuration.IconSetId;
         ImGui.Text("Icon set:");
         ImGui.SameLine();
@@ -348,21 +356,31 @@ internal class PluginUI : IDisposable
             "You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
         ImGui.Dummy(new Vector2(0f, 10f));
-
-        if (ImGui.CollapsingHeader("Overworld", ImGuiTreeNodeFlags.DefaultOpen))
+        
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Overworld");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld,
                 (mode) => _configuration.NameplateOverworld = mode,
                 "Party:");
-
+    
             NameplateModeSection("##np_others", () => _configuration.NameplateOthers,
                 (mode) => _configuration.NameplateOthers = mode,
                 "Others:");
-            
-            ImGui.Dummy(new Vector2(0, 10f));
         }
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 2f));
         
-        if (ImGui.CollapsingHeader("Instances", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Instances");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon,
                 (mode) => _configuration.NameplateDungeon = mode,
@@ -375,30 +393,39 @@ internal class PluginUI : IDisposable
             NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
                 (mode) => _configuration.NameplateAllianceRaid = mode,
                 "Alliance:");
-            
-            ImGui.Dummy(new Vector2(0, 10f));
         }
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 2f));
         
-        if (ImGui.CollapsingHeader("Bozja", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Forays");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
+            ImGui.TextDisabled("e.g. Eureka, Bozja");
+            
             NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty,
                 mode => _configuration.NameplateBozjaParty = mode, "Party:");
             
             NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers,
                 mode => _configuration.NameplateBozjaOthers = mode, "Others:");
-            
-            ImGui.Dummy(new Vector2(0, 10f));
         }
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 2f));
 
-        if (ImGui.CollapsingHeader("PvP", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("PvP");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, 2f));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ImGui.TextDisabled("This plugin is intentionally automatically disabled during PvP matches.");
-            
-            ImGui.Dummy(new Vector2(0, 10f));
+            ImGui.TextDisabled("This plugin is intentionally disabled during PvP matches.");
         }
-
-        ImGui.TextWrapped(
-            "Please note that it usually takes a some time for nameplates to reload, especially for own character nameplate.");
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 10f));
 
         ImGui.Dummy(new Vector2(0, 10f));
 
@@ -413,7 +440,15 @@ internal class PluginUI : IDisposable
     
     private void DrawChatNameSettings()
     {
-        if (ImGui.CollapsingHeader("Overworld", ImGuiTreeNodeFlags.DefaultOpen))
+        const float separatorPadding = 2f;
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Overworld");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld,
                 (mode) => _configuration.ChatOverworld = mode,
@@ -422,10 +457,16 @@ internal class PluginUI : IDisposable
             ChatModeSection("##chat_others", () => _configuration.ChatOthers,
                 (mode) => _configuration.ChatOthers = mode,
                 "Others:");
-            ImGui.Dummy(new Vector2(0, 15f));
         }
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 2f));
         
-        if (ImGui.CollapsingHeader("Instances", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Overworld");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, separatorPadding));
+        ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon,
                 (mode) => _configuration.ChatDungeon = mode,
@@ -437,12 +478,15 @@ internal class PluginUI : IDisposable
             ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
                 (mode) => _configuration.ChatAllianceRaid = mode,
                 "Alliance:");
-            ImGui.Dummy(new Vector2(0, 15f));
         }
+        ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        ImGui.Dummy(new Vector2(0, 2f));
     }
 
     private void DrawStaticAssignmentsSettings()
     {
+        ImGui.Dummy(new Vector2(0, 2f));
+        
         ImGui.TextWrapped(
             "Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
         ImGui.Dummy(new Vector2(0f, 25f));
@@ -536,7 +580,7 @@ internal class PluginUI : IDisposable
     private void ChatModeSection(string label, Func<ChatMode> getter, Action<ChatMode> setter, string title = "Chat name: ")
     {
         ImGui.Text(title);
-        ImGui.SameLine(85f);
+        ImGui.SameLine(100f);
         SetComboWidth(Enum.GetValues<ChatMode>().Select(ChatModeToString));
 
         // hack to fix incorrect configurations
@@ -580,9 +624,10 @@ internal class PluginUI : IDisposable
     private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter,
         string title = "Nameplate: ")
     {
-        // ImGui.SetNextItemWidth(100f);
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + 3f);
         ImGui.Text(title);
-        ImGui.SameLine(85f);
+        ImGui.SameLine(100f);
+            ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 3f);
         SetComboWidth(Enum.GetValues<NameplateMode>().Select(x => x.ToString()));
 
         // hack to fix incorrect configurations
