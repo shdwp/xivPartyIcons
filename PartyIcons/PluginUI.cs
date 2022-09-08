@@ -17,6 +17,7 @@ using ImGuiNET;
 using ImGuiScene;
 using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
+using PartyIcons.Utils;
 using PartyIcons.View;
 
 namespace PartyIcons;
@@ -37,10 +38,20 @@ internal class PluginUI : IDisposable
     private string? _noticeString;
     private string? _noticeUrl;
 
+    private static WindowSizeHelper _windowSizeHelper = new();
+
     public bool SettingsVisible
     {
         get => _settingsVisible;
-        set => _settingsVisible = value;
+        set
+        {
+            _settingsVisible = value;
+
+            if (value)
+            {
+                _windowSizeHelper.ForceSize();
+            }
+        }
     }
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
@@ -155,7 +166,7 @@ internal class PluginUI : IDisposable
     {
         SettingsVisible = !SettingsVisible;
     }
-
+    
     public void DrawSettingsWindow()
     {
         if (!SettingsVisible)
@@ -163,10 +174,12 @@ internal class PluginUI : IDisposable
             return;
         }
 
-        SetSettingsWindowSizeAndPosition();
+        _windowSizeHelper.SetWindowSize();
 
         if (ImGui.Begin("PartyIcons", ref _settingsVisible))
         {
+            _windowSizeHelper.CheckWindowSize();
+            
             if (ImGui.BeginTabBar("##tabbar"))
             {
                 if (ImGui.BeginTabItem("General##general"))
@@ -198,19 +211,6 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.End();
-    }
-
-    private static void SetSettingsWindowSizeAndPosition()
-    {
-        Vector2 initialSize = ImGuiHelpers.MainViewport.Size / 2f;
-        Vector2 minimumSize = initialSize / 2f;
-        Vector2 initialPosition = ImGuiHelpers.MainViewport.Size / 5f;
-
-        ImGui.SetNextWindowSize(initialSize, ImGuiCond.FirstUseEver);
-        
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(initialPosition, ImGuiCond.FirstUseEver);
-
-        ImGui.SetNextWindowSizeConstraints(minimumSize, new Vector2(float.MaxValue));
     }
 
     private void DrawGeneralSettings()
