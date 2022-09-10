@@ -179,33 +179,57 @@ internal class PluginUI : IDisposable
         if (ImGui.Begin("PartyIcons", ref _settingsVisible))
         {
             _windowSizeHelper.CheckWindowSize();
-            
+
             if (ImGui.BeginTabBar("##tabbar"))
             {
                 if (ImGui.BeginTabItem("General##general"))
                 {
-                    DrawGeneralSettings();
-                    ImGui.EndTabItem();
-                }
-
-                if (ImGui.BeginTabItem("Nameplates"))
-                {
-                    DrawNameplateSettings();
+                    if (ImGui.BeginChild("##general_content"))
+                    {
+                        DrawGeneralSettings();
+                        
+                        ImGui.EndChild();
+                    }
+                    
                     ImGui.EndTabItem();
                 }
                 
+                if (ImGui.BeginTabItem("Nameplates"))
+                {
+                    if (ImGui.BeginChild("##nameplates_content"))
+                    {
+                        DrawNameplateSettings();
+                        
+                        ImGui.EndChild();
+                    }
+                    
+                    ImGui.EndTabItem();
+                }
+
                 if (ImGui.BeginTabItem("Chat Names"))
                 {
-                    DrawChatNameSettings();
+                    if (ImGui.BeginChild("##chat_names_content"))
+                    {
+                        DrawChatNameSettings();
+                        
+                        ImGui.EndChild();
+                    }
+                    
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Static Roles##static_assignments"))
+                if (ImGui.BeginTabItem("Roles##static_assignments"))
                 {
-                    DrawStaticAssignmentsSettings();
+                    if (ImGui.BeginChild("##static_assignments_content"))
+                    {
+                        DrawStaticAssignmentsSettings();
+                        
+                        ImGui.EndChild();
+                    }
+                    
                     ImGui.EndTabItem();
                 }
-
+                
                 ImGui.EndTabBar();
             }
         }
@@ -240,56 +264,6 @@ internal class PluginUI : IDisposable
         ImGui.SameLine();
         ImGui.Text("Display chat message when entering duty");
         ImGuiComponents.HelpMarker("Can be used to determine the duty type before fully loading in.");
-
-        var easternNamingConvention = _configuration.EasternNamingConvention;
-
-        if (ImGui.Checkbox("##easteannaming", ref easternNamingConvention))
-        {
-            _configuration.EasternNamingConvention = easternNamingConvention;
-            _configuration.Save();
-        }
-
-        ImGui.SameLine();
-        ImGui.Text("Eastern role naming convention");
-        ImGuiComponents.HelpMarker("Use japanese data center role naming convention (MT ST D1-D4 H1-2).");
-
-        var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
-
-        if (ImGui.Checkbox("##displayrolesinpartylist", ref displayRoleInPartyList))
-        {
-            _configuration.DisplayRoleInPartyList = displayRoleInPartyList;
-            _configuration.Save();
-        }
-
-        ImGui.SameLine();
-        ImGui.Text("Replace party numbers with role in Party List");
-        ImGuiHelpTooltip(
-            "EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).",
-            true);
-        
-        var useContextMenu = _configuration.UseContextMenu;
-        
-        if (ImGui.Checkbox("##useContextMenu", ref useContextMenu))
-        {
-            _configuration.UseContextMenu = useContextMenu;
-            _configuration.Save();
-        }
-
-        ImGui.SameLine();
-        ImGui.Text("Add context menu commands to assign roles");
-        ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
-
-        var assignFromChat = _configuration.AssignFromChat;
-
-        if (ImGui.Checkbox("##assignFromChat", ref assignFromChat))
-        {
-            _configuration.AssignFromChat = assignFromChat;
-            _configuration.Save();
-        }
-
-        ImGui.SameLine();
-        ImGui.Text("Allow party to self-assign role");
-        ImGuiComponents.HelpMarker("Allows party members to assign themselves a role. i.e. saying 'h1' in party chat will give that player the healer 1 role.");
 
         DisplayNotice();
     }
@@ -462,7 +436,7 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, 2f));
         
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Overworld");
+        ImGui.Text("Instances");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
@@ -487,10 +461,85 @@ internal class PluginUI : IDisposable
     {
         ImGui.Dummy(new Vector2(0, 2f));
         
-        ImGui.TextWrapped(
-            "Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
-        ImGui.Dummy(new Vector2(0f, 25f));
+        var easternNamingConvention = _configuration.EasternNamingConvention;
 
+        if (ImGui.Checkbox("##easteannaming", ref easternNamingConvention))
+        {
+            _configuration.EasternNamingConvention = easternNamingConvention;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Eastern role naming convention");
+        ImGuiComponents.HelpMarker("Use Japanese data center role naming convention (MT ST D1-D4 H1-2).");
+
+        var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
+
+        if (ImGui.Checkbox("##displayrolesinpartylist", ref displayRoleInPartyList))
+        {
+            _configuration.DisplayRoleInPartyList = displayRoleInPartyList;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Replace party numbers with role in Party List");
+        ImGuiHelpTooltip(
+            "EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).",
+            true);
+        
+        var useContextMenu = _configuration.UseContextMenu;
+        
+        if (ImGui.Checkbox("##useContextMenu", ref useContextMenu))
+        {
+            _configuration.UseContextMenu = useContextMenu;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Add context menu commands to assign roles");
+        ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
+
+        var assignFromChat = _configuration.AssignFromChat;
+
+        if (ImGui.Checkbox("##assignFromChat", ref assignFromChat))
+        {
+            _configuration.AssignFromChat = assignFromChat;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Allow party members to self-assign roles via party chat");
+        ImGuiComponents.HelpMarker("Allows party members to assign themselves a role, e.g. saying 'h1' in party chat will give that player the healer 1 role.");
+        
+        ImGui.Dummy(new Vector2(0, 2f));
+        
+        
+        
+        
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("Static Roles");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        ImGui.Dummy(new Vector2(0, 2f));
+        // ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
+        {
+            ImGui.PushStyleColor(0, ImGuiColors.ParsedGrey);
+            {
+                ImGui.TextWrapped(
+                    "Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
+                ImGui.Dummy(new Vector2(0f, 25f));
+            }
+            ImGui.PopStyleColor();
+        }
+        // ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        // ImGui.Dummy(new Vector2(0, 2f));
+        
+        
+        
+        
+        
+        
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 22f);
         foreach (var kv in new Dictionary<string, RoleId>(_configuration.StaticAssignments))
         {
             if (ImGui.Button("x##remove_occupation_" + kv.Key))
@@ -548,6 +597,9 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.InputText("##new_role_name", ref _occupationNewName, 64);
+        
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + 22f);
+
     }
 
     private void CollapsibleExampleImage(NameplateMode mode, TextureWrap tex)
