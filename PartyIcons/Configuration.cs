@@ -32,11 +32,11 @@ public class Configuration : IPluginConfiguration
     public NameplateMode NameplateRaid { get; set; } = NameplateMode.RoleLetters;
     public NameplateMode NameplateOthers { get; set; } = NameplateMode.SmallJobIcon;
 
-    public ChatMode ChatOverworld { get; set; } = ChatMode.Role;
-    public ChatMode ChatAllianceRaid { get; set; } = ChatMode.Role;
-    public ChatMode ChatDungeon { get; set; } = ChatMode.Job;
-    public ChatMode ChatRaid { get; set; } = ChatMode.Role;
-    public ChatMode ChatOthers { get; set; } = ChatMode.Job;
+    public ChatConfig ChatOverworld { get; set; } = new ChatConfig(ChatMode.Role, true);
+    public ChatConfig ChatAllianceRaid { get; set; } = new ChatConfig(ChatMode.Role, true);
+    public ChatConfig ChatDungeon { get; set; } = new ChatConfig(ChatMode.Job, true);
+    public ChatConfig ChatRaid { get; set; } = new ChatConfig(ChatMode.Role, true);
+    public ChatConfig ChatOthers { get; set; } = new ChatConfig(ChatMode.Job, true);
 
     public Dictionary<string, RoleId> StaticAssignments { get; set; } = new();
 

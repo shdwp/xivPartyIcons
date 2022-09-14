@@ -33,8 +33,8 @@ public sealed class ChatNameUpdater : IDisposable
     private readonly RoleTracker _roleTracker;
     private readonly PlayerStylesheet _stylesheet;
 
-    public ChatMode PartyMode { get; set; }
-    public ChatMode OthersMode { get; set; }
+    public ChatConfig PartyMode { get; set; }
+    public ChatConfig OthersMode { get; set; }
 
     public ChatNameUpdater(RoleTracker roleTracker, PlayerStylesheet stylesheet)
     {
@@ -156,23 +156,26 @@ public sealed class ChatNameUpdater : IDisposable
     {
         var playerPayload = GetPlayerPayload(sender);
 
-        var mode = CheckIfPlayerPayloadInParty(playerPayload) ? PartyMode : OthersMode;
+        var config = CheckIfPlayerPayloadInParty(playerPayload) ? PartyMode : OthersMode;
 
-        if (mode == ChatMode.Role &&
+        if (config.Mode == ChatMode.Role &&
             _roleTracker.TryGetAssignedRole(playerPayload.PlayerName, playerPayload.World.RowId, out var roleId))
         {
-            RemoveExistingForeground(sender);
             GetAndRemovePartyNumberPrefix(chatType, sender, out _);
 
             var prefixString = new SeString();
-            prefixString.Append(new UIForegroundPayload(_stylesheet.GetRoleChatColor(roleId)));
+            if (config.Colored)
+            {
+                RemoveExistingForeground(sender);
+                prefixString.Append(new UIForegroundPayload(_stylesheet.GetRoleChatColor(roleId)));
+            }
             prefixString.Append(_stylesheet.GetRoleChatPrefix(roleId));
             prefixString.Append(new TextPayload(" "));
 
             sender.Payloads.InsertRange(0, prefixString.Payloads);
-            sender.Payloads.Add(UIForegroundPayload.UIForegroundOff);
+            if (config.Colored) sender.Payloads.Add(UIForegroundPayload.UIForegroundOff);
         }
-        else if (mode != ChatMode.GameDefault)
+        else if (config.Mode != ChatMode.GameDefault || config.Colored) // still get in if GameDefault && Colored
         {
             var senderJob = FindSenderJob(playerPayload);
 
@@ -181,40 +184,49 @@ public sealed class ChatNameUpdater : IDisposable
                 return;
             }
 
-            RemoveExistingForeground(sender);
             GetAndRemovePartyNumberPrefix(chatType, sender, out var numberPrefix);
 
             var prefixString = new SeString();
 
-            switch (mode)
+            switch (config.Mode)
             {
                 case ChatMode.Job:
-                    prefixString.Append(new UIForegroundPayload(_stylesheet.GetJobChatColor(senderJob)));
+                    if (config.Colored)
+                    {
+                        RemoveExistingForeground(sender);
+                        prefixString.Append(new UIForegroundPayload(_stylesheet.GetJobChatColor(senderJob)));
+                    }
 
                     if (numberPrefix.Length > 0)
                     {
                         prefixString.Append(new TextPayload(numberPrefix));
                     }
 
-                    prefixString.Append(_stylesheet.GetJobChatPrefix(senderJob).Payloads);
+                    prefixString.Append(_stylesheet.GetJobChatPrefix(senderJob, config.Colored).Payloads);
                     prefixString.Append(new TextPayload(" "));
 
                     break;
 
                 case ChatMode.Role:
-                    prefixString.Append(new UIForegroundPayload(_stylesheet.GetGenericRoleChatColor(senderJob)));
+                    if (config.Colored)
+                    {
+                        RemoveExistingForeground(sender);
+                        prefixString.Append(new UIForegroundPayload(_stylesheet.GetGenericRoleChatColor(senderJob)));
+                    }
 
                     if (numberPrefix.Length > 0)
                     {
                         prefixString.Append(new TextPayload(numberPrefix));
                     }
 
-                    prefixString.Append(_stylesheet.GetGenericRoleChatPrefix(senderJob).Payloads);
+                    prefixString.Append(_stylesheet.GetGenericRoleChatPrefix(senderJob, config.Colored).Payloads);
                     prefixString.Append(new TextPayload(" "));
 
                     break;
 
-                case ChatMode.OnlyColor:
+                case ChatMode.GameDefault:
+                    // don't need to check Colored again
+                    RemoveExistingForeground(sender);
                     prefixString.Append(new UIForegroundPayload(_stylesheet.GetGenericRoleChatColor(senderJob)));
 
                     if (numberPrefix.Length > 0)
@@ -231,7 +243,7 @@ public sealed class ChatNameUpdater : IDisposable
             }
 
             sender.Payloads.InsertRange(0, prefixString.Payloads);
-            sender.Payloads.Add(UIForegroundPayload.UIForegroundOff);
+            if (config.Colored) sender.Payloads.Add(UIForegroundPayload.UIForegroundOff);
         }
     }
 }

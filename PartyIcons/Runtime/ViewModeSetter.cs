@@ -141,6 +141,6 @@ public sealed class ViewModeSetter
                                          _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
         PluginLog.Debug(
-            $"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
+            $"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode.Mode} {_chatNameUpdater.PartyMode.Colored}, update HUD {_partyListHudUpdater.UpdateHUD}");
     }
 }
