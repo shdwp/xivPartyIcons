@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿using System;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Party;
@@ -96,7 +97,10 @@ public sealed class Plugin : IDalamudPlugin
         _partyListHudUpdater = new PartyListHUDUpdater(_partyHUDView, _roleTracker, Configuration);
         Interface.Inject(_partyListHudUpdater);
 
-        _nameplateUpdater = new NameplateUpdater(Address, _nameplateView);
+        _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
+        Interface.Inject(_modeSetter);
+
+        _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, _modeSetter);
         Interface.Inject(_nameplateUpdater);
 
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
@@ -109,9 +113,6 @@ public sealed class Plugin : IDalamudPlugin
         Interface.UiBuilder.OpenConfigUi += _ui.OpenSettingsWindow;
 
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
-
-        _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
-        Interface.Inject(_modeSetter);
 
         _partyListHudUpdater.Enable();
         _modeSetter.Enable();
@@ -177,6 +178,28 @@ public sealed class Plugin : IDalamudPlugin
         else if (arguments == "dbg party")
         {
             ChatGui.Print(_partyHUDView.GetDebugInfo());
+        }
+        else if (arguments.Contains("dbg icon"))
+        {
+            var argv = arguments.Split(' ');
+
+            if (argv.Length == 3)
+            {
+                try
+                {
+                    _nameplateUpdater.DebugIcon = int.Parse(argv[2]);
+                    PluginLog.Debug($"Set debug icon to {_nameplateUpdater.DebugIcon}");
+                }
+                catch (Exception)
+                {
+                    PluginLog.Debug("Invalid icon id given for debug icon.");
+                    _nameplateUpdater.DebugIcon = -1;
+                }
+            }
+            else
+            {
+                _nameplateUpdater.DebugIcon = -1;
+            }
         }
     }
 }

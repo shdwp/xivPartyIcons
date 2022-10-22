@@ -21,6 +21,11 @@ public sealed class ViewModeSetter
     [PluginService]
     public ChatGui ChatGui { get; set; }
 
+    /// <summary>
+    /// Whether the player is currently in a duty.
+    /// </summary>
+    public bool InDuty { get; private set; } = true;
+
     private readonly NameplateView _nameplateView;
     private readonly Configuration _configuration;
     private readonly ChatNameUpdater _chatNameUpdater;
@@ -70,12 +75,15 @@ public sealed class ViewModeSetter
 
         if (content == null)
         {
+            InDuty = false;
             PluginLog.Information($"Content null {ClientState.TerritoryType}");
             _nameplateView.PartyMode = _configuration.NameplateOverworld;
             _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
         }
         else
         {
+            InDuty = true;
+
             if (_configuration.ChatContentMessage)
             {
                 ChatGui.Print($"Entering {content.Name}.");
