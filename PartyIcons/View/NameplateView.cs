@@ -52,7 +52,12 @@ public sealed class NameplateView : IDisposable
         npObject.SetNameScale(0.5f);
     }
 
-    public void SetupForPC(XivApi.SafeNamePlateObject npObject)
+    /// <summary>
+    /// Position and scale nameplate elements based on the current mode.
+    /// </summary>
+    /// <param name="npObject">The nameplate object to modify.</param>
+    /// <param name="forceIcon">Whether modes that do not normally support icons should be adjusted to show an icon.</param>
+    public void SetupForPC(XivApi.SafeNamePlateObject npObject, bool forceIcon)
     {
         var nameScale = 0.75f;
         var iconScale = 1f;
@@ -128,6 +133,24 @@ public sealed class NameplateView : IDisposable
 
             case NameplateMode.RoleLetters:
                 iconScale = 0f;
+
+                // Allow an icon to be displayed in roles only mode
+                if (forceIcon)
+                {
+                    iconScale = _configuration.SizeMode switch
+                    {
+                        NameplateSizeMode.Smaller => 1f,
+                        NameplateSizeMode.Medium => 1.5f,
+                        NameplateSizeMode.Bigger => 2f
+                    };
+                    iconOffset = _configuration.SizeMode switch
+                    {
+                        NameplateSizeMode.Smaller => new Vector2(-6, 74),
+                        NameplateSizeMode.Medium => new Vector2(-42, 55),
+                        NameplateSizeMode.Bigger => new Vector2(-78, 35)
+                    };
+                }
+                
                 nameScale = _configuration.SizeMode switch
                 {
                     NameplateSizeMode.Smaller => 0.5f,
@@ -153,6 +176,7 @@ public sealed class NameplateView : IDisposable
         ref int iconID
     )
     {
+        //name = SeStringUtils.SeStringToPtr(SeStringUtils.Text("Plugin Enjoyer"));
         var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
         var mode = GetModeForNameplate(npObject);
 
@@ -288,19 +312,36 @@ public sealed class NameplateView : IDisposable
 
     private SeString GetStateNametext(int iconId, string prefix)
     {
-        return iconId switch
+        switch (iconId)
         {
-            //061521 - party leader
-            //061522 - party member
-
-            061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
-            061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
-            061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
-            061543 => SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix),
-            061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
-            061547 => SeStringUtils.Icon(BitmapFontIcon.Returner, prefix),
-            _ => SeStringUtils.Text(prefix + " ")
-        };
+            case 061523:
+                return SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix);
+            
+            case 061540:
+                return SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix);
+            
+            case 061542:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix);
+            
+            case 061543:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix);
+            
+            case 061544:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix);
+            
+            case 061547:
+                return SeStringUtils.Icon(BitmapFontIcon.Returner, prefix);
+            
+            default:
+            {
+                if (iconId > 0)
+                {
+                    PluginLog.Debug($"Name text unavailable for icon: {iconId}");
+                }
+            
+                return SeStringUtils.Text(prefix + " ");
+            }
+        }
     }
 
     private NameplateMode GetModeForNameplate(XivApi.SafeNamePlateObject npObject)
