@@ -1,4 +1,5 @@
 ﻿using System;
+using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
@@ -39,6 +40,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] public PartyList PartyList { get; set; }
 
     [PluginService] public SigScanner SigScanner { get; set; }
+    
+    [PluginService] public DataManager DataManager { get; set; }
 
     public PluginAddressResolver Address { get; }
 
@@ -75,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
 
         _playerStylesheet = new PlayerStylesheet(Configuration);
 
-        _ui = new PluginUI(Configuration, _playerStylesheet);
+        _ui = new PluginUI(DataManager, Configuration, _playerStylesheet);
         Interface.Inject(_ui);
 
         XivApi.Initialize(this, Address);
@@ -100,7 +103,7 @@ public sealed class Plugin : IDalamudPlugin
         _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
         Interface.Inject(_modeSetter);
 
-        _nameplateUpdater = new NameplateUpdater(Address, _nameplateView, _modeSetter);
+        _nameplateUpdater = new NameplateUpdater(Configuration, Address, _nameplateView, _modeSetter);
         Interface.Inject(_nameplateUpdater);
 
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
