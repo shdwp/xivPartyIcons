@@ -7,12 +7,14 @@ using System.Net.Http;
 using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Dalamud.Data;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
 using PartyIcons.Entities;
@@ -29,6 +31,7 @@ internal class PluginUI : IDisposable
     private DalamudPluginInterface Interface { get; set; }
 
     private readonly Configuration _configuration;
+    private readonly DataManager _dataManager;
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
@@ -57,8 +60,9 @@ internal class PluginUI : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public PluginUI(Configuration configuration, PlayerStylesheet stylesheet)
+    public PluginUI(DataManager dataManager, Configuration configuration, PlayerStylesheet stylesheet)
     {
+        _dataManager = dataManager;
         _configuration = configuration;
         _stylesheet = stylesheet;
         _httpClient = new HttpClient();
@@ -242,6 +246,33 @@ internal class PluginUI : IDisposable
     {
         ImGui.Dummy(new Vector2(0, 2f));
 
+        var usePriorityIcons = _configuration.UsePriorityIcons;
+        
+        if (ImGui.Checkbox("##usePriorityIcons", ref usePriorityIcons))
+        {
+            _configuration.UsePriorityIcons = usePriorityIcons;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Prioritize status icons");
+        ImGuiComponents.HelpMarker("Prioritizes certain status icons over job icons.\n\nInside of a duty, the only status icons that take priority are Disconnecting, Viewing Cutscene, Idle, and Group Pose.\n\nEven if this is unchecked, the Disconnecting icon will always take priority.");
+
+        /*
+        // Sample code for later when we want to incorporate icon previews into the UI.
+        var iconTex = _dataManager.GetIcon(61508);
+        //if (iconTex == null) return;
+
+        if (iconTex != null)
+        {
+            var tex = Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(), iconTex.Header.Width, iconTex.Header.Height, 4);
+        }
+        
+        // ...
+        
+        ImGui.Image(tex.ImGuiHandle, new Vector2(tex.Width, tex.Height));
+        */
+        
         var testingMode = _configuration.TestingMode;
         
         if (ImGui.Checkbox("##testingMode", ref testingMode))

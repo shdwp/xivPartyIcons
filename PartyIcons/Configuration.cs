@@ -20,6 +20,7 @@ public class Configuration : IPluginConfiguration
     public bool DisplayRoleInPartyList = false;
     public bool UseContextMenu = false;
     public bool AssignFromChat = true;
+    public bool UsePriorityIcons = true;
 
     public IconSetId IconSetId { get; set; } = IconSetId.GlowingColored;
     public NameplateSizeMode SizeMode { get; set; } = NameplateSizeMode.Medium;

@@ -18,6 +18,7 @@ public sealed class NameplateUpdater : IDisposable
     [PluginService]
     private ClientState ClientState { get; set; }
 
+    private readonly Configuration _configuration;
     private readonly NameplateView _view;
     private readonly PluginAddressResolver _address;
     private readonly ViewModeSetter _modeSetter;
@@ -25,8 +26,9 @@ public sealed class NameplateUpdater : IDisposable
 
     public int DebugIcon { get; set; } = -1;
     
-    public NameplateUpdater(PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
+    public NameplateUpdater(Configuration configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
     {
+        _configuration = configuration;
         _address = address;
         _view = view;
         _modeSetter = modeSetter;
@@ -119,7 +121,7 @@ public sealed class NameplateUpdater : IDisposable
 
             return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
         }
-        
+
         var isPriorityIcon = IsPriorityIcon(iconID, out var priorityIconId);
 
         _view.NameplateDataForPC(npObject, ref isPrefixTitle, ref displayTitle, ref title, ref name, ref fcName, ref iconID);
@@ -159,14 +161,22 @@ public sealed class NameplateUpdater : IDisposable
     /// <returns>Whether a priority icon was found.</returns>
     private bool IsPriorityIcon(int iconId, out int priorityIconId)
     {
-        // PluginLog.Debug($"Icon ID: {iconId}");
+        //PluginLog.Debug($"Icon ID: {iconId}");
+        priorityIconId = iconId;
+
+        if (_configuration.UsePriorityIcons == false &&
+            iconId != (int)Icon.Disconnecting && iconId != (int)Icon.Disconnecting + 50)
+        {
+            return false;
+        }
         
         // Select which set of priority icons to use based on whether we're in a duty
         // In the future, there can be a third list used when in combat
         var priorityIcons = _modeSetter.InDuty ? priorityIconsInDuty : priorityIconsOverworld;
 
-        // Determine whether the incoming icon should take priority over the job icon 
-        bool isPriorityIcon = priorityIcons.Contains(iconId);
+        // Determine whether the incoming icon should take priority over the job icon
+        // Check the id plus 50 as that's an alternately sized version
+        bool isPriorityIcon = priorityIcons.Contains(iconId) || priorityIcons.Contains(iconId + 50);
         
         // Save the id of the icon
         priorityIconId = iconId;
@@ -176,11 +186,18 @@ public sealed class NameplateUpdater : IDisposable
         {
             isPriorityIcon = true;
             priorityIconId = DebugIcon;
+            
+            //DebugIcon++;
         }
 
         return isPriorityIcon;
     }
-    
+
+    public enum Icon
+    {
+        Disconnecting = 061503,
+    }
+
     private static readonly int[] priorityIconsOverworld =
     {
         061503, // Disconnecting
@@ -191,6 +208,7 @@ public sealed class NameplateUpdater : IDisposable
         061521, // Party Leader
         061522, // Party Member
         061545, // Role Playing
+        061546, // Group Pose
     };
 
     private static readonly int[] priorityIconsInDuty =
@@ -198,5 +216,6 @@ public sealed class NameplateUpdater : IDisposable
         061503, // Disconnecting
         061508, // Viewing Cutscene
         061511, // Idle
+        061546, // Group Pose //extremely important when raiding
     };
 }
