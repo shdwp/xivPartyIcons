@@ -25,12 +25,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public PluginAddressResolver Address { get; }
 
-    private Configuration Configuration { get; }
-
     private readonly PartyListHUDView _partyHUDView;
-
     private readonly PartyListHUDUpdater _partyListHudUpdater;
-
     private readonly PluginUI _ui;
     private readonly NameplateUpdater _nameplateUpdater;
     private readonly NPCNameplateFixer _npcNameplateFixer;
@@ -44,10 +40,9 @@ public sealed class Plugin : IDalamudPlugin
     {
         pluginInterface.Create<Service>();
         
-        Configuration = Service.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        Configuration.Initialize(Service.PluginInterface);
-        Configuration.OnSave += OnConfigurationSave;
-
+        var config = Service.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        config.Initialize(Service.PluginInterface);
+        
         Service.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {
             HelpMessage =
@@ -57,9 +52,9 @@ public sealed class Plugin : IDalamudPlugin
         Address = new PluginAddressResolver();
         Address.Setup(Service.SigScanner);
 
-        var playerStylesheet = new PlayerStylesheet(Configuration);
+        var playerStylesheet = new PlayerStylesheet(config);
 
-        _ui = new PluginUI(Configuration, playerStylesheet);
+        _ui = new PluginUI(config, playerStylesheet);
         Service.PluginInterface.Inject(_ui);
 
         XivApi.Initialize(this, Address);
@@ -67,14 +62,14 @@ public sealed class Plugin : IDalamudPlugin
         SeStringUtils.Initialize();
 
         _partyHUDView = new PartyListHUDView(Service.GameGui, playerStylesheet);
-        _roleTracker = new RoleTracker(Configuration);
-        _nameplateView = new NameplateView(_roleTracker, Configuration, playerStylesheet, _partyHUDView);
+        _roleTracker = new RoleTracker(config);
+        _nameplateView = new NameplateView(_roleTracker, config, playerStylesheet, _partyHUDView);
         _chatNameUpdater = new ChatNameUpdater(_roleTracker, playerStylesheet);
-        _partyListHudUpdater = new PartyListHUDUpdater(_partyHUDView, _roleTracker, Configuration);
-        _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
-        _nameplateUpdater = new NameplateUpdater(Configuration, Address, _nameplateView, _modeSetter);
+        _partyListHudUpdater = new PartyListHUDUpdater(_partyHUDView, _roleTracker, config);
+        _modeSetter = new ViewModeSetter(_nameplateView, config, _chatNameUpdater, _partyListHudUpdater);
+        _nameplateUpdater = new NameplateUpdater(config, Address, _nameplateView, _modeSetter);
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
-        _contextMenu = new PlayerContextMenu(_roleTracker, Configuration, playerStylesheet);
+        _contextMenu = new PlayerContextMenu(_roleTracker, config, playerStylesheet);
 
         _ui.Initialize();
         Service.PluginInterface.UiBuilder.Draw += _ui.DrawSettingsWindow;
@@ -111,12 +106,6 @@ public sealed class Plugin : IDalamudPlugin
         XivApi.DisposeInstance();
 
         Service.CommandManager.RemoveHandler(commandName);
-        Configuration.OnSave -= OnConfigurationSave;
-    }
-
-    private void OnConfigurationSave()
-    {
-        _modeSetter.ForceRefresh();
     }
 
     private void OnAssignedRolesUpdated()

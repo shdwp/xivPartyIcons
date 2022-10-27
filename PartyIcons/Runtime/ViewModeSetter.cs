@@ -32,6 +32,13 @@ public sealed class ViewModeSetter
         _configuration = configuration;
         _chatNameUpdater = chatNameUpdater;
         _partyListHudUpdater = partyListHudUpdater;
+        
+        _configuration.OnSave += OnConfigurationSave;
+    }
+
+    private void OnConfigurationSave()
+    {
+        ForceRefresh();
     }
 
     public void Enable()
@@ -57,6 +64,7 @@ public sealed class ViewModeSetter
 
     public void Dispose()
     {
+        _configuration.OnSave -= OnConfigurationSave;
         Disable();
     }
 
