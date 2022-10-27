@@ -24,7 +24,7 @@ using PartyIcons.View;
 
 namespace PartyIcons;
 
-internal class PluginUI : IDisposable
+public sealed class PluginUI : IDisposable
 {
     private readonly Configuration _configuration;
     private readonly PlayerStylesheet _stylesheet;
@@ -93,6 +93,9 @@ internal class PluginUI : IDisposable
         }
 
         DownloadAndParseNotice();
+        
+        Service.PluginInterface.UiBuilder.Draw += DrawSettingsWindow;
+        Service.PluginInterface.UiBuilder.OpenConfigUi += OpenSettingsWindow;
     }
 
     private void DownloadAndParseNotice()
@@ -153,8 +156,12 @@ internal class PluginUI : IDisposable
 
         ImGui.PopStyleColor();
     }
-    
-    public void Dispose() { }
+
+    public void Dispose()
+    {
+        Service.PluginInterface.UiBuilder.Draw -= DrawSettingsWindow;
+        Service.PluginInterface.UiBuilder.OpenConfigUi -= OpenSettingsWindow;
+    }
 
     public void OpenSettingsWindow()
     {
