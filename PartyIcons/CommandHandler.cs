@@ -28,23 +28,23 @@ public class CommandHandler : IDisposable
 
         if (arguments == "" || arguments == "config")
         {
-            Plugin._ui.ToggleSettingsWindow();
+            Plugin.SettingsWindow.ToggleSettingsWindow();
         }
         else if (arguments == "reset" || arguments == "r")
         {
-            Plugin._roleTracker.ResetOccupations();
-            Plugin._roleTracker.ResetAssignments();
-            Plugin._roleTracker.CalculateUnassignedPartyRoles();
+            Plugin.RoleTracker.ResetOccupations();
+            Plugin.RoleTracker.ResetAssignments();
+            Plugin.RoleTracker.CalculateUnassignedPartyRoles();
             Service.ChatGui.Print("Occupations are reset, roles are auto assigned.");
         }
         else if (arguments == "dbg state")
         {
-            Service.ChatGui.Print($"Current mode is {Plugin._nameplateView.PartyMode}, party count {Service.PartyList.Length}");
-            Service.ChatGui.Print(Plugin._roleTracker.DebugDescription());
+            Service.ChatGui.Print($"Current mode is {Plugin.NameplateView.PartyMode}, party count {Service.PartyList.Length}");
+            Service.ChatGui.Print(Plugin.RoleTracker.DebugDescription());
         }
         else if (arguments == "dbg party")
         {
-            Service.ChatGui.Print(Plugin._partyHUDView.GetDebugInfo());
+            Service.ChatGui.Print(Plugin.PartyHudView.GetDebugInfo());
         }
         else if (arguments.Contains("dbg icon"))
         {
@@ -54,18 +54,18 @@ public class CommandHandler : IDisposable
             {
                 try
                 {
-                    Plugin._nameplateUpdater.DebugIcon = int.Parse(argv[2]);
-                    PluginLog.Debug($"Set debug icon to {Plugin._nameplateUpdater.DebugIcon}");
+                    Plugin.NameplateUpdater.DebugIcon = int.Parse(argv[2]);
+                    PluginLog.Debug($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
                 }
                 catch (Exception)
                 {
                     PluginLog.Debug("Invalid icon id given for debug icon.");
-                    Plugin._nameplateUpdater.DebugIcon = -1;
+                    Plugin.NameplateUpdater.DebugIcon = -1;
                 }
             }
             else
             {
-                Plugin._nameplateUpdater.DebugIcon = -1;
+                Plugin.NameplateUpdater.DebugIcon = -1;
             }
         }
     }

@@ -25,7 +25,7 @@ using static PartyIcons.Configuration;
 
 namespace PartyIcons;
 
-public sealed class PluginUI : IDisposable
+public sealed class SettingsWindow : IDisposable
 {
     private readonly Configuration _configuration;
     private readonly PlayerStylesheet _stylesheet;
@@ -56,7 +56,7 @@ public sealed class PluginUI : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public PluginUI(Configuration configuration, PlayerStylesheet stylesheet)
+    public SettingsWindow(Configuration configuration, PlayerStylesheet stylesheet)
     {
         _configuration = configuration;
         _stylesheet = stylesheet;
