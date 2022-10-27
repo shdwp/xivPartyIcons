@@ -26,9 +26,6 @@ namespace PartyIcons;
 
 internal class PluginUI : IDisposable
 {
-    [PluginService]
-    private DalamudPluginInterface Interface { get; set; }
-
     private readonly Configuration _configuration;
     private readonly DataManager _dataManager;
     private readonly PlayerStylesheet _stylesheet;
@@ -59,11 +56,8 @@ internal class PluginUI : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public PluginUI(DataManager dataManager, Configuration configuration, PlayerStylesheet stylesheet)
+    public PluginUI()
     {
-        _dataManager = dataManager;
-        _configuration = configuration;
-        _stylesheet = stylesheet;
         _httpClient = new HttpClient();
     }
 
@@ -94,7 +88,7 @@ internal class PluginUI : IDisposable
             using var memoryStream = new MemoryStream();
             fileStream.CopyTo(memoryStream);
 
-            _nameplateExamples[kv.Key] = Interface.UiBuilder.LoadImage(memoryStream.ToArray());
+            _nameplateExamples[kv.Key] = Service.PluginInterface.UiBuilder.LoadImage(memoryStream.ToArray());
         }
 
         DownloadAndParseNotice();

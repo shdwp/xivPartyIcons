@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
@@ -12,15 +13,6 @@ namespace PartyIcons.Runtime;
 
 public sealed class ViewModeSetter
 {
-    [PluginService]
-    public ClientState ClientState { get; set; }
-
-    [PluginService]
-    public DataManager DataManager { get; set; }
-
-    [PluginService]
-    public ChatGui ChatGui { get; set; }
-
     /// <summary>
     /// Whether the player is currently in a duty.
     /// </summary>
@@ -44,10 +36,10 @@ public sealed class ViewModeSetter
 
     public void Enable()
     {
-        _contentFinderConditionsSheet = DataManager.GameData.GetExcelSheet<ContentFinderCondition>();
+        _contentFinderConditionsSheet = Service.DataManager.GameData.GetExcelSheet<ContentFinderCondition>() ?? throw new InvalidOperationException();
 
         ForceRefresh();
-        ClientState.TerritoryChanged += OnTerritoryChanged;
+        Service.ClientState.TerritoryChanged += OnTerritoryChanged;
     }
 
     public void ForceRefresh()
@@ -60,7 +52,7 @@ public sealed class ViewModeSetter
 
     public void Disable()
     {
-        ClientState.TerritoryChanged -= OnTerritoryChanged;
+        Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
     }
 
     public void Dispose()
@@ -71,12 +63,12 @@ public sealed class ViewModeSetter
     private void OnTerritoryChanged(object? sender, ushort e)
     {
         var content =
-            _contentFinderConditionsSheet.FirstOrDefault(t => t.TerritoryType.Row == ClientState.TerritoryType);
+            _contentFinderConditionsSheet.FirstOrDefault(t => t.TerritoryType.Row == Service.ClientState.TerritoryType);
 
         if (content == null)
         {
             InDuty = false;
-            PluginLog.Information($"Content null {ClientState.TerritoryType}");
+            PluginLog.Information($"Content null {Service.ClientState.TerritoryType}");
             _nameplateView.PartyMode = _configuration.NameplateOverworld;
             _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
         }
@@ -86,7 +78,7 @@ public sealed class ViewModeSetter
 
             if (_configuration.ChatContentMessage)
             {
-                ChatGui.Print($"Entering {content.Name}.");
+                Service.ChatGui.Print($"Entering {content.Name}.");
             }
 
             var memberType = content.ContentMemberType.Row;
@@ -104,7 +96,7 @@ public sealed class ViewModeSetter
             }
 
             PluginLog.Debug(
-                $"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
+                $"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {Service.ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
 
             switch (memberType)
             {

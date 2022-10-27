@@ -28,7 +28,7 @@ public class XivApi : IDisposable
     public static void Initialize(Plugin plugin, PluginAddressResolver address)
     {
         _plugin ??= plugin;
-        Instance ??= new XivApi(plugin.Interface, address);
+        Instance ??= new XivApi(Service.PluginInterface, address);
     }
 
     private static XivApi Instance;
@@ -91,7 +91,7 @@ public class XivApi : IDisposable
 
     #endregion
 
-    public static SafeAddonNamePlate GetSafeAddonNamePlate() => new(_plugin.Interface);
+    public static SafeAddonNamePlate GetSafeAddonNamePlate() => new(Service.PluginInterface);
 
     public static bool IsLocalPlayer(uint actorID) => Service.ClientState.LocalPlayer?.ObjectId == actorID;
 
@@ -103,7 +103,7 @@ public class XivApi : IDisposable
 
     public static bool IsPlayerCharacter(uint actorID)
     {
-        foreach (var obj in _plugin.ObjectTable)
+        foreach (var obj in Service.ObjectTable)
         {
             if (obj == null)
             {
@@ -121,7 +121,7 @@ public class XivApi : IDisposable
 
     public static uint GetJobId(uint actorID)
     {
-        foreach (var obj in _plugin.ObjectTable)
+        foreach (var obj in Service.ObjectTable)
         {
             if (obj == null)
             {
@@ -141,7 +141,7 @@ public class XivApi : IDisposable
     {
         private readonly DalamudPluginInterface Interface;
 
-        public IntPtr Pointer => _plugin.GameGui.GetAddonByName("NamePlate", 1);
+        public IntPtr Pointer => Service.GameGui.GetAddonByName("NamePlate", 1);
 
         public SafeAddonNamePlate(DalamudPluginInterface pluginInterface)
         {

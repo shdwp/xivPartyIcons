@@ -15,8 +15,8 @@ namespace PartyIcons.Runtime;
 
 public sealed class NameplateUpdater : IDisposable
 {
-    [PluginService]
-    private ClientState ClientState { get; set; }
+    // [PluginService]
+    // private ClientState ClientState { get; set; }
 
     private readonly Configuration _configuration;
     private readonly NameplateView _view;
@@ -69,7 +69,7 @@ public sealed class NameplateUpdater : IDisposable
     public IntPtr SetNamePlate(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title,
         IntPtr name, IntPtr fcName, int iconID)
     {
-        if (ClientState.IsPvP)
+        if (Service.ClientState.IsPvP)
         {
             // disable in PvP
             return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);

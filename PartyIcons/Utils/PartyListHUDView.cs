@@ -13,8 +13,8 @@ namespace PartyIcons.Utils;
 
 public unsafe class PartyListHUDView : IDisposable
 {
-    [PluginService]
-    public PartyList PartyList { get; set; }
+    // [PluginService]
+    // public PartyList PartyList { get; set; }
 
     private readonly PlayerStylesheet _stylesheet;
     private readonly GameGui _gameGui;
@@ -168,9 +168,9 @@ public unsafe class PartyListHUDView : IDisposable
         }
 
         var result = new StringBuilder();
-        result.AppendLine($"PARTY ({PartyList.Length}):");
+        result.AppendLine($"PARTY ({Service.PartyList.Length}):");
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             var index = GetPartySlotIndex(member.ObjectId);
             result.AppendLine(
