@@ -4,10 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Network;
-using Dalamud.IoC;
 using Dalamud.Logging;
 using Newtonsoft.Json;
 using PartyIcons.Entities;
@@ -18,11 +15,6 @@ namespace PartyIcons.Runtime;
 public sealed class PartyListHUDUpdater : IDisposable
 {
     public bool UpdateHUD = false;
-
-    [PluginService] public PartyList PartyList { get; set; }
-    [PluginService] public Framework Framework { get; set; }
-    [PluginService] public GameNetwork GameNetwork { get; set; }
-    [PluginService] public ClientState ClientState { get; set; }
 
     private readonly Configuration _configuration;
     private readonly PartyListHUDView _view;
@@ -49,18 +41,18 @@ public sealed class PartyListHUDUpdater : IDisposable
     public void Enable()
     {
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
-        Framework.Update += OnUpdate;
-        GameNetwork.NetworkMessage += OnNetworkMessage;
+        Service.Framework.Update += OnUpdate;
+        Service.GameNetwork.NetworkMessage += OnNetworkMessage;
         _configuration.OnSave += OnConfigurationSave;
-        ClientState.EnterPvP += OnEnterPvP;
+        Service.ClientState.EnterPvP += OnEnterPvP;
     }
 
     public void Dispose()
     {
-        ClientState.EnterPvP -= OnEnterPvP;
+        Service.ClientState.EnterPvP -= OnEnterPvP;
         _configuration.OnSave -= OnConfigurationSave;
-        GameNetwork.NetworkMessage -= OnNetworkMessage;
-        Framework.Update -= OnUpdate;
+        Service.GameNetwork.NetworkMessage -= OnNetworkMessage;
+        Service.Framework.Update -= OnUpdate;
         _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
     }
 
@@ -122,7 +114,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         NetworkMessageDirection direction)
     {
         if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) &&
-            targetactorid == ClientState.LocalPlayer?.ObjectId)
+            targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
             PluginLog.Verbose(_view.GetDebugInfo());
@@ -132,7 +124,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
     private void OnUpdate(Framework framework)
     {
-        var inParty = PartyList.Any();
+        var inParty = Service.PartyList.Any();
 
         if ((!inParty && _previousInParty) || (!_configuration.TestingMode && _previousTesting))
         {
@@ -159,7 +151,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         }
 
         if (_configuration.TestingMode &&
-            ClientState.LocalPlayer is { } localPlayer)
+            Service.ClientState.LocalPlayer is { } localPlayer)
         {
             _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.M1);
         }
@@ -169,7 +161,7 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-        if (ClientState.IsPvP)
+        if (Service.ClientState.IsPvP)
         {
             return;
         }
@@ -177,7 +169,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         PluginLog.Verbose("Updating party list HUD");
         _displayingRoles = true;
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
             {
