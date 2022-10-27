@@ -25,9 +25,9 @@ public sealed class Plugin : IDalamudPlugin
 
     [PluginService] public DalamudPluginInterface Interface { get; set; }
 
-    [PluginService] public ClientState ClientState { get; set; }
+    //[PluginService] public ClientState ClientState { get; set; }
 
-    [PluginService] public Framework Framework { get; set; }
+    //[PluginService] public Framework Framework { get; set; }
 
     [PluginService] public CommandManager CommandManager { get; set; }
 
@@ -63,6 +63,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
+        Interface.Create<Service>();
+        
         Configuration = Interface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(Interface);
         Configuration.OnSave += OnConfigurationSave;
