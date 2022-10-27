@@ -233,50 +233,33 @@ public sealed class RoleTracker : IDisposable
 
     private void FrameworkOnUpdate(Framework framework)
     {
-        try
+        if (!Service.Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance]
+            && Service.PartyList.Length == 0 &&
+            _occupiedRoles.Any())
         {
-            if (Service.Condition == null)
-            {
-                return;
-            }
-            
-            if (!Service.Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance]
-                && Service.PartyList.Length == 0 &&
-                _occupiedRoles.Any())
-            {
-                PluginLog.Debug("Resetting occupations, no longer in a party");
-                ResetOccupations();
+            PluginLog.Debug("Resetting occupations, no longer in a party");
+            ResetOccupations();
 
-                return;
-            }
-
-            var partyHash = 17;
-
-            foreach (var member in Service.PartyList)
-            {
-                unchecked
-                {
-                    partyHash = partyHash * 23 + (int)member.ObjectId;
-                }
-            }
-
-            if (partyHash != _previousStateHash)
-            {
-                PluginLog.Debug($"Party hash changed ({partyHash}, prev {_previousStateHash}), recalculating roles");
-                CalculateUnassignedPartyRoles();
-            }
-
-            _previousStateHash = partyHash;
+            return;
         }
-        catch (Exception e)
+
+        var partyHash = 17;
+
+        foreach (var member in Service.PartyList)
         {
-            PluginLog.Warning($"{e}");
-            PluginLog.Warning($"Service.Condition: {Service.Condition}");
-            PluginLog.Warning($"Service.PartyList: {Service.PartyList}");
-            PluginLog.Warning($"Service.PartyList.Length: {Service.PartyList.Length}");
-
-            throw;
+            unchecked
+            {
+                partyHash = partyHash * 23 + (int)member.ObjectId;
+            }
         }
+
+        if (partyHash != _previousStateHash)
+        {
+            PluginLog.Debug($"Party hash changed ({partyHash}, prev {_previousStateHash}), recalculating roles");
+            CalculateUnassignedPartyRoles();
+        }
+
+        _previousStateHash = partyHash;
     }
 
     private string PlayerId(string name, uint worldId) => $"{name}@{worldId}";
