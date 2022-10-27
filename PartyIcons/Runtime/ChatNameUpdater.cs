@@ -18,17 +18,17 @@ namespace PartyIcons.Runtime;
 
 public sealed class ChatNameUpdater : IDisposable
 {
-    [PluginService]
-    private ClientState ClientState { get; set; }
-
-    [PluginService]
-    private PartyList PartyList { get; set; }
-
-    [PluginService]
-    private ObjectTable ObjectTable { get; set; }
-
-    [PluginService]
-    private ChatGui ChatGui { get; set; }
+    // [PluginService]
+    // private ClientState ClientState { get; set; }
+    //
+    // [PluginService]
+    // private PartyList PartyList { get; set; }
+    //
+    // [PluginService]
+    // private ObjectTable ObjectTable { get; set; }
+    //
+    // [PluginService]
+    // private ChatGui ChatGui { get; set; }
 
     private readonly RoleTracker _roleTracker;
     private readonly PlayerStylesheet _stylesheet;
@@ -44,13 +44,13 @@ public sealed class ChatNameUpdater : IDisposable
 
     public void Enable()
     {
-        ChatGui.ChatMessage += OnChatMessage;
+        Service.ChatGui.ChatMessage += OnChatMessage;
     }
 
     private void OnChatMessage(XivChatType type, uint senderid, ref SeString sender, ref SeString message,
         ref bool ishandled)
     {
-        if (ClientState.IsPvP)
+        if (Service.ClientState.IsPvP)
         {
             return;
         }
@@ -64,7 +64,7 @@ public sealed class ChatNameUpdater : IDisposable
 
     public void Disable()
     {
-        ChatGui.ChatMessage -= OnChatMessage;
+        Service.ChatGui.ChatMessage -= OnChatMessage;
     }
 
     public void Dispose()
@@ -72,14 +72,13 @@ public sealed class ChatNameUpdater : IDisposable
         Disable();
     }
 
-    private PlayerPayload GetPlayerPayload(SeString sender)
+    private PlayerPayload? GetPlayerPayload(SeString sender)
     {
-        var playerPayload = sender.Payloads.FirstOrDefault(p => p is PlayerPayload) as PlayerPayload;
+        var playerPayload = sender.Payloads.FirstOrDefault(p => p is PlayerPayload) as PlayerPayload ?? null;
 
-        if (playerPayload == null)
+        if (playerPayload == null && Service.ClientState.LocalPlayer is { } localPlayer)
         {
-            playerPayload = new PlayerPayload(ClientState.LocalPlayer.Name.TextValue,
-                ClientState.LocalPlayer.HomeWorld.Id);
+            playerPayload = new PlayerPayload(localPlayer.Name.TextValue, localPlayer.HomeWorld.Id);
         }
 
         return playerPayload;
@@ -87,7 +86,7 @@ public sealed class ChatNameUpdater : IDisposable
 
     private bool CheckIfPlayerPayloadInParty(PlayerPayload playerPayload)
     {
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             if (member.Name.ToString() == playerPayload.PlayerName && member.World.Id == playerPayload.World.RowId)
             {
@@ -125,7 +124,7 @@ public sealed class ChatNameUpdater : IDisposable
     {
         ClassJob? senderJob = null;
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             if (member.Name.ToString() == playerPayload.PlayerName && member.World.Id == playerPayload.World.RowId)
             {
@@ -137,7 +136,7 @@ public sealed class ChatNameUpdater : IDisposable
 
         if (senderJob == null)
         {
-            foreach (var obj in ObjectTable)
+            foreach (var obj in Service.ObjectTable)
             {
                 if (obj is PlayerCharacter pc && pc.Name.ToString() == playerPayload.PlayerName &&
                     pc.HomeWorld.Id == playerPayload.World.RowId)
@@ -155,6 +154,12 @@ public sealed class ChatNameUpdater : IDisposable
     private void Parse(XivChatType chatType, ref SeString sender)
     {
         var playerPayload = GetPlayerPayload(sender);
+
+        if (playerPayload == null)
+        {
+            PluginLog.Verbose("playerPayload was null");
+            return;
+        }
 
         var config = CheckIfPlayerPayloadInParty(playerPayload) ? PartyMode : OthersMode;
 

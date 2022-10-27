@@ -24,18 +24,6 @@ public sealed class RoleTracker : IDisposable
     public event Action<string, RoleId> OnRoleSuggested;
     public event Action OnAssignedRolesUpdated;
 
-    [PluginService] private Framework Framework { get; set; }
-
-    [PluginService] private ChatGui ChatGui { get; set; }
-
-    [PluginService] private ClientState ClientState { get; set; }
-
-    [PluginService] private Condition Condition { get; set; }
-
-    [PluginService] private PartyList PartyList { get; set; }
-
-    [PluginService] private ToastGui ToastGui { get; set; }
-
     private readonly Configuration _configuration;
 
     private bool _currentlyInParty;
@@ -76,14 +64,14 @@ public sealed class RoleTracker : IDisposable
 
     public void Enable()
     {
-        ChatGui.ChatMessage += OnChatMessage;
-        Framework.Update += FrameworkOnUpdate;
+        Service.ChatGui.ChatMessage += OnChatMessage;
+        Service.Framework.Update += FrameworkOnUpdate;
     }
 
     public void Disable()
     {
-        ChatGui.ChatMessage -= OnChatMessage;
-        Framework.Update -= FrameworkOnUpdate;
+        Service.ChatGui.ChatMessage -= OnChatMessage;
+        Service.Framework.Update -= FrameworkOnUpdate;
     }
 
     public void Dispose()
@@ -109,7 +97,7 @@ public sealed class RoleTracker : IDisposable
 
         _occupiedRoles[PlayerId(name, world)] = roleId;
         OnRoleOccupied?.Invoke(name, roleId);
-        ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions { DisplayCheckmark = true });
+        Service.ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions { DisplayCheckmark = true });
     }
 
     public void SuggestRole(string name, uint world, RoleId roleId)
@@ -158,7 +146,7 @@ public sealed class RoleTracker : IDisposable
 
         foreach (var kv in _configuration.StaticAssignments)
         {
-            foreach (var member in PartyList)
+            foreach (var member in Service.PartyList)
             {
                 var playerId = PlayerId(member);
 
@@ -193,7 +181,7 @@ public sealed class RoleTracker : IDisposable
 
         PluginLog.Debug("Assigning the rest");
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             if (_assignedRoles.ContainsKey(PlayerId(member)))
             {
@@ -245,7 +233,7 @@ public sealed class RoleTracker : IDisposable
 
     private void FrameworkOnUpdate(Framework framework)
     {
-        if (!Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance] && PartyList.Length == 0 &&
+        if (!Service.Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance] && Service.PartyList.Length == 0 &&
             _occupiedRoles.Any())
         {
             PluginLog.Debug("Resetting occupations, no longer in a party");
@@ -256,7 +244,7 @@ public sealed class RoleTracker : IDisposable
 
         var partyHash = 17;
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             unchecked
             {
@@ -317,8 +305,8 @@ public sealed class RoleTracker : IDisposable
 
             if (playerPayload == null)
             {
-                playerName = ClientState.LocalPlayer?.Name.TextValue;
-                playerWorld = ClientState.LocalPlayer?.HomeWorld.Id;
+                playerName = Service.ClientState.LocalPlayer?.Name.TextValue;
+                playerWorld = Service.ClientState.LocalPlayer?.HomeWorld.Id;
             }
             else
             {

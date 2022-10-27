@@ -10,8 +10,6 @@ namespace PartyIcons.View
 {
     public sealed class PlayerContextMenu : IDisposable
     {
-        [PluginService] private DalamudContextMenu ContextMenu { get; } = new();
-
         // Whether to indicate context menu items are from Dalamud.
         // Setting this to true at least sets apart the menu items given that submenus are not currently supported in Dalamud.ContextMenu.
         private static bool _useDalamudIndicator = true;
@@ -29,12 +27,12 @@ namespace PartyIcons.View
 
         public void Enable()
         {
-            ContextMenu.OnOpenGameObjectContextMenu += OnOpenContextMenu;
+            Service.ContextMenu.OnOpenGameObjectContextMenu += OnOpenContextMenu;
         }
 
         public void Disable()
         {
-            ContextMenu.OnOpenGameObjectContextMenu -= OnOpenContextMenu;
+            Service.ContextMenu.OnOpenGameObjectContextMenu -= OnOpenContextMenu;
         }
 
         public void Dispose()
