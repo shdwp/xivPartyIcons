@@ -27,7 +27,6 @@ namespace PartyIcons;
 internal class PluginUI : IDisposable
 {
     private readonly Configuration _configuration;
-    private readonly DataManager _dataManager;
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
@@ -56,8 +55,10 @@ internal class PluginUI : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public PluginUI()
+    public PluginUI(Configuration configuration, PlayerStylesheet stylesheet)
     {
+        _configuration = configuration;
+        _stylesheet = stylesheet;
         _httpClient = new HttpClient();
     }
 

@@ -31,7 +31,6 @@ public sealed class Plugin : IDalamudPlugin
 
     private readonly PartyListHUDUpdater _partyListHudUpdater;
 
-    //private readonly PlayerContextMenu _contextMenu;
     private readonly PluginUI _ui;
     private readonly NameplateUpdater _nameplateUpdater;
     private readonly NPCNameplateFixer _npcNameplateFixer;
@@ -60,7 +59,7 @@ public sealed class Plugin : IDalamudPlugin
 
         var playerStylesheet = new PlayerStylesheet(Configuration);
 
-        _ui = new PluginUI();
+        _ui = new PluginUI(Configuration, playerStylesheet);
         Service.PluginInterface.Inject(_ui);
 
         XivApi.Initialize(this, Address);
