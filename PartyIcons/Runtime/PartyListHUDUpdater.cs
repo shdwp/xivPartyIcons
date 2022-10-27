@@ -28,10 +28,10 @@ public sealed class PartyListHUDUpdater : IDisposable
     private readonly PartyListHUDView _view;
     private readonly RoleTracker _roleTracker;
 
-    private bool _displayingRoles = false;
+    private bool _displayingRoles;
 
-    private bool _previousInParty = false;
-    private bool _previousTesting = false;
+    private bool _previousInParty;
+    private bool _previousTesting;
     private DateTime _lastUpdate = DateTime.Today;
 
     private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
@@ -68,7 +68,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         var client = new HttpClient();
         var data = await client.GetStringAsync(OpcodesUrl);
-        dynamic json = JsonConvert.DeserializeObject(data);
+        dynamic json = JsonConvert.DeserializeObject(data)!;
 
         foreach (var clientType in json)
         {
@@ -158,9 +158,9 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-        if (_configuration.TestingMode)
+        if (_configuration.TestingMode &&
+            ClientState.LocalPlayer is { } localPlayer)
         {
-            var localPlayer = ClientState.LocalPlayer;
             _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.M1);
         }
 
