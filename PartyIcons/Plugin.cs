@@ -12,18 +12,18 @@ public sealed class Plugin : IDalamudPlugin
     public string Name => "PartyIcons";
 
     public PluginAddressResolver Address { get; }
-    
-    public static PartyListHUDView PartyHudView { get; private set; }
-    public static PartyListHUDUpdater PartyListHudUpdater { get; private set; }
-    public static SettingsWindow SettingsWindow { get; private set; }
-    public static NameplateUpdater NameplateUpdater { get; private set; }
-    public static NPCNameplateFixer NpcNameplateFixer { get; private set; }
-    public static NameplateView NameplateView { get; private set; }
-    public static RoleTracker RoleTracker { get; private set; }
-    public static ViewModeSetter ModeSetter { get; private set; }
-    public static ChatNameUpdater ChatNameUpdater { get; private set; }
-    public static PlayerContextMenu ContextMenu { get; private set; }
-    public static CommandHandler CommandHandler { get; private set; }
+
+    public static PartyListHUDView PartyHudView { get; private set; } = null!;
+    public static PartyListHUDUpdater PartyListHudUpdater { get; private set; } = null!;
+    public static SettingsWindow SettingsWindow { get; private set; } = null!;
+    public static NameplateUpdater NameplateUpdater { get; private set; } = null!;
+    public static NPCNameplateFixer NpcNameplateFixer { get; private set; } = null!;
+    public static NameplateView NameplateView { get; private set; } = null!;
+    public static RoleTracker RoleTracker { get; private set; } = null!;
+    public static ViewModeSetter ModeSetter { get; private set; } = null!;
+    public static ChatNameUpdater ChatNameUpdater { get; private set; } = null!;
+    public static PlayerContextMenu ContextMenu { get; private set; } = null!;
+    public static CommandHandler CommandHandler { get; private set; } = null!;
 
     public Plugin(DalamudPluginInterface pluginInterface)
     {
