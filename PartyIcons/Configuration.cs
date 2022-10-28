@@ -14,7 +14,7 @@ public class Configuration : IPluginConfiguration
 
     public int Version { get; set; } = 1;
     public bool ChatContentMessage = true;
-    public bool HideLocalPlayerNameplate = true;
+    public bool HideLocalPlayerNameplate = false;
     public bool TestingMode = true;
     public bool EasternNamingConvention = false;
     public bool DisplayRoleInPartyList = false;
