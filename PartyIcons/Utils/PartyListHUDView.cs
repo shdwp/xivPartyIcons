@@ -66,7 +66,8 @@ public unsafe class PartyListHUDView : IDisposable
             return null;
         }
 
-        if (hud->PartyMemberCount > 8)
+        // 9 instead of 8 is used here, in case the player has a pet out
+        if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
             PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
@@ -159,7 +160,7 @@ public unsafe class PartyListHUDView : IDisposable
             return null;
         }
 
-        if (hud->PartyMemberCount > 8)
+        if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
             PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
