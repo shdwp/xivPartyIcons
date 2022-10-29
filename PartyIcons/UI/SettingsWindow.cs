@@ -22,9 +22,6 @@ namespace PartyIcons.UI;
 
 public sealed class SettingsWindow : IDisposable
 {
-    private readonly Settings _configuration;
-    private readonly PlayerStylesheet _stylesheet;
-
     private bool _settingsVisible = false;
     private string _occupationNewName = "Character Name@World";
     private RoleId _occupationNewRole = RoleId.Undefined;
@@ -51,10 +48,8 @@ public sealed class SettingsWindow : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public SettingsWindow(Settings configuration, PlayerStylesheet stylesheet)
+    public SettingsWindow()
     {
-        _configuration = configuration;
-        _stylesheet = stylesheet;
         _httpClient = new HttpClient();
     }
 
@@ -243,12 +238,12 @@ public sealed class SettingsWindow : IDisposable
     {
         ImGui.Dummy(new Vector2(0, 2f));
 
-        var usePriorityIcons = _configuration.UsePriorityIcons;
+        var usePriorityIcons = Plugin.Settings.UsePriorityIcons;
         
         if (ImGui.Checkbox("##usePriorityIcons", ref usePriorityIcons))
         {
-            _configuration.UsePriorityIcons = usePriorityIcons;
-            _configuration.Save();
+            Plugin.Settings.UsePriorityIcons = usePriorityIcons;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
@@ -270,24 +265,24 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Image(tex.ImGuiHandle, new Vector2(tex.Width, tex.Height));
         */
         
-        var testingMode = _configuration.TestingMode;
+        var testingMode = Plugin.Settings.TestingMode;
         
         if (ImGui.Checkbox("##testingMode", ref testingMode))
         {
-            _configuration.TestingMode = testingMode;
-            _configuration.Save();
+            Plugin.Settings.TestingMode = testingMode;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
         ImGui.Text("Enable testing mode");
         ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 
-        var chatContentMessage = _configuration.ChatContentMessage;
+        var chatContentMessage = Plugin.Settings.ChatContentMessage;
 
         if (ImGui.Checkbox("##chatmessage", ref chatContentMessage))
         {
-            _configuration.ChatContentMessage = chatContentMessage;
-            _configuration.Save();
+            Plugin.Settings.ChatContentMessage = chatContentMessage;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
@@ -305,7 +300,7 @@ public sealed class SettingsWindow : IDisposable
         ImGui.TextDisabled("Please note, it usually takes time for nameplates to reload.");
         ImGui.Dummy(new Vector2(0, 10f));
         
-        var iconSetId = _configuration.IconSetId;
+        var iconSetId = Plugin.Settings.IconSetId;
         ImGui.Text("Icon set:");
         ImGui.SameLine();
         SetComboWidth(Enum.GetValues<IconSetId>().Select(IconSetIdToString));
@@ -316,15 +311,15 @@ public sealed class SettingsWindow : IDisposable
             {
                 if (ImGui.Selectable(IconSetIdToString(id) + "##icon_set_" + id))
                 {
-                    _configuration.IconSetId = id;
-                    _configuration.Save();
+                    Plugin.Settings.IconSetId = id;
+                    Plugin.Settings.Save();
                 }
             }
 
             ImGui.EndCombo();
         }
 
-        var iconSizeMode = _configuration.SizeMode;
+        var iconSizeMode = Plugin.Settings.SizeMode;
         ImGui.Text("Nameplate size:");
         ImGui.SameLine();
         SetComboWidth(Enum.GetValues<NameplateSizeMode>().Select(x => x.ToString()));
@@ -335,8 +330,8 @@ public sealed class SettingsWindow : IDisposable
             {
                 if (ImGui.Selectable(mode + "##icon_set_" + mode))
                 {
-                    _configuration.SizeMode = mode;
-                    _configuration.Save();
+                    Plugin.Settings.SizeMode = mode;
+                    Plugin.Settings.Save();
                 }
             }
 
@@ -345,12 +340,12 @@ public sealed class SettingsWindow : IDisposable
 
         ImGuiHelpTooltip("Affects all presets, except Game Default and Small Job Icon.");
         
-        var hideLocalNameplate = _configuration.HideLocalPlayerNameplate;
+        var hideLocalNameplate = Plugin.Settings.HideLocalPlayerNameplate;
 
         if (ImGui.Checkbox("##hidelocal", ref hideLocalNameplate))
         {
-            _configuration.HideLocalPlayerNameplate = hideLocalNameplate;
-            _configuration.Save();
+            Plugin.Settings.HideLocalPlayerNameplate = hideLocalNameplate;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
@@ -367,12 +362,12 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld,
-                (mode) => _configuration.NameplateOverworld = mode,
+            NameplateModeSection("##np_overworld", () => Plugin.Settings.NameplateOverworld,
+                (mode) => Plugin.Settings.NameplateOverworld = mode,
                 "Party:");
     
-            NameplateModeSection("##np_others", () => _configuration.NameplateOthers,
-                (mode) => _configuration.NameplateOthers = mode,
+            NameplateModeSection("##np_others", () => Plugin.Settings.NameplateOthers,
+                (mode) => Plugin.Settings.NameplateOthers = mode,
                 "Others:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -385,16 +380,16 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon,
-                (mode) => _configuration.NameplateDungeon = mode,
+            NameplateModeSection("##np_dungeon", () => Plugin.Settings.NameplateDungeon,
+                (mode) => Plugin.Settings.NameplateDungeon = mode,
                 "Dungeon:");
 
-            NameplateModeSection("##np_raid", () => _configuration.NameplateRaid,
-                (mode) => _configuration.NameplateRaid = mode,
+            NameplateModeSection("##np_raid", () => Plugin.Settings.NameplateRaid,
+                (mode) => Plugin.Settings.NameplateRaid = mode,
                 "Raid:");
 
-            NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
-                (mode) => _configuration.NameplateAllianceRaid = mode,
+            NameplateModeSection("##np_alliance", () => Plugin.Settings.NameplateAllianceRaid,
+                (mode) => Plugin.Settings.NameplateAllianceRaid = mode,
                 "Alliance:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -409,11 +404,11 @@ public sealed class SettingsWindow : IDisposable
         {
             ImGui.TextDisabled("e.g. Eureka, Bozja");
             
-            NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty,
-                mode => _configuration.NameplateBozjaParty = mode, "Party:");
+            NameplateModeSection("##np_bozja_party", () => Plugin.Settings.NameplateBozjaParty,
+                mode => Plugin.Settings.NameplateBozjaParty = mode, "Party:");
             
-            NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers,
-                mode => _configuration.NameplateBozjaOthers = mode, "Others:");
+            NameplateModeSection("##np_bozja_others", () => Plugin.Settings.NameplateBozjaOthers,
+                mode => Plugin.Settings.NameplateBozjaOthers = mode, "Others:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -454,13 +449,13 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             ChatModeSection("##chat_overworld",
-                () => _configuration.ChatOverworld,
-                (config) => _configuration.ChatOverworld = config,
+                () => Plugin.Settings.ChatOverworld,
+                (config) => Plugin.Settings.ChatOverworld = config,
                 "Party:");
 
             ChatModeSection("##chat_others",
-                () => _configuration.ChatOthers,
-                (config) => _configuration.ChatOthers = config,
+                () => Plugin.Settings.ChatOthers,
+                (config) => Plugin.Settings.ChatOthers = config,
                 "Others:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -474,18 +469,18 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
             ChatModeSection("##chat_dungeon",
-                () => _configuration.ChatDungeon,
-                (config) => _configuration.ChatDungeon = config,
+                () => Plugin.Settings.ChatDungeon,
+                (config) => Plugin.Settings.ChatDungeon = config,
                 "Dungeon:");
             
             ChatModeSection("##chat_raid",
-                () => _configuration.ChatRaid,
-                (config) => _configuration.ChatRaid = config,
+                () => Plugin.Settings.ChatRaid,
+                (config) => Plugin.Settings.ChatRaid = config,
                 "Raid:");
             
             ChatModeSection("##chat_alliance",
-                () => _configuration.ChatAllianceRaid,
-                (config) => _configuration.ChatAllianceRaid = config,
+                () => Plugin.Settings.ChatAllianceRaid,
+                (config) => Plugin.Settings.ChatAllianceRaid = config,
                 "Alliance:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -496,24 +491,24 @@ public sealed class SettingsWindow : IDisposable
     {
         ImGui.Dummy(new Vector2(0, 2f));
         
-        var easternNamingConvention = _configuration.EasternNamingConvention;
+        var easternNamingConvention = Plugin.Settings.EasternNamingConvention;
 
         if (ImGui.Checkbox("##easteannaming", ref easternNamingConvention))
         {
-            _configuration.EasternNamingConvention = easternNamingConvention;
-            _configuration.Save();
+            Plugin.Settings.EasternNamingConvention = easternNamingConvention;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
         ImGui.Text("Eastern role naming convention");
         ImGuiComponents.HelpMarker("Use Japanese data center role naming convention (MT ST D1-D4 H1-2).");
 
-        var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
+        var displayRoleInPartyList = Plugin.Settings.DisplayRoleInPartyList;
 
         if (ImGui.Checkbox("##displayrolesinpartylist", ref displayRoleInPartyList))
         {
-            _configuration.DisplayRoleInPartyList = displayRoleInPartyList;
-            _configuration.Save();
+            Plugin.Settings.DisplayRoleInPartyList = displayRoleInPartyList;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
@@ -522,24 +517,24 @@ public sealed class SettingsWindow : IDisposable
             "EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).",
             true);
         
-        var useContextMenu = _configuration.UseContextMenu;
+        var useContextMenu = Plugin.Settings.UseContextMenu;
         
         if (ImGui.Checkbox("##useContextMenu", ref useContextMenu))
         {
-            _configuration.UseContextMenu = useContextMenu;
-            _configuration.Save();
+            Plugin.Settings.UseContextMenu = useContextMenu;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
         ImGui.Text("Add context menu commands to assign roles");
         ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
 
-        var assignFromChat = _configuration.AssignFromChat;
+        var assignFromChat = Plugin.Settings.AssignFromChat;
 
         if (ImGui.Checkbox("##assignFromChat", ref assignFromChat))
         {
-            _configuration.AssignFromChat = assignFromChat;
-            _configuration.Save();
+            Plugin.Settings.AssignFromChat = assignFromChat;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
@@ -575,29 +570,29 @@ public sealed class SettingsWindow : IDisposable
         
         
         ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 22f);
-        foreach (var kv in new Dictionary<string, RoleId>(_configuration.StaticAssignments))
+        foreach (var kv in new Dictionary<string, RoleId>(Plugin.Settings.StaticAssignments))
         {
             if (ImGui.Button("x##remove_occupation_" + kv.Key))
             {
-                _configuration.StaticAssignments.Remove(kv.Key);
-                _configuration.Save();
+                Plugin.Settings.StaticAssignments.Remove(kv.Key);
+                Plugin.Settings.Save();
 
                 continue;
             }
 
             ImGui.SameLine();
-            SetComboWidth(Enum.GetValues<RoleId>().Select(x => _stylesheet.GetRoleName(x)));
+            SetComboWidth(Enum.GetValues<RoleId>().Select(x => Plugin.PlayerStylesheet.GetRoleName(x)));
 
             if (ImGui.BeginCombo("##role_combo_" + kv.Key,
-                    _stylesheet.GetRoleName(_configuration.StaticAssignments[kv.Key])))
+                    Plugin.PlayerStylesheet.GetRoleName(Plugin.Settings.StaticAssignments[kv.Key])))
             {
                 foreach (var roleId in Enum.GetValues<RoleId>())
                 {
-                    if (ImGui.Selectable(_stylesheet.GetRoleName(roleId) + "##role_combo_option_" + kv.Key + "_" +
+                    if (ImGui.Selectable(Plugin.PlayerStylesheet.GetRoleName(roleId) + "##role_combo_option_" + kv.Key + "_" +
                                          roleId))
                     {
-                        _configuration.StaticAssignments[kv.Key] = roleId;
-                        _configuration.Save();
+                        Plugin.Settings.StaticAssignments[kv.Key] = roleId;
+                        Plugin.Settings.Save();
                     }
                 }
 
@@ -610,18 +605,18 @@ public sealed class SettingsWindow : IDisposable
 
         if (ImGui.Button("+##add_occupation"))
         {
-            _configuration.StaticAssignments[_occupationNewName] = _occupationNewRole;
-            _configuration.Save();
+            Plugin.Settings.StaticAssignments[_occupationNewName] = _occupationNewRole;
+            Plugin.Settings.Save();
         }
 
         ImGui.SameLine();
-        SetComboWidth(Enum.GetValues<RoleId>().Select(x => _stylesheet.GetRoleName(x)));
+        SetComboWidth(Enum.GetValues<RoleId>().Select(x => Plugin.PlayerStylesheet.GetRoleName(x)));
 
-        if (ImGui.BeginCombo("##new_role_combo", _stylesheet.GetRoleName(_occupationNewRole)))
+        if (ImGui.BeginCombo("##new_role_combo", Plugin.PlayerStylesheet.GetRoleName(_occupationNewRole)))
         {
             foreach (var roleId in Enum.GetValues<RoleId>())
             {
-                if (ImGui.Selectable(_stylesheet.GetRoleName(roleId) + "##new_role_combo_option_" + "_" + roleId))
+                if (ImGui.Selectable(Plugin.PlayerStylesheet.GetRoleName(roleId) + "##new_role_combo_option_" + "_" + roleId))
                 {
                     _occupationNewRole = roleId;
                 }
@@ -680,7 +675,7 @@ public sealed class SettingsWindow : IDisposable
         catch (ArgumentException ex)
         {
             setter(NewConf);
-            _configuration.Save();
+            Plugin.Settings.Save();
         }
 
         if (ImGui.BeginCombo(label, ChatModeToString(NewConf.Mode)))
@@ -691,7 +686,7 @@ public sealed class SettingsWindow : IDisposable
                 {
                     NewConf.Mode = mode;;
                     setter(NewConf);
-                    _configuration.Save();
+                    Plugin.Settings.Save();
                 }
             }
 
@@ -705,7 +700,7 @@ public sealed class SettingsWindow : IDisposable
         {
             NewConf.UseRoleColor = colored;
             setter(NewConf);
-            _configuration.Save();
+            Plugin.Settings.Save();
         }
     }
 
@@ -737,7 +732,7 @@ public sealed class SettingsWindow : IDisposable
         catch (ArgumentException ex)
         {
             setter(NameplateMode.Default);
-            _configuration.Save();
+            Plugin.Settings.Save();
         }
 
         if (ImGui.BeginCombo(label, NameplateModeToString(getter())))
@@ -747,7 +742,7 @@ public sealed class SettingsWindow : IDisposable
                 if (ImGui.Selectable(NameplateModeToString(mode), mode == getter()))
                 {
                     setter(mode);
-                    _configuration.Save();
+                    Plugin.Settings.Save();
                 }
             }
 

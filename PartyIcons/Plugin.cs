@@ -26,33 +26,35 @@ public sealed class Plugin : IDalamudPlugin
     public static ChatNameUpdater ChatNameUpdater { get; private set; } = null!;
     public static PlayerContextMenu ContextMenu { get; private set; } = null!;
     public static CommandHandler CommandHandler { get; private set; } = null!;
+    public static Settings Settings { get; private set; } = null!;
+    public static PlayerStylesheet PlayerStylesheet { get; private set; } = null!;
 
     public Plugin(DalamudPluginInterface pluginInterface)
     {
         pluginInterface.Create<Service>();
 
-        var config = Settings.Load();
+        Settings = Settings.Load();
 
         Address = new PluginAddressResolver();
         Address.Setup(Service.SigScanner);
 
-        var playerStylesheet = new PlayerStylesheet(config);
+        PlayerStylesheet = new PlayerStylesheet(Settings);
 
-        SettingsWindow = new SettingsWindow(config, playerStylesheet);
+        SettingsWindow = new SettingsWindow();
 
         XivApi.Initialize(this, Address);
 
         SeStringUtils.Initialize();
 
-        PartyHudView = new PartyListHUDView(Service.GameGui, playerStylesheet);
-        RoleTracker = new RoleTracker(config);
-        NameplateView = new NameplateView(RoleTracker, config, playerStylesheet, PartyHudView);
-        ChatNameUpdater = new ChatNameUpdater(RoleTracker, playerStylesheet);
-        PartyListHudUpdater = new PartyListHUDUpdater(PartyHudView, RoleTracker, config);
-        ModeSetter = new ViewModeSetter(NameplateView, config, ChatNameUpdater, PartyListHudUpdater);
-        NameplateUpdater = new NameplateUpdater(config, Address, NameplateView, ModeSetter);
+        PartyHudView = new PartyListHUDView(Service.GameGui, PlayerStylesheet);
+        RoleTracker = new RoleTracker(Settings);
+        NameplateView = new NameplateView(RoleTracker, Settings, PlayerStylesheet, PartyHudView);
+        ChatNameUpdater = new ChatNameUpdater(RoleTracker, PlayerStylesheet);
+        PartyListHudUpdater = new PartyListHUDUpdater(PartyHudView, RoleTracker, Settings);
+        ModeSetter = new ViewModeSetter(NameplateView, Settings, ChatNameUpdater, PartyListHudUpdater);
+        NameplateUpdater = new NameplateUpdater(Settings, Address, NameplateView, ModeSetter);
         NpcNameplateFixer = new NPCNameplateFixer(NameplateView);
-        ContextMenu = new PlayerContextMenu(RoleTracker, config, playerStylesheet);
+        ContextMenu = new PlayerContextMenu(RoleTracker, Settings, PlayerStylesheet);
         CommandHandler = new CommandHandler();
 
         SettingsWindow.Initialize();
