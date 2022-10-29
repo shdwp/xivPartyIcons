@@ -17,16 +17,18 @@ using Dalamud.Plugin;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
 using PartyIcons.View;
+using static PartyIcons.Configuration.Settings;
 
 namespace PartyIcons;
 
 public sealed class SettingsWindow : IDisposable
 {
-    private readonly Configuration _configuration;
+    private readonly Settings _configuration;
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
@@ -55,7 +57,7 @@ public sealed class SettingsWindow : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public SettingsWindow(Configuration configuration, PlayerStylesheet stylesheet)
+    public SettingsWindow(Settings configuration, PlayerStylesheet stylesheet)
     {
         _configuration = configuration;
         _stylesheet = stylesheet;
@@ -457,12 +459,14 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld,
-                (mode) => _configuration.ChatOverworld = mode,
+            ChatModeSection("##chat_overworld",
+                () => _configuration.ChatOverworld,
+                (config) => _configuration.ChatOverworld = config,
                 "Party:");
-            
-            ChatModeSection("##chat_others", () => _configuration.ChatOthers,
-                (mode) => _configuration.ChatOthers = mode,
+
+            ChatModeSection("##chat_others",
+                () => _configuration.ChatOthers,
+                (config) => _configuration.ChatOthers = config,
                 "Others:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -475,15 +479,19 @@ public sealed class SettingsWindow : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon,
-                (mode) => _configuration.ChatDungeon = mode,
+            ChatModeSection("##chat_dungeon",
+                () => _configuration.ChatDungeon,
+                (config) => _configuration.ChatDungeon = config,
                 "Dungeon:");
-
-            ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode,
+            
+            ChatModeSection("##chat_raid",
+                () => _configuration.ChatRaid,
+                (config) => _configuration.ChatRaid = config,
                 "Raid:");
-
-            ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
-                (mode) => _configuration.ChatAllianceRaid = mode,
+            
+            ChatModeSection("##chat_alliance",
+                () => _configuration.ChatAllianceRaid,
+                (config) => _configuration.ChatAllianceRaid = config,
                 "Alliance:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
@@ -662,8 +670,10 @@ public sealed class SettingsWindow : IDisposable
         }
     }
 
-    private void ChatModeSection(string label, Func<ChatMode> getter, Action<ChatMode> setter, string title = "Chat name: ")
+    private void ChatModeSection(string label, Func<ChatConfig> getter, Action<ChatConfig> setter, string title = "Chat name: ")
     {
+        ChatConfig NewConf = new ChatConfig(ChatMode.GameDefault, true);
+
         ImGui.Text(title);
         ImGui.SameLine(100f);
         SetComboWidth(Enum.GetValues<ChatMode>().Select(ChatModeToString));
@@ -671,26 +681,37 @@ public sealed class SettingsWindow : IDisposable
         // hack to fix incorrect configurations
         try
         {
-            getter();
+            NewConf = getter();
         }
         catch (ArgumentException ex)
         {
-            setter(ChatMode.GameDefault);
+            setter(NewConf);
             _configuration.Save();
         }
 
-        if (ImGui.BeginCombo(label, ChatModeToString(getter())))
+        if (ImGui.BeginCombo(label, ChatModeToString(NewConf.Mode)))
         {
             foreach (var mode in Enum.GetValues<ChatMode>())
             {
-                if (ImGui.Selectable(ChatModeToString(mode), mode == getter()))
+                if (ImGui.Selectable(ChatModeToString(mode), mode == NewConf.Mode))
                 {
-                    setter(mode);
+                    NewConf.Mode = mode;;
+                    setter(NewConf);
                     _configuration.Save();
                 }
             }
 
             ImGui.EndCombo();
+        }
+
+        ImGui.SameLine();
+        var colored = NewConf.UseRoleColor;
+
+        if (ImGui.Checkbox($"Role Color{label}", ref colored))
+        {
+            NewConf.UseRoleColor = colored;
+            setter(NewConf);
+            _configuration.Save();
         }
     }
 
@@ -701,7 +722,6 @@ public sealed class SettingsWindow : IDisposable
             ChatMode.GameDefault => "Game Default",
             ChatMode.Role => "Role",
             ChatMode.Job => "Job abbreviation",
-            ChatMode.OnlyColor => "Color only",
             _ => throw new ArgumentException()
         };
     }

@@ -3,6 +3,7 @@ using System.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Lumina.Excel.GeneratedSheets;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
 using PartyIcons.View;
@@ -11,10 +12,10 @@ namespace PartyIcons.Stylesheet;
 
 public sealed class PlayerStylesheet
 {
-    private readonly Configuration _configuration;
+    private readonly Settings _configuration;
     private ushort _fallbackColor = 1;
 
-    public PlayerStylesheet(Configuration configuration)
+    public PlayerStylesheet(Settings configuration)
     {
         _configuration = configuration;
     }
@@ -135,9 +136,12 @@ public sealed class PlayerStylesheet
 
     public SeString GetGenericRolePlate(GenericRole genericRole)
     {
-        if (genericRole <= GenericRole.Healer)
-        {
-            return genericRole switch
+        return GetGenericRolePlate(genericRole, true);
+    }
+    public SeString GetGenericRolePlate(GenericRole genericRole, bool colored)
+    {
+        return colored ?
+            genericRole switch
             {
                 GenericRole.Tank => SeStringUtils.Text(BoxedCharacterString("T"), GetGenericRoleColor(genericRole)),
                 GenericRole.Melee => SeStringUtils.Text(
@@ -147,13 +151,19 @@ public sealed class PlayerStylesheet
                     BoxedCharacterString(_configuration.EasternNamingConvention ? "D" : "R"),
                     GetGenericRoleColor(genericRole)),
                 GenericRole.Healer => SeStringUtils.Text(BoxedCharacterString("H"),
-                    GetGenericRoleColor(genericRole))
+                    GetGenericRoleColor(genericRole)),
+                _ => ""
+            } :
+            genericRole switch
+            {
+                GenericRole.Tank => SeStringUtils.Text(BoxedCharacterString("T")),
+                GenericRole.Melee => SeStringUtils.Text(
+                    BoxedCharacterString(_configuration.EasternNamingConvention ? "D" : "M")),
+                GenericRole.Ranged => SeStringUtils.Text(
+                    BoxedCharacterString(_configuration.EasternNamingConvention ? "D" : "R")),
+                GenericRole.Healer => SeStringUtils.Text(BoxedCharacterString("H")),
+                _ => ""
             };
-        }
-        else
-        {
-            return "";
-        }
     }
 
     public SeString GetRolePlate(RoleId roleId)
@@ -229,8 +239,8 @@ public sealed class PlayerStylesheet
 
     public ushort GetRoleChatColor(RoleId roleId) => GetRoleColor(roleId);
 
-    public SeString GetGenericRoleChatPrefix(ClassJob classJob) =>
-        GetGenericRolePlate(JobExtensions.GetRole((Job) classJob.RowId));
+    public SeString GetGenericRoleChatPrefix(ClassJob classJob, bool colored) =>
+        GetGenericRolePlate(JobExtensions.GetRole((Job) classJob.RowId), colored);
 
     public ushort GetGenericRoleChatColor(ClassJob classJob) =>
         GetGenericRoleColor(JobExtensions.GetRole((Job) classJob.RowId));
@@ -238,15 +248,23 @@ public sealed class PlayerStylesheet
 
     public SeString GetJobChatPrefix(ClassJob classJob)
     {
+        return GetJobChatPrefix(classJob, true);
+    }
+    public SeString GetJobChatPrefix(ClassJob classJob, bool colored)
+    {
         if (true)
         {
-            return new SeString(
-                new UIGlowPayload(GetGenericRoleChatColor(classJob)),
-                new UIForegroundPayload(GetGenericRoleChatColor(classJob)),
-                new TextPayload(classJob.Abbreviation),
-                UIForegroundPayload.UIForegroundOff,
-                UIGlowPayload.UIGlowOff
-            );
+            return colored ? 
+                new SeString(
+                    new UIGlowPayload(GetGenericRoleChatColor(classJob)),
+                    new UIForegroundPayload(GetGenericRoleChatColor(classJob)),
+                    new TextPayload(classJob.Abbreviation),
+                    UIForegroundPayload.UIForegroundOff,
+                    UIGlowPayload.UIGlowOff
+                ) :
+                new SeString(
+                    new TextPayload(classJob.Abbreviation)
+                );
         }
     }
 

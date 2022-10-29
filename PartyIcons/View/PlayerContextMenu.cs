@@ -5,6 +5,7 @@ using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using Dalamud.ContextMenu;
+using PartyIcons.Configuration;
 
 namespace PartyIcons.View
 {
@@ -17,10 +18,10 @@ namespace PartyIcons.View
         private static bool _useDalamudIndicator = true;
         
         private readonly RoleTracker _roleTracker;
-        private readonly Configuration _configuration;
+        private readonly Settings _configuration;
         private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet)
+        public PlayerContextMenu(RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet)
         {
             _roleTracker = roleTracker;
             _configuration = configuration;

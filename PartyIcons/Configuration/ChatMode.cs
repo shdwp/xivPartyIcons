@@ -1,9 +1,8 @@
-﻿namespace PartyIcons.View;
+﻿namespace PartyIcons.Configuration;
 
 public enum ChatMode
 {
     GameDefault,
-    OnlyColor,
     Role,
     Job
 }

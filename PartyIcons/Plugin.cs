@@ -1,5 +1,6 @@
 ﻿using Dalamud.Plugin;
 using PartyIcons.Api;
+using PartyIcons.Configuration;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
@@ -28,9 +29,8 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin(DalamudPluginInterface pluginInterface)
     {
         pluginInterface.Create<Service>();
-        
-        var config = Service.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        config.Initialize(Service.PluginInterface);
+
+        var config = Settings.Load();
 
         Address = new PluginAddressResolver();
         Address.Setup(Service.SigScanner);

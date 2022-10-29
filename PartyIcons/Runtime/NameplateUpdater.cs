@@ -7,6 +7,7 @@ using Dalamud.Hooking;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Api;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
 using PartyIcons.View;
@@ -15,10 +16,7 @@ namespace PartyIcons.Runtime;
 
 public sealed class NameplateUpdater : IDisposable
 {
-    // [PluginService]
-    // private ClientState ClientState { get; set; }
-
-    private readonly Configuration _configuration;
+    private readonly Settings _configuration;
     private readonly NameplateView _view;
     private readonly PluginAddressResolver _address;
     private readonly ViewModeSetter _modeSetter;
@@ -26,7 +24,7 @@ public sealed class NameplateUpdater : IDisposable
 
     public int DebugIcon { get; set; } = -1;
     
-    public NameplateUpdater(Configuration configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
+    public NameplateUpdater(Settings configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
     {
         _configuration = configuration;
         _address = address;

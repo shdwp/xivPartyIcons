@@ -1,18 +1,46 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Dalamud.Configuration;
-using Dalamud.Plugin;
 using PartyIcons.Entities;
-using PartyIcons.View;
 
-namespace PartyIcons;
+namespace PartyIcons.Configuration;
 
-[Serializable]
-public class Configuration : IPluginConfiguration
+public class SettingsV1
 {
-    public event Action OnSave;
+    public enum ChatModeV1
+    {
+        GameDefault,
+        OnlyColor,
+        Role,
+        Job
+    }
 
+    public static ChatMode Convert(ChatModeV1 chatModeV1)
+    {
+        switch (chatModeV1)
+        {
+            case ChatModeV1.GameDefault:
+            case ChatModeV1.OnlyColor:
+                return ChatMode.GameDefault;
+            
+            case ChatModeV1.Role:
+                return ChatMode.Job;
+
+            case ChatModeV1.Job:
+                return ChatMode.Job;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(chatModeV1), chatModeV1, null);
+        }
+    }
+
+    public static ChatConfig ToChatConfig(ChatModeV1 chatModeV1)
+    {
+        var chatMode = Convert(chatModeV1);
+
+        return new ChatConfig(chatMode);
+    }
+    
     public int Version { get; set; } = 1;
+    
     public bool ChatContentMessage = true;
     public bool HideLocalPlayerNameplate = false;
     public bool TestingMode = true;
@@ -33,24 +61,11 @@ public class Configuration : IPluginConfiguration
     public NameplateMode NameplateRaid { get; set; } = NameplateMode.RoleLetters;
     public NameplateMode NameplateOthers { get; set; } = NameplateMode.SmallJobIcon;
 
-    public ChatMode ChatOverworld { get; set; } = ChatMode.Role;
-    public ChatMode ChatAllianceRaid { get; set; } = ChatMode.Role;
-    public ChatMode ChatDungeon { get; set; } = ChatMode.Job;
-    public ChatMode ChatRaid { get; set; } = ChatMode.Role;
-    public ChatMode ChatOthers { get; set; } = ChatMode.Job;
+    public ChatModeV1 ChatOverworld { get; set; } = ChatModeV1.Role;
+    public ChatModeV1 ChatAllianceRaid { get; set; } = ChatModeV1.Role;
+    public ChatModeV1 ChatDungeon { get; set; } = ChatModeV1.Job;
+    public ChatModeV1 ChatRaid { get; set; } = ChatModeV1.Role;
+    public ChatModeV1 ChatOthers { get; set; } = ChatModeV1.Job;
 
     public Dictionary<string, RoleId> StaticAssignments { get; set; } = new();
-
-    private DalamudPluginInterface _interface;
-
-    public void Initialize(DalamudPluginInterface @interface)
-    {
-        _interface = @interface;
-    }
-
-    public void Save()
-    {
-        _interface.SavePluginConfig(this);
-        OnSave?.Invoke();
-    }
 }
