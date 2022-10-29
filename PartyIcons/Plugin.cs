@@ -3,6 +3,7 @@ using PartyIcons.Api;
 using PartyIcons.Configuration;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
+using PartyIcons.UI;
 using PartyIcons.Utils;
 using PartyIcons.View;
 

@@ -7,24 +7,18 @@ using System.Net.Http;
 using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Dalamud.Data;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.IoC;
 using Dalamud.Logging;
-using Dalamud.Plugin;
-using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
-using PartyIcons.View;
-using static PartyIcons.Configuration.Settings;
 
-namespace PartyIcons;
+namespace PartyIcons.UI;
 
 public sealed class SettingsWindow : IDisposable
 {
