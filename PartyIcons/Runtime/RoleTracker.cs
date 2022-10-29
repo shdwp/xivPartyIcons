@@ -25,7 +25,7 @@ public sealed class RoleTracker : IDisposable
     public event Action<string, RoleId> OnRoleSuggested;
     public event Action OnAssignedRolesUpdated;
 
-    private readonly PluginConfiguration _configuration;
+    private readonly Settings _configuration;
 
     private bool _currentlyInParty;
     private uint _territoryId;
@@ -39,7 +39,7 @@ public sealed class RoleTracker : IDisposable
     private Dictionary<string, RoleId> _suggestedRoles = new();
     private HashSet<RoleId> _unassignedRoles = new();
 
-    public RoleTracker(PluginConfiguration configuration)
+    public RoleTracker(Settings configuration)
     {
         _configuration = configuration;
 

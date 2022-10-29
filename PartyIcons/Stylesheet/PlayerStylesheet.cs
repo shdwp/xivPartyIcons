@@ -12,10 +12,10 @@ namespace PartyIcons.Stylesheet;
 
 public sealed class PlayerStylesheet
 {
-    private readonly PluginConfiguration _configuration;
+    private readonly Settings _configuration;
     private ushort _fallbackColor = 1;
 
-    public PlayerStylesheet(PluginConfiguration configuration)
+    public PlayerStylesheet(Settings configuration)
     {
         _configuration = configuration;
     }

@@ -1,4 +1,4 @@
-﻿namespace PartyIcons.View;
+﻿namespace PartyIcons.Configuration;
 
 public enum IconSetId
 {

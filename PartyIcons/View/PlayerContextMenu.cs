@@ -18,10 +18,10 @@ namespace PartyIcons.View
         private static bool _useDalamudIndicator = true;
         
         private readonly RoleTracker _roleTracker;
-        private readonly PluginConfiguration _configuration;
+        private readonly Settings _configuration;
         private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(RoleTracker roleTracker, PluginConfiguration configuration, PlayerStylesheet stylesheet)
+        public PlayerContextMenu(RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet)
         {
             _roleTracker = roleTracker;
             _configuration = configuration;

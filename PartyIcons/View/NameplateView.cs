@@ -22,7 +22,7 @@ public sealed class NameplateView : IDisposable
     // [PluginService]
     // private ObjectTable ObjectTable { get; set; }
 
-    private readonly PluginConfiguration _configuration;
+    private readonly Settings _configuration;
     private readonly PlayerStylesheet _stylesheet;
     private readonly RoleTracker _roleTracker;
     private readonly PartyListHUDView _partyListHudView;
@@ -32,7 +32,7 @@ public sealed class NameplateView : IDisposable
     public NameplateMode PartyMode { get; set; }
     public NameplateMode OthersMode { get; set; }
     
-    public NameplateView(RoleTracker roleTracker, PluginConfiguration configuration, PlayerStylesheet stylesheet,
+    public NameplateView(RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet,
         PartyListHUDView partyListHudView)
     {
         _roleTracker = roleTracker;

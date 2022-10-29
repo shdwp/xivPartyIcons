@@ -22,13 +22,13 @@ using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
 using PartyIcons.View;
-using static PartyIcons.Configuration.PluginConfiguration;
+using static PartyIcons.Configuration.Settings;
 
 namespace PartyIcons;
 
 public sealed class SettingsWindow : IDisposable
 {
-    private readonly PluginConfiguration _configuration;
+    private readonly Settings _configuration;
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
@@ -57,7 +57,7 @@ public sealed class SettingsWindow : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public SettingsWindow(PluginConfiguration configuration, PlayerStylesheet stylesheet)
+    public SettingsWindow(Settings configuration, PlayerStylesheet stylesheet)
     {
         _configuration = configuration;
         _stylesheet = stylesheet;
@@ -705,18 +705,14 @@ public sealed class SettingsWindow : IDisposable
         }
 
         ImGui.SameLine();
-        var colored = NewConf.Colored;
+        var colored = NewConf.UseRoleColor;
 
-        if (ImGui.Checkbox($"Colored{label}", ref colored))
+        if (ImGui.Checkbox($"Role Color{label}", ref colored))
         {
-            NewConf.Colored = colored;
+            NewConf.UseRoleColor = colored;
             setter(NewConf);
             _configuration.Save();
         }
-
-        //ImGui.SameLine();
-        //ImGui.Text("Enable testing mode");
-        //ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
     }
 
     private string ChatModeToString(ChatMode mode)

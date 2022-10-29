@@ -19,7 +19,7 @@ public sealed class NameplateUpdater : IDisposable
     // [PluginService]
     // private ClientState ClientState { get; set; }
 
-    private readonly PluginConfiguration _configuration;
+    private readonly Settings _configuration;
     private readonly NameplateView _view;
     private readonly PluginAddressResolver _address;
     private readonly ViewModeSetter _modeSetter;
@@ -27,7 +27,7 @@ public sealed class NameplateUpdater : IDisposable
 
     public int DebugIcon { get; set; } = -1;
     
-    public NameplateUpdater(PluginConfiguration configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
+    public NameplateUpdater(Settings configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
     {
         _configuration = configuration;
         _address = address;

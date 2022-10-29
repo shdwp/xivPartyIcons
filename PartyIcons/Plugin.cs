@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using Dalamud.Logging;
-using Dalamud.Plugin;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Dalamud.Plugin;
 using PartyIcons.Api;
 using PartyIcons.Configuration;
 using PartyIcons.Runtime;
@@ -32,18 +27,12 @@ public sealed class Plugin : IDalamudPlugin
     public static CommandHandler CommandHandler { get; private set; } = null!;
     
 
-    private static int GetConfigFileVersion(string fileText)
-    {
-        var json = JObject.Parse(fileText);
-
-        return json.GetValue("Version")?.Value<int>() ?? 0;
-    }
     
     public Plugin(DalamudPluginInterface pluginInterface)
     {
         pluginInterface.Create<Service>();
 
-        var config = LoadConfiguration();
+        var config = Settings.Load();
 
         Address = new PluginAddressResolver();
         Address.Setup(Service.SigScanner);
@@ -76,56 +65,6 @@ public sealed class Plugin : IDalamudPlugin
         NpcNameplateFixer.Enable();
         ChatNameUpdater.Enable();
         ContextMenu.Enable();
-    }
-
-    private static PluginConfiguration LoadConfiguration()
-    {
-        PluginConfiguration? config = null;
-        
-        try
-        {
-            //JsonConvert.DeserializeObject<CharacterConfiguration>(fileText);
-            var configFileInfo = Service.PluginInterface.ConfigFile;
-
-            if (configFileInfo.Exists)
-            {
-                var reader = new StreamReader(configFileInfo.FullName);
-                var fileText = reader.ReadToEnd();
-                reader.Dispose();
-
-                var versionNumber = GetConfigFileVersion(fileText);
-                PluginLog.Information($"Config is v{versionNumber}");
-
-                if (versionNumber == PluginConfiguration.CurrentVersion)
-                {
-                    config = JsonConvert.DeserializeObject<PluginConfiguration>(fileText);
-                }
-                else if (versionNumber == 1)
-                {
-                    var configV1 = JsonConvert.DeserializeObject<ConfigurationV1>(fileText);
-                    config = new PluginConfiguration(configV1);
-                    config.Save();
-                    PluginLog.Information($"Converted config v{versionNumber} to v{PluginConfiguration.CurrentVersion}.");
-                }
-                else
-                {
-                    PluginLog.Error($"No reader available for config v{versionNumber}");
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error("Could not read config.");
-            PluginLog.Error(e.ToString());
-        }
-
-        if (config != null)
-        {
-            return config;
-        }
-
-        PluginLog.Information("Creating a new config.");
-        return new PluginConfiguration();
     }
 
     public void Dispose()
