@@ -76,7 +76,7 @@ public sealed class ViewModeSetter
         if (content == null)
         {
             InDuty = false;
-            PluginLog.Information($"Content null {Service.ClientState.TerritoryType}");
+            PluginLog.Verbose($"Content null {Service.ClientState.TerritoryType}");
             _nameplateView.PartyMode = _configuration.NameplateOverworld;
             _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
         }
@@ -103,7 +103,7 @@ public sealed class ViewModeSetter
                 memberType = 127;
             }
 
-            PluginLog.Debug(
+            PluginLog.Verbose(
                 $"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {Service.ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
 
             switch (memberType)
@@ -148,7 +148,7 @@ public sealed class ViewModeSetter
         _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
                                          _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
-        PluginLog.Debug(
+        PluginLog.Verbose(
             $"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
     }
 }

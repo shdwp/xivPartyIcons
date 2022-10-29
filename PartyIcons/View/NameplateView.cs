@@ -333,7 +333,7 @@ public sealed class NameplateView : IDisposable
             {
                 if (iconId > 0)
                 {
-                    PluginLog.Debug($"Name text unavailable for icon: {iconId}");
+                    PluginLog.Verbose($"Name text unavailable for icon: {iconId}");
                 }
             
                 return SeStringUtils.Text(prefix + " ");

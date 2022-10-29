@@ -73,7 +73,7 @@ public sealed class PartyListHUDUpdater : IDisposable
                     if (name == "PrepareZoning")
                     {
                         _prepareZoningOpcodes.Add(opcode);
-                        PluginLog.Debug($"Adding zoning opcode - {record.name} ({record.opcode})");
+                        PluginLog.Verbose($"Adding zoning opcode - {record.name} ({record.opcode})");
                     }
                 }
             }
@@ -84,7 +84,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         if (_displayingRoles)
         {
-            PluginLog.Debug("PartyListHUDUpdater: reverting party list due to entering a PvP zone");
+            PluginLog.Verbose("PartyListHUDUpdater: reverting party list due to entering a PvP zone");
             _displayingRoles = false;
             _view.RevertSlotNumbers();
         }
@@ -94,18 +94,18 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         if (_displayingRoles)
         {
-            PluginLog.Debug("PartyListHUDUpdater: reverting party list before the update due to config change");
+            PluginLog.Verbose("PartyListHUDUpdater: reverting party list before the update due to config change");
             _view.RevertSlotNumbers();
         }
 
-        PluginLog.Debug("PartyListHUDUpdater forcing update due to changes in the config");
+        PluginLog.Verbose("PartyListHUDUpdater forcing update due to changes in the config");
         PluginLog.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
 
     private void OnAssignedRolesUpdated()
     {
-        PluginLog.Debug("PartyListHUDUpdater forcing update due to assignments update");
+        PluginLog.Verbose("PartyListHUDUpdater forcing update due to assignments update");
         PluginLog.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
@@ -116,7 +116,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) &&
             targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
         {
-            PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
+            PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
             PluginLog.Verbose(_view.GetDebugInfo());
             UpdatePartyListHUD();
         }
@@ -128,7 +128,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
         if ((!inParty && _previousInParty) || (!_configuration.TestingMode && _previousTesting))
         {
-            PluginLog.Debug("No longer in party/testing mode, reverting party list HUD changes");
+            PluginLog.Verbose("No longer in party/testing mode, reverting party list HUD changes");
             _displayingRoles = false;
             _view.RevertSlotNumbers();
         }

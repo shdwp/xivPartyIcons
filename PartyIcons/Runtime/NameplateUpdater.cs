@@ -161,7 +161,7 @@ public sealed class NameplateUpdater : IDisposable
     /// <returns>Whether a priority icon was found.</returns>
     private bool IsPriorityIcon(int iconId, out int priorityIconId)
     {
-        //PluginLog.Debug($"Icon ID: {iconId}");
+        //PluginLog.Verbose($"Icon ID: {iconId}");
         priorityIconId = iconId;
 
         if (_configuration.UsePriorityIcons == false &&
