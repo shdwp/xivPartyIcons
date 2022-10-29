@@ -9,7 +9,7 @@ public enum ChatMode
 
 public struct ChatConfig
 {
-    public ChatConfig(ChatMode mode, bool colored)
+    public ChatConfig(ChatMode mode, bool colored = true)
     {
         Mode = mode;
         Colored = colored;

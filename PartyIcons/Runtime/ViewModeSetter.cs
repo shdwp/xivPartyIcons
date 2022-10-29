@@ -7,6 +7,7 @@ using Dalamud.IoC;
 using Dalamud.Logging;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
+using PartyIcons.Configuration;
 using PartyIcons.View;
 
 namespace PartyIcons.Runtime;
@@ -19,13 +20,13 @@ public sealed class ViewModeSetter
     public bool InDuty { get; private set; } = true;
 
     private readonly NameplateView _nameplateView;
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
     private readonly ChatNameUpdater _chatNameUpdater;
     private readonly PartyListHUDUpdater _partyListHudUpdater;
 
     private ExcelSheet<ContentFinderCondition> _contentFinderConditionsSheet;
 
-    public ViewModeSetter(NameplateView nameplateView, Configuration configuration, ChatNameUpdater chatNameUpdater,
+    public ViewModeSetter(NameplateView nameplateView, PluginConfiguration configuration, ChatNameUpdater chatNameUpdater,
         PartyListHUDUpdater partyListHudUpdater)
     {
         _nameplateView = nameplateView;

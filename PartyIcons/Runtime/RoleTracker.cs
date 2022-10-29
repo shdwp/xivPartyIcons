@@ -14,6 +14,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 
 namespace PartyIcons.Runtime;
@@ -24,7 +25,7 @@ public sealed class RoleTracker : IDisposable
     public event Action<string, RoleId> OnRoleSuggested;
     public event Action OnAssignedRolesUpdated;
 
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
 
     private bool _currentlyInParty;
     private uint _territoryId;
@@ -38,7 +39,7 @@ public sealed class RoleTracker : IDisposable
     private Dictionary<string, RoleId> _suggestedRoles = new();
     private HashSet<RoleId> _unassignedRoles = new();
 
-    public RoleTracker(Configuration configuration)
+    public RoleTracker(PluginConfiguration configuration)
     {
         _configuration = configuration;
 

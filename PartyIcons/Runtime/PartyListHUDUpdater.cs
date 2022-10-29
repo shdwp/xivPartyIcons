@@ -7,6 +7,7 @@ using Dalamud.Game;
 using Dalamud.Game.Network;
 using Dalamud.Logging;
 using Newtonsoft.Json;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
 
@@ -16,7 +17,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 {
     public bool UpdateHUD = false;
 
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
     private readonly PartyListHUDView _view;
     private readonly RoleTracker _roleTracker;
 
@@ -29,7 +30,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
     private List<int> _prepareZoningOpcodes = new();
 
-    public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Configuration configuration)
+    public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, PluginConfiguration configuration)
     {
         _view = view;
         _roleTracker = roleTracker;

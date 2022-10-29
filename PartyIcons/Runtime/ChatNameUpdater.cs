@@ -153,11 +153,8 @@ public sealed class ChatNameUpdater : IDisposable
 
     private void Parse(XivChatType chatType, ref SeString sender)
     {
-        var playerPayload = GetPlayerPayload(sender);
-
-        if (playerPayload == null)
+        if (GetPlayerPayload(sender) is not { } playerPayload)
         {
-            PluginLog.Verbose("playerPayload was null");
             return;
         }
 

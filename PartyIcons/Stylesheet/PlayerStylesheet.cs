@@ -3,6 +3,7 @@ using System.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Lumina.Excel.GeneratedSheets;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
 using PartyIcons.View;
@@ -11,10 +12,10 @@ namespace PartyIcons.Stylesheet;
 
 public sealed class PlayerStylesheet
 {
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
     private ushort _fallbackColor = 1;
 
-    public PlayerStylesheet(Configuration configuration)
+    public PlayerStylesheet(PluginConfiguration configuration)
     {
         _configuration = configuration;
     }

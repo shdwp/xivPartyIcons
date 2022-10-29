@@ -9,6 +9,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Api;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
@@ -21,7 +22,7 @@ public sealed class NameplateView : IDisposable
     // [PluginService]
     // private ObjectTable ObjectTable { get; set; }
 
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
     private readonly PlayerStylesheet _stylesheet;
     private readonly RoleTracker _roleTracker;
     private readonly PartyListHUDView _partyListHudView;
@@ -31,7 +32,7 @@ public sealed class NameplateView : IDisposable
     public NameplateMode PartyMode { get; set; }
     public NameplateMode OthersMode { get; set; }
     
-    public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet,
+    public NameplateView(RoleTracker roleTracker, PluginConfiguration configuration, PlayerStylesheet stylesheet,
         PartyListHUDView partyListHudView)
     {
         _roleTracker = roleTracker;

@@ -17,17 +17,18 @@ using Dalamud.Plugin;
 using Dalamud.Utility;
 using ImGuiNET;
 using ImGuiScene;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
 using PartyIcons.Utils;
 using PartyIcons.View;
-using static PartyIcons.Configuration;
+using static PartyIcons.Configuration.PluginConfiguration;
 
 namespace PartyIcons;
 
 public sealed class SettingsWindow : IDisposable
 {
-    private readonly Configuration _configuration;
+    private readonly PluginConfiguration _configuration;
     private readonly PlayerStylesheet _stylesheet;
 
     private bool _settingsVisible = false;
@@ -56,7 +57,7 @@ public sealed class SettingsWindow : IDisposable
 
     private Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 
-    public SettingsWindow(Configuration configuration, PlayerStylesheet stylesheet)
+    public SettingsWindow(PluginConfiguration configuration, PlayerStylesheet stylesheet)
     {
         _configuration = configuration;
         _stylesheet = stylesheet;
