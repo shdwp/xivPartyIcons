@@ -14,29 +14,25 @@ public class SettingsV1
         Job
     }
 
-    public static ChatMode Convert(ChatModeV1 chatModeV1)
+    public static ChatConfig ToChatConfig(ChatModeV1 chatModeV1)
     {
         switch (chatModeV1)
         {
             case ChatModeV1.GameDefault:
+                return new ChatConfig(ChatMode.GameDefault, useRoleColor: false);
+                
             case ChatModeV1.OnlyColor:
-                return ChatMode.GameDefault;
+                return new ChatConfig(ChatMode.GameDefault, useRoleColor: true);
             
             case ChatModeV1.Role:
-                return ChatMode.Job;
+                return new ChatConfig(ChatMode.Role, useRoleColor: true);
 
             case ChatModeV1.Job:
-                return ChatMode.Job;
+                return new ChatConfig(ChatMode.Job, useRoleColor: true);
+            
             default:
                 throw new ArgumentOutOfRangeException(nameof(chatModeV1), chatModeV1, null);
         }
-    }
-
-    public static ChatConfig ToChatConfig(ChatModeV1 chatModeV1)
-    {
-        var chatMode = Convert(chatModeV1);
-
-        return new ChatConfig(chatMode);
     }
     
     public int Version { get; set; } = 1;
