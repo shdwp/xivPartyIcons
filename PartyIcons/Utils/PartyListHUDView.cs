@@ -70,7 +70,7 @@ public unsafe class PartyListHUDView : IDisposable
         if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
-            PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
+            PluginLog.Verbose("GetPartySlotIndex - trust detected, returning null");
 
             return null;
         }
@@ -163,7 +163,7 @@ public unsafe class PartyListHUDView : IDisposable
         if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
-            PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
+            PluginLog.Verbose("GetPartySlotIndex - trust detected, returning null");
 
             return null;
         }

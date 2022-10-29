@@ -24,7 +24,7 @@ public sealed class NPCNameplateFixer : IDisposable
 
     public void Dispose()
     {
-        PluginLog.Debug("NPCNameplateFixer dispose, cancelling the token");
+        PluginLog.Verbose("NPCNameplateFixer dispose, cancelling the token");
         FixNonPlayerCharacterNamePlatesTokenSource.Cancel();
         RevertAll();
     }
@@ -33,7 +33,7 @@ public sealed class NPCNameplateFixer : IDisposable
     {
         try
         {
-            PluginLog.Debug("NPCNameplateFixer thread started");
+            PluginLog.Verbose("NPCNameplateFixer thread started");
 
             while (!token.IsCancellationRequested)
             {
@@ -41,11 +41,11 @@ public sealed class NPCNameplateFixer : IDisposable
                 Task.Delay(16, token).Wait(token);
             }
 
-            PluginLog.Debug("NPCNameplateFixer thread halted");
+            PluginLog.Verbose("NPCNameplateFixer thread halted");
         }
         catch (OperationCanceledException)
         {
-            PluginLog.Debug("NPCNameplateFixed thread stopped");
+            PluginLog.Verbose("NPCNameplateFixed thread stopped");
         }
         catch (Exception ex)
         {

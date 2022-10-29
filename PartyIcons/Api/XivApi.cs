@@ -161,7 +161,7 @@ public class XivApi : IDisposable
 
             if (npObjectArrayPtr == IntPtr.Zero)
             {
-                PluginLog.Debug($"[{GetType().Name}] NamePlateObjectArray was null");
+                PluginLog.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
 
                 return null;
             }
@@ -198,7 +198,7 @@ public class XivApi : IDisposable
 
                     if (npObject0 == null)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] NamePlateObject0 was null");
+                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
 
                         return -1;
                     }
@@ -209,7 +209,7 @@ public class XivApi : IDisposable
 
                     if (index < 0 || index >= 50)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] NamePlateObject index was out of bounds");
+                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
 
                         return -1;
                     }
@@ -231,7 +231,7 @@ public class XivApi : IDisposable
 
                     if (rapturePtr == IntPtr.Zero)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] RaptureAtkModule was null");
+                        PluginLog.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
 
                         return null;
                     }

@@ -110,13 +110,13 @@ public sealed class RoleTracker : IDisposable
 
     public void ResetOccupations()
     {
-        PluginLog.Debug("Resetting occupation");
+        PluginLog.Verbose("Resetting occupation");
         _occupiedRoles.Clear();
     }
 
     public void ResetAssignments()
     {
-        PluginLog.Debug("Resetting assignments");
+        PluginLog.Verbose("Resetting assignments");
         _assignedRoles.Clear();
         _unassignedRoles.Clear();
 
@@ -133,17 +133,17 @@ public sealed class RoleTracker : IDisposable
     {
         ResetAssignments();
 
-        PluginLog.Debug($"Assigning current occupations ({_occupiedRoles.Count})");
+        PluginLog.Verbose($"Assigning current occupations ({_occupiedRoles.Count})");
 
         foreach (var kv in _occupiedRoles)
         {
-            PluginLog.Debug($"{kv.Key} == {kv.Value} as per occupation");
+            PluginLog.Verbose($"{kv.Key} == {kv.Value} as per occupation");
 
             _assignedRoles[kv.Key] = kv.Value;
             _unassignedRoles.Remove(kv.Value);
         }
 
-        PluginLog.Debug($"Assigning static assignments ({_configuration.StaticAssignments.Count})");
+        PluginLog.Verbose($"Assigning static assignments ({_configuration.StaticAssignments.Count})");
 
         foreach (var kv in _configuration.StaticAssignments)
         {
@@ -153,7 +153,7 @@ public sealed class RoleTracker : IDisposable
 
                 if (_assignedRoles.ContainsKey(playerId))
                 {
-                    PluginLog.Debug($"{PlayerId(member)} has already been assigned a role");
+                    PluginLog.Verbose($"{PlayerId(member)} has already been assigned a role");
 
                     continue;
                 }
@@ -168,25 +168,25 @@ public sealed class RoleTracker : IDisposable
 
                     if (applicableRoles.Contains(kv.Value))
                     {
-                        PluginLog.Debug($"{playerId} == {kv.Value} as per static assignments {playerDescription}");
+                        PluginLog.Verbose($"{playerId} == {kv.Value} as per static assignments {playerDescription}");
                         _assignedRoles[playerId] = kv.Value;
                     }
                     else
                     {
-                        PluginLog.Debug(
+                        PluginLog.Verbose(
                             $"Skipping static assignment - applicable roles {string.Join(", ", applicableRoles)}, static role - {kv.Value}");
                     }
                 }
             }
         }
 
-        PluginLog.Debug("Assigning the rest");
+        PluginLog.Verbose("Assigning the rest");
 
         foreach (var member in Service.PartyList)
         {
             if (_assignedRoles.ContainsKey(PlayerId(member)))
             {
-                PluginLog.Debug($"{PlayerId(member)} has already been assigned a role");
+                PluginLog.Verbose($"{PlayerId(member)} has already been assigned a role");
 
                 continue;
             }
@@ -196,7 +196,7 @@ public sealed class RoleTracker : IDisposable
 
             if (roleToAssign != default)
             {
-                PluginLog.Debug($"{PlayerId(member)} == {roleToAssign} as per first available");
+                PluginLog.Verbose($"{PlayerId(member)} == {roleToAssign} as per first available");
                 _assignedRoles[PlayerId(member)] = roleToAssign;
                 _unassignedRoles.Remove(roleToAssign);
             }
@@ -238,7 +238,7 @@ public sealed class RoleTracker : IDisposable
             && Service.PartyList.Length == 0 &&
             _occupiedRoles.Any())
         {
-            PluginLog.Debug("Resetting occupations, no longer in a party");
+            PluginLog.Verbose("Resetting occupations, no longer in a party");
             ResetOccupations();
 
             return;
@@ -256,7 +256,7 @@ public sealed class RoleTracker : IDisposable
 
         if (partyHash != _previousStateHash)
         {
-            PluginLog.Debug($"Party hash changed ({partyHash}, prev {_previousStateHash}), recalculating roles");
+            PluginLog.Verbose($"Party hash changed ({partyHash}, prev {_previousStateHash}), recalculating roles");
             CalculateUnassignedPartyRoles();
         }
 
@@ -318,7 +318,7 @@ public sealed class RoleTracker : IDisposable
 
             if (playerName == null || !playerWorld.HasValue)
             {
-                PluginLog.Debug($"Failed to get player data from {senderid}, {sender} ({sender.Payloads})");
+                PluginLog.Verbose($"Failed to get player data from {senderid}, {sender} ({sender.Payloads})");
 
                 return;
             }
@@ -335,7 +335,7 @@ public sealed class RoleTracker : IDisposable
             {
                 if (tuple.Item2.Equals(paddedText))
                 {
-                    PluginLog.Debug(
+                    PluginLog.Verbose(
                         $"Message contained role occupation ({playerName}@{playerWorld} - {text}, detected role {tuple.Item1})");
 
                     if (roleToOccupy == RoleId.Undefined)
@@ -344,7 +344,7 @@ public sealed class RoleTracker : IDisposable
                     }
                     else
                     {
-                        PluginLog.Debug($"Multiple role occupation matches, aborting");
+                        PluginLog.Verbose($"Multiple role occupation matches, aborting");
                         occupationTainted = true;
 
                         break;
@@ -356,7 +356,7 @@ public sealed class RoleTracker : IDisposable
             {
                 if (tuple.Item2.IsMatch(paddedText))
                 {
-                    PluginLog.Debug(
+                    PluginLog.Verbose(
                         $"Message contained role suggestion ({playerName}@{playerWorld}: {text}, detected {tuple.Item1}");
 
                     if (roleToSuggest == RoleId.Undefined)
@@ -365,7 +365,7 @@ public sealed class RoleTracker : IDisposable
                     }
                     else
                     {
-                        PluginLog.Debug("Multiple role suggesting matches, aborting");
+                        PluginLog.Verbose("Multiple role suggesting matches, aborting");
                         suggestionTainted = true;
 
                         break;
@@ -377,7 +377,7 @@ public sealed class RoleTracker : IDisposable
             {
                 OccupyRole(playerName, playerWorld.Value, roleToOccupy);
 
-                PluginLog.Debug($"Recalculating assignments due to new occupations");
+                PluginLog.Verbose($"Recalculating assignments due to new occupations");
                 CalculateUnassignedPartyRoles();
             }
             else if (!suggestionTainted && roleToSuggest != RoleId.Undefined)

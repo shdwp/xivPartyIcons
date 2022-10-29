@@ -53,7 +53,7 @@ namespace PartyIcons.View
             var playerName = args.Text.TextValue;
             var playerWorld = args.ObjectWorld;
 
-            PluginLog.Debug($"Opening menu for {playerName}");
+            PluginLog.Verbose($"Opening menu for {playerName}");
 
             AddSuggestedRoleMenuItem(playerName, playerWorld, args);
             AddSwapRoleMenuItem(playerName, playerWorld, args);

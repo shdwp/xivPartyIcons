@@ -55,11 +55,11 @@ public class CommandHandler : IDisposable
                 try
                 {
                     Plugin.NameplateUpdater.DebugIcon = int.Parse(argv[2]);
-                    PluginLog.Debug($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
+                    PluginLog.Verbose($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
                 }
                 catch (Exception)
                 {
-                    PluginLog.Debug("Invalid icon id given for debug icon.");
+                    PluginLog.Verbose("Invalid icon id given for debug icon.");
                     Plugin.NameplateUpdater.DebugIcon = -1;
                 }
             }
