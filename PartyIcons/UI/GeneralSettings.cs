@@ -8,6 +8,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Logging;
 using ImGuiNET;
+using PartyIcons.UI.Controls;
 
 namespace PartyIcons.UI;
 
@@ -20,6 +21,8 @@ public sealed class GeneralSettings
         _notice.Initialize();
     }
 
+    private FlashingText _testingModeText = new();
+    
     public void DrawGeneralSettings()
     {
         ImGui.Dummy(new Vector2(0, 2f));
@@ -60,7 +63,9 @@ public sealed class GeneralSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Enable testing mode");
+        _testingModeText.IsFlashing = Plugin.Settings.TestingMode;
+        _testingModeText.Draw("Enable testing mode");
+        // ImGui.Text("Enable testing mode");
         ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 
         var chatContentMessage = Plugin.Settings.ChatContentMessage;
