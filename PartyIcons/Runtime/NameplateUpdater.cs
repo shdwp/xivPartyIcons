@@ -170,7 +170,7 @@ public sealed class NameplateUpdater : IDisposable
         
         // Select which set of priority icons to use based on whether we're in a duty
         // In the future, there can be a third list used when in combat
-        var priorityIcons = _modeSetter.InDuty ? priorityIconsInDuty : priorityIconsOverworld;
+        var priorityIcons = GetPriorityIcons();
 
         // Determine whether the incoming icon should take priority over the job icon
         // Check the id plus 50 as that's an alternately sized version
@@ -191,6 +191,21 @@ public sealed class NameplateUpdater : IDisposable
         return isPriorityIcon;
     }
 
+    private int[] GetPriorityIcons()
+    {
+        if (_modeSetter.ZoneType == ZoneType.Foray)
+        {
+            return priorityIconsInForay;
+        }
+        
+        if (_modeSetter.InDuty)
+        {
+            return priorityIconsInDuty;
+        }
+        
+        return priorityIconsOverworld;
+    }
+
     public enum Icon
     {
         Disconnecting = 061503,
@@ -199,6 +214,7 @@ public sealed class NameplateUpdater : IDisposable
     private static readonly int[] priorityIconsOverworld =
     {
         061503, // Disconnecting
+        061506, // In Duty
         061508, // Viewing Cutscene
         061509, // Busy
         061511, // Idle
@@ -214,6 +230,17 @@ public sealed class NameplateUpdater : IDisposable
         061503, // Disconnecting
         061508, // Viewing Cutscene
         061511, // Idle
-        061546, // Group Pose //extremely important when raiding
+        061546, // Group Pose
+    };
+    
+    private static readonly int[] priorityIconsInForay =
+    {
+        // This allows you to see which players don't have a party
+        061506, // In Duty
+        
+        061503, // Disconnecting
+        061508, // Viewing Cutscene
+        061511, // Idle
+        061546, // Group Pose
     };
 }

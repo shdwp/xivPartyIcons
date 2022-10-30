@@ -12,12 +12,23 @@ using PartyIcons.View;
 
 namespace PartyIcons.Runtime;
 
+public enum ZoneType
+{
+    Overworld,
+    Dungeon,
+    Raid,
+    AllianceRaid,
+    Foray,
+}
+
 public sealed class ViewModeSetter
 {
     /// <summary>
     /// Whether the player is currently in a duty.
     /// </summary>
-    public bool InDuty { get; private set; } = true;
+    public bool InDuty => ZoneType != ZoneType.Overworld;
+    
+    public ZoneType ZoneType { get; private set; } = ZoneType.Overworld;
 
     private readonly NameplateView _nameplateView;
     private readonly Settings _configuration;
@@ -76,15 +87,13 @@ public sealed class ViewModeSetter
 
         if (content == null)
         {
-            InDuty = false;
             PluginLog.Verbose($"Content null {Service.ClientState.TerritoryType}");
             _nameplateView.PartyMode = _configuration.NameplateOverworld;
             _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
+            ZoneType = ZoneType.Overworld;
         }
         else
         {
-            InDuty = true;
-
             if (_configuration.ChatContentMessage)
             {
                 Service.ChatGui.Print($"Entering {content.Name}.");
@@ -110,6 +119,7 @@ public sealed class ViewModeSetter
             switch (memberType)
             {
                 case 2:
+                    ZoneType = ZoneType.Dungeon;
                     _nameplateView.PartyMode = _configuration.NameplateDungeon;
                     _nameplateView.OthersMode = _configuration.NameplateOthers;
                     _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
@@ -117,6 +127,7 @@ public sealed class ViewModeSetter
                     break;
 
                 case 3:
+                    ZoneType = ZoneType.Raid;
                     _nameplateView.PartyMode = _configuration.NameplateRaid;
                     _nameplateView.OthersMode = _configuration.NameplateOthers;
                     _chatNameUpdater.PartyMode = _configuration.ChatRaid;
@@ -124,6 +135,7 @@ public sealed class ViewModeSetter
                     break;
 
                 case 4:
+                    ZoneType = ZoneType.AllianceRaid;
                     _nameplateView.PartyMode = _configuration.NameplateAllianceRaid;
                     _nameplateView.OthersMode = _configuration.NameplateOthers;
                     _chatNameUpdater.PartyMode = _configuration.ChatAllianceRaid;
@@ -131,6 +143,7 @@ public sealed class ViewModeSetter
                     break;
 
                 case 127:
+                    ZoneType = ZoneType.Foray;
                     _nameplateView.PartyMode = _configuration.NameplateBozjaParty;
                     _nameplateView.OthersMode = _configuration.NameplateBozjaOthers;
                     _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
@@ -138,6 +151,7 @@ public sealed class ViewModeSetter
                     break;
 
                 default:
+                    ZoneType = ZoneType.Dungeon;
                     _nameplateView.PartyMode = _configuration.NameplateDungeon;
                     _nameplateView.OthersMode = _configuration.NameplateOthers;
                     _chatNameUpdater.PartyMode = _configuration.ChatDungeon;
@@ -149,7 +163,7 @@ public sealed class ViewModeSetter
         _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
                                          _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
-        PluginLog.Verbose(
-            $"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
+        PluginLog.Verbose($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
+        PluginLog.Debug($"Entered ZoneType {ZoneType.ToString()}");
     }
 }
