@@ -68,6 +68,11 @@ public sealed class ChatNameUpdater : IDisposable
 
     private bool CheckIfPlayerPayloadInParty(PlayerPayload playerPayload)
     {
+        if (Plugin.Settings.TestingMode)
+        {
+            return true;
+        }
+        
         foreach (var member in Service.PartyList)
         {
             if (member.Name.ToString() == playerPayload.PlayerName && member.World.Id == playerPayload.World.RowId)
