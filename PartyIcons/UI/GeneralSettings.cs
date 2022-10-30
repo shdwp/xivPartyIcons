@@ -64,7 +64,7 @@ public sealed class GeneralSettings
 
         ImGui.SameLine();
         _testingModeText.IsFlashing = Plugin.Settings.TestingMode;
-        _testingModeText.Draw("Enable testing mode");
+        _testingModeText.Draw(() => ImGui.Text("Enable testing mode"));
         // ImGui.Text("Enable testing mode");
         ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 

@@ -8,6 +8,7 @@ using Dalamud.Interface.Components;
 using ImGuiNET;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
+using PartyIcons.UI.Controls;
 using PartyIcons.Utils;
 
 namespace PartyIcons.UI;
@@ -68,7 +69,9 @@ public sealed class SettingsWindow : IDisposable
 
             if (ImGui.BeginTabBar("##tabbar"))
             {
-                if (ImGui.BeginTabItem("General##general"))
+                _generalTabText.IsFlashing = Plugin.Settings.TestingMode;
+                
+                if (_generalTabText.Draw(() => ImGui.BeginTabItem("General##general")))
                 {
                     if (ImGui.BeginChild("##general_content"))
                     {
@@ -162,4 +165,6 @@ public sealed class SettingsWindow : IDisposable
     private readonly NameplateSettings _nameplateSettings = new();
     private readonly ChatNameSettings _chatNameSettings = new();
     private readonly StaticAssignmentsSettings _staticAssignmentsSettings = new StaticAssignmentsSettings();
+    
+    private FlashingText _generalTabText = new();
 }

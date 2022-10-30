@@ -1,6 +1,8 @@
+using System;
 using System.Diagnostics;
 using System.Numerics;
 using ImGuiNET;
+using PartyIcons.Configuration;
 
 namespace PartyIcons.UI.Controls;
 
@@ -33,18 +35,27 @@ public class FlashingText
         }
     }
 
-    public void Draw(string text)
+    public void Draw(Action draw)
+    {
+        _ = Draw(() =>
+        {
+            draw.Invoke();
+            return true;
+        });
+    }
+    
+    public bool Draw(Func<bool> draw)
     {
         Vector4 flashColor = _flashColor0;
 
         if (IsFlashing)
         {
-            if (_stopwatch.ElapsedMilliseconds < 500)
+            if (_stopwatch.ElapsedMilliseconds < FlashIntervalMs)
             {
                 flashColor = _flashColor1;
             }
 
-            if (_stopwatch.ElapsedMilliseconds > 1000)
+            if (_stopwatch.ElapsedMilliseconds > FlashIntervalMs * 2)
             {
                 _stopwatch.Restart();
             }
@@ -55,17 +66,20 @@ public class FlashingText
             ImGui.PushStyleColor(0, flashColor);
         }
         
-        ImGui.Text(text);
+        bool result = draw.Invoke();//ImGui.Text(text);
 
         if (IsFlashing)
         {
             ImGui.PopStyleColor();
         }
+
+        return result;
     }
     
     private readonly Vector4 _flashColor0;
     private readonly Vector4 _flashColor1;
 
-    private readonly Stopwatch _stopwatch = new();
+    private static readonly Stopwatch _stopwatch = new();
+    private const int FlashIntervalMs = 500;
     private bool _isFlashing;
 }
