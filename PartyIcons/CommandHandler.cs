@@ -46,15 +46,15 @@ public class CommandHandler : IDisposable
         {
             Service.ChatGui.Print(Plugin.PartyHudView.GetDebugInfo());
         }
-        else if (arguments.Contains("dbg icon"))
+        else if (arguments.Contains("set"))
         {
             var argv = arguments.Split(' ');
 
-            if (argv.Length == 3)
+            if (argv.Length == 2)
             {
                 try
                 {
-                    Plugin.NameplateUpdater.DebugIcon = int.Parse(argv[2]);
+                    Plugin.NameplateUpdater.DebugIcon = int.Parse(argv[1]);
                     PluginLog.Verbose($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
                 }
                 catch (Exception)
