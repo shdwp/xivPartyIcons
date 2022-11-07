@@ -106,7 +106,7 @@ public unsafe class PartyListHUDView : IDisposable
                     if (!index.HasValue || index.Value != i)
                     {
                         PluginLog.Warning("PartyHUD and HUDAgent id's mismatch!");
-                        PluginLog.Warning(GetDebugInfo());
+                        // PluginLog.Warning(GetDebugInfo());
                     }
 
                     SetPartyMemberRole(i, roleId);
@@ -181,7 +181,7 @@ public unsafe class PartyListHUDView : IDisposable
         result.AppendLine("STRUCTS:");
         var memberList = (HudPartyMember*) hud->PartyMemberList;
 
-        for (var i = 0; i < hud->PartyMemberCount; i++)
+        for (var i = 0; i < Math.Min(hud->PartyMemberCount, 8u); i++)
         {
             var memberStruct = GetPartyMemberStruct((uint) i);
 

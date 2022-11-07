@@ -100,14 +100,14 @@ public sealed class PartyListHUDUpdater : IDisposable
         }
 
         PluginLog.Verbose("PartyListHUDUpdater forcing update due to changes in the config");
-        PluginLog.Verbose(_view.GetDebugInfo());
+        // PluginLog.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
 
     private void OnAssignedRolesUpdated()
     {
         PluginLog.Verbose("PartyListHUDUpdater forcing update due to assignments update");
-        PluginLog.Verbose(_view.GetDebugInfo());
+        // PluginLog.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
 
@@ -118,7 +118,7 @@ public sealed class PartyListHUDUpdater : IDisposable
             targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
-            PluginLog.Verbose(_view.GetDebugInfo());
+            // PluginLog.Verbose(_view.GetDebugInfo());
             UpdatePartyListHUD();
         }
     }
