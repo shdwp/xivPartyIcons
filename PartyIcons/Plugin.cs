@@ -11,7 +11,7 @@ namespace PartyIcons;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    public string Name => "PartyIcons";
+    public string Name => "Party Icons";
 
     public PluginAddressResolver Address { get; }
 
