@@ -13,6 +13,9 @@
         "requested": "[7.0.0-alpha.1, )",
         "resolved": "7.0.0-alpha.1",
         "contentHash": "4Yy4Wg3bnI/g9BSEYAqOZALmVMJZS0wcP847VlUIThBqIS/47O6tw2BI84he4KuPSTfIsYOzrcz3vAia8+Pn3g=="
+      },
+      "dalamud.contextmenu": {
+        "type": "Project"
       }
     }
   }
