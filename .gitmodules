@@ -1,0 +1,3 @@
+[submodule "Dalamud.ContextMenu"]
+	path = Dalamud.ContextMenu
+	url = https://github.com/kalilistic/Dalamud.ContextMenu
