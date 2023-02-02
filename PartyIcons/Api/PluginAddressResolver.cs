@@ -70,7 +70,7 @@ public sealed class PluginAddressResolver : BaseAddressResolver
     public IntPtr BattleCharaStorePtr;
 
     private const string BattleCharaStore_LookupBattleCharaByObjectIDSignature =
-        "E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 74 3A 48 8B C8";
+        "E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 74 3A 48 8B C8 E8 ?? ?? ?? ?? 84 C0";
 
     public IntPtr BattleCharaStore_LookupBattleCharaByObjectIDPtr;
 
