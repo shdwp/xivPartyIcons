@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Game;
 using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.View;
 
 namespace PartyIcons.Runtime;
 
+/// <summary>
+/// Reverts NPC nameplates that have had their icon or name text scaled and
+/// also reverts all nameplates when the plugin is unloading.
+/// </summary>
 public sealed class NPCNameplateFixer : IDisposable
 {
-    private readonly CancellationTokenSource FixNonPlayerCharacterNamePlatesTokenSource = new();
+    private const uint NoTarget = 0xE0000000;
     private readonly NameplateView _view;
 
     public NPCNameplateFixer(NameplateView view)
@@ -19,38 +24,18 @@ public sealed class NPCNameplateFixer : IDisposable
 
     public void Enable()
     {
-        Task.Run(() => TaskMain(FixNonPlayerCharacterNamePlatesTokenSource.Token));
+        Service.Framework.Update += OnUpdate;
     }
 
     public void Dispose()
     {
-        PluginLog.Verbose("NPCNameplateFixer dispose, cancelling the token");
-        FixNonPlayerCharacterNamePlatesTokenSource.Cancel();
+        Service.Framework.Update -= OnUpdate;
         RevertAll();
     }
 
-    private void TaskMain(CancellationToken token)
+    private void OnUpdate(Framework framework)
     {
-        try
-        {
-            PluginLog.Verbose("NPCNameplateFixer thread started");
-
-            while (!token.IsCancellationRequested)
-            {
-                RevertNPC();
-                Task.Delay(16, token).Wait(token);
-            }
-
-            PluginLog.Verbose("NPCNameplateFixer thread halted");
-        }
-        catch (OperationCanceledException)
-        {
-            PluginLog.Verbose("NPCNameplateFixed thread stopped");
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error(ex, "Non-PC Updater loop has crashed");
-        }
+        RevertNPC();
     }
 
     private void RevertNPC()
@@ -75,16 +60,16 @@ public sealed class NPCNameplateFixer : IDisposable
 
             var actorID = npInfo.Data.ObjectID.ObjectID;
 
-            if (actorID == 0xE0000000)
+            if (actorID == NoTarget)
             {
                 continue;
             }
 
             var isPC = npInfo.IsPlayerCharacter();
 
-            if (!isPC)
+            if (!isPC && _view.SetupDefault(npObject))
             {
-                _view.SetupDefault(npObject);
+                PluginLog.Verbose($"Reverted NPC {actorID} (#{i})");
             }
         }
     }
@@ -111,12 +96,15 @@ public sealed class NPCNameplateFixer : IDisposable
 
             var actorID = npInfo.Data.ObjectID.ObjectID;
 
-            if (actorID == 0xE0000000)
+            if (actorID == NoTarget)
             {
                 continue;
             }
 
-            _view.SetupDefault(npObject);
+            if (_view.SetupDefault(npObject))
+            {
+                PluginLog.Verbose($"Reverted {actorID} (#{i})");
+            }
         }
     }
 }

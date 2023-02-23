@@ -176,7 +176,7 @@ public class XivApi : IDisposable
     {
         public readonly IntPtr Pointer;
         public readonly AddonNamePlate.NamePlateObject Data;
-
+        
         private int _Index;
         private SafeNamePlateInfo _NamePlateInfo;
 
@@ -267,20 +267,28 @@ public class XivApi : IDisposable
 
         public bool IsPlayer => Data.NameplateKind == 0;
 
-        public void SetIconScale(float scale, bool force = false)
+        /// <returns>True if the icon scale was changed.</returns>
+        public bool SetIconScale(float scale, bool force = false)
         {
-            if (force || IconImageNode.AtkResNode.ScaleX != scale || IconImageNode.AtkResNode.ScaleY != scale)
+            if (force || !IsIconScaleEqual(scale))
             {
                 Instance.SetNodeScale(IconImageNodeAddress, scale, scale);
+                return true;
             }
+
+            return false;
         }
 
-        public void SetNameScale(float scale, bool force = false)
+        /// <returns>True if the name scale was changed.</returns>
+        public bool SetNameScale(float scale, bool force = false)
         {
-            if (force || NameTextNode.AtkResNode.ScaleX != scale || NameTextNode.AtkResNode.ScaleY != scale)
+            if (force || !IsNameScaleEqual(scale))
             {
                 Instance.SetNodeScale(NameNodeAddress, scale, scale);
+                return true;
             }
+
+            return false;
         }
 
         public unsafe void SetName(IntPtr ptr)
@@ -302,6 +310,21 @@ public class XivApi : IDisposable
             Marshal.WriteInt16(iconXAdjustPtr, x);
             Marshal.WriteInt16(iconYAdjustPtr, y);
         }
+        
+        private static bool NearlyEqual(float left, float right, float tolerance)
+        {
+            return Math.Abs(left - right) <= tolerance; 
+        }
+        
+        private bool IsIconScaleEqual(float scale) =>
+            NearlyEqual(scale, IconImageNode.AtkResNode.ScaleX, ScaleTolerance) &&
+            NearlyEqual(scale, IconImageNode.AtkResNode.ScaleY, ScaleTolerance);
+
+        private bool IsNameScaleEqual(float scale) =>
+            NearlyEqual(scale, NameTextNode.AtkResNode.ScaleX, ScaleTolerance) &&
+            NearlyEqual(scale, NameTextNode.AtkResNode.ScaleY, ScaleTolerance);
+        
+        private const float ScaleTolerance = 0.001f;
     }
 
     public class SafeNamePlateInfo

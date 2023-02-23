@@ -44,10 +44,11 @@ public sealed class NameplateView : IDisposable
 
     public void Dispose() { }
 
-    public void SetupDefault(XivApi.SafeNamePlateObject npObject)
+    /// <returns>True if the icon or name scale was changed (different from default).</returns>
+    public bool SetupDefault(XivApi.SafeNamePlateObject npObject)
     {
-        npObject.SetIconScale(1f);
-        npObject.SetNameScale(0.5f);
+        return npObject.SetIconScale(1f) &&
+               npObject.SetNameScale(0.5f);
     }
 
     /// <summary>
@@ -160,8 +161,8 @@ public sealed class NameplateView : IDisposable
         }
 
         npObject.SetIconPosition((short) iconOffset.X, (short) iconOffset.Y);
-        npObject.SetIconScale(iconScale);
-        npObject.SetNameScale(nameScale);
+        _ = npObject.SetIconScale(iconScale);
+        _ = npObject.SetNameScale(nameScale);
     }
 
     public void NameplateDataForPC(
@@ -331,14 +332,7 @@ public sealed class NameplateView : IDisposable
                 return SeStringUtils.Icon(BitmapFontIcon.Returner, prefix);
             
             default:
-            {
-                if (iconId > 0)
-                {
-                    PluginLog.Verbose($"Name text unavailable for icon: {iconId}");
-                }
-            
                 return SeStringUtils.Text(prefix + " ");
-            }
         }
     }
 
