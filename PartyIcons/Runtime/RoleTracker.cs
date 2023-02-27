@@ -83,8 +83,11 @@ public sealed class RoleTracker : IDisposable
     public bool TryGetSuggestedRole(string name, uint worldId, out RoleId roleId) =>
         _suggestedRoles.TryGetValue(PlayerId(name, worldId), out roleId);
 
-    public bool TryGetAssignedRole(string name, uint worldId, out RoleId roleId) =>
-        _assignedRoles.TryGetValue(PlayerId(name, worldId), out roleId);
+    public bool TryGetAssignedRole(string name, uint worldId, out RoleId roleId)
+    {
+        PluginLog.Verbose($"{_assignedRoles.Count}");
+        return _assignedRoles.TryGetValue(PlayerId(name, worldId), out roleId);
+    }
 
     public void OccupyRole(string name, uint world, RoleId roleId)
     {

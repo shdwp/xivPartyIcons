@@ -167,15 +167,21 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-        PluginLog.Verbose("Updating party list HUD");
+        PluginLog.Verbose($"Updating party list HUD. members = {Service.PartyList.Length}");
         _displayingRoles = true;
 
         foreach (var member in Service.PartyList)
         {
+            PluginLog.Verbose($"member {member.Name.ToString()}");
+            
             if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
             {
                 PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
                 _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
+            }
+            else
+            {
+                PluginLog.Verbose($"Could not get assigned role for member {member.Name.ToString()}, {member.World.Id}");
             }
         }
     }
