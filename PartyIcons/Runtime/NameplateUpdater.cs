@@ -227,6 +227,7 @@ public sealed class NameplateUpdater : IDisposable
         061522, // Party Member
         061524, // Game Master
         061532, // Game Master
+        061533, // Event Participant
         061545, // Role Playing
         061546, // Group Pose
     };
