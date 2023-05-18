@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Dalamud.Game;
-using Dalamud.Game.Network;
+using Dalamud.Hooking;
 using Dalamud.Logging;
-using Newtonsoft.Json;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
@@ -27,23 +23,25 @@ public sealed class PartyListHUDUpdater : IDisposable
     private bool _previousTesting;
     private DateTime _lastUpdate = DateTime.Today;
 
-    private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
-    private List<int> _prepareZoningOpcodes = new();
+    private const string PrepareZoningSig = "48 89 5C 24 ?? 57 48 83 EC 40 F6 42 0D 08";
+    private delegate nint PrepareZoningDelegate (nint a1, nint a2, byte a3);
+    private Hook<PrepareZoningDelegate> prepareZoningHook;
 
     public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Settings configuration)
     {
         _view = view;
         _roleTracker = roleTracker;
         _configuration = configuration;
-
-        Task.WaitAll(new[] { DownloadOpcodes() });
+        
+        prepareZoningHook =
+            Hook<PrepareZoningDelegate>.FromAddress(Service.SigScanner.ScanText(PrepareZoningSig), PrepareZoning);
+        prepareZoningHook?.Enable();
     }
 
     public void Enable()
     {
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
         Service.Framework.Update += OnUpdate;
-        Service.GameNetwork.NetworkMessage += OnNetworkMessage;
         _configuration.OnSave += OnConfigurationSave;
         Service.ClientState.EnterPvP += OnEnterPvP;
     }
@@ -52,33 +50,17 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         Service.ClientState.EnterPvP -= OnEnterPvP;
         _configuration.OnSave -= OnConfigurationSave;
-        Service.GameNetwork.NetworkMessage -= OnNetworkMessage;
         Service.Framework.Update -= OnUpdate;
         _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
+        prepareZoningHook?.Dispose();
     }
 
-    private async Task DownloadOpcodes()
+    private nint PrepareZoning(nint a1, nint a2, byte a3)
     {
-        var client = new HttpClient();
-        var data = await client.GetStringAsync(OpcodesUrl);
-        dynamic json = JsonConvert.DeserializeObject(data)!;
-
-        foreach (var clientType in json)
-        {
-            if (clientType.region == "Global")
-            {
-                foreach (var record in clientType["lists"]["ServerZoneIpcType"])
-                {
-                    var name = record.name.ToString();
-                    var opcode = (int)record.opcode;
-                    if (name == "PrepareZoning")
-                    {
-                        _prepareZoningOpcodes.Add(opcode);
-                        PluginLog.Verbose($"Adding zoning opcode - {record.name} ({record.opcode})");
-                    }
-                }
-            }
-        }
+        PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
+        // PluginLog.Verbose(_view.GetDebugInfo());
+        UpdatePartyListHUD();
+        return prepareZoningHook.OriginalDisposeSafe(a1,a2,a3);
     }
 
     private void OnEnterPvP()
@@ -110,19 +92,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         // PluginLog.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
-
-    private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid,
-        NetworkMessageDirection direction)
-    {
-        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) &&
-            targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
-        {
-            PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
-            // PluginLog.Verbose(_view.GetDebugInfo());
-            UpdatePartyListHUD();
-        }
-    }
-
+    
     private void OnUpdate(Framework framework)
     {
         var inParty = Service.PartyList.Any();
