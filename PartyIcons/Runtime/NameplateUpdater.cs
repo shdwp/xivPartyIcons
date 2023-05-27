@@ -49,28 +49,29 @@ public sealed class NameplateUpdater : IDisposable
         _hook.Dispose();
     }
 
-    public IntPtr SetNamePlateDetour(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title,
-        IntPtr name, IntPtr fcName, int iconID)
+    public IntPtr SetNamePlateDetour(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle,
+            IntPtr title, IntPtr name, IntPtr fcName, IntPtr prefix, int iconID)
+    // IntPtr titlePtr, IntPtr namePtr, IntPtr freeCompanyPtr, IntPtr prefixOrWhatever, int iconId
     {
         try
         {
-            return SetNamePlate(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return SetNamePlate(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
         catch (Exception ex)
         {
             PluginLog.Error(ex, "SetNamePlateDetour encountered a critical error");
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
     }
 
     public IntPtr SetNamePlate(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle, IntPtr title,
-        IntPtr name, IntPtr fcName, int iconID)
+        IntPtr name, IntPtr fcName, IntPtr prefix, int iconID)
     {
         if (Service.ClientState.IsPvP)
         {
             // disable in PvP
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var originalTitle = title;
@@ -83,7 +84,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var npInfo = npObject.NamePlateInfo;
@@ -92,7 +93,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var actorID = npInfo.Data.ObjectID.ObjectID;
@@ -101,14 +102,14 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         if (!npObject.IsPlayer)
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var jobID = npInfo.GetJobID();
@@ -117,7 +118,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var isPriorityIcon = IsPriorityIcon(iconID, out var priorityIconId);
@@ -129,7 +130,7 @@ public sealed class NameplateUpdater : IDisposable
             iconID = priorityIconId;
         }
 
-        var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+        var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         _view.SetupForPC(npObject, isPriorityIcon);
 
         if (originalName != name)
