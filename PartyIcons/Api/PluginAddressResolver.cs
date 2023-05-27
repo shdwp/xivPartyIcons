@@ -8,7 +8,7 @@ namespace PartyIcons.Api;
 
 [UnmanagedFunctionPointer(CallingConvention.ThisCall, CharSet = CharSet.Ansi)]
 public delegate IntPtr SetNamePlateDelegate(IntPtr addon, bool isPrefixTitle, bool displayTitle, IntPtr title,
-    IntPtr name, IntPtr fcName, int iconID);
+    IntPtr name, IntPtr fcName, IntPtr prefix, int iconID);
 
 [UnmanagedFunctionPointer(CallingConvention.ThisCall, CharSet = CharSet.Ansi)]
 public delegate IntPtr AtkResNode_SetScaleDelegate(IntPtr node, float x, float y);
@@ -38,7 +38,7 @@ public delegate IntPtr PrintMessage(IntPtr chatManager, XivChatType xivChatType,
 public sealed class PluginAddressResolver : BaseAddressResolver
 {
     private const string AddonNamePlate_SetNamePlateSignature =
-        "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 54 41 56 41 57 48 83 EC 40 44 0F B6 E2";
+        "E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 48 8B 5C 24 ?? 45 38 BE";
 
     public IntPtr AddonNamePlate_SetNamePlatePtr;
 
