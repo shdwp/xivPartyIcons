@@ -7,12 +7,5 @@
   "RepoUrl": "https://github.com/shdwp/xivPartyIcons",
   "Tags": [
     "UI"
-  ],
-  "ImageUrls": [
-    "https://github.com/goatcorp/DalamudPlugins/raw/api6/plugins/PartyIcons/images/image1.png",
-    "https://github.com/goatcorp/DalamudPlugins/raw/api6/plugins/PartyIcons/images/image2.png",
-    "https://github.com/goatcorp/DalamudPlugins/raw/api6/plugins/PartyIcons/images/image3.png",
-    "https://github.com/goatcorp/DalamudPlugins/raw/api6/plugins/PartyIcons/images/image4.png"
-  ],
-  "IconUrl": "https://github.com/goatcorp/DalamudPlugins/raw/api6/plugins/PartyIcons/images/icon.png"
+  ]
 }
