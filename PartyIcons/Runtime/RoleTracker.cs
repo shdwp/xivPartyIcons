@@ -85,7 +85,7 @@ public sealed class RoleTracker : IDisposable
 
     public bool TryGetAssignedRole(string name, uint worldId, out RoleId roleId)
     {
-        PluginLog.Verbose($"{_assignedRoles.Count}");
+        // PluginLog.Verbose($"{_assignedRoles.Count}");
         return _assignedRoles.TryGetValue(PlayerId(name, worldId), out roleId);
     }
 
