@@ -2,11 +2,11 @@
 
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Authors>shdwp</Authors>
+        <Authors>shdwp, abashby</Authors>
         <Company>shdwp</Company>
         <Description>PartyIcons plugin</Description>
         <Copyright>shdwp 2021</Copyright>
-        <PackageProjectUrl>https://github.com/shdwp/xivPartyIcons</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/abashby/xivPartyIcons</PackageProjectUrl>
         <Version>1.1.3.2</Version>
     </PropertyGroup>
 
