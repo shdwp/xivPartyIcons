@@ -90,6 +90,12 @@ public sealed class ChatNameUpdater : IDisposable
         {
             var playerNamePayload = sender.Payloads.FirstOrDefault(p => p is TextPayload) as TextPayload;
             prefix = playerNamePayload.Text.Substring(0, 1);
+            if (prefix[0] is < '\uE000' or > '\uF8FF') {
+                // Not a special character (outside private use area) so probably part of the name
+                prefix = "";
+                return false;
+            }
+
             playerNamePayload.Text = playerNamePayload.Text.Substring(1);
 
             return true;
