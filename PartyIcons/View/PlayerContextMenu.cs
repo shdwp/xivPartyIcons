@@ -41,6 +41,7 @@ namespace PartyIcons.View
         public void Dispose()
         {
             Disable();
+            _contextMenu.Dispose();
         }
         
         private void OnOpenContextMenu(GameObjectContextMenuOpenArgs args)
