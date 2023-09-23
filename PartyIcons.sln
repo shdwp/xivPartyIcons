@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartyIcons", "PartyIcons\PartyIcons.csproj", "{13C812E9-0D42-4B95-8646-40EEBF30636F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dalamud.ContextMenu", "Dalamud.ContextMenu\src\Dalamud.ContextMenu\Dalamud.ContextMenu.csproj", "{1010CD03-5986-4D78-A7A8-659FC8B80255}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -17,10 +15,6 @@ Global
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|x64.Build.0 = Debug|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|x64.ActiveCfg = Release|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|x64.Build.0 = Release|x64
-		{1010CD03-5986-4D78-A7A8-659FC8B80255}.Debug|x64.ActiveCfg = Debug|x64
-		{1010CD03-5986-4D78-A7A8-659FC8B80255}.Debug|x64.Build.0 = Debug|x64
-		{1010CD03-5986-4D78-A7A8-659FC8B80255}.Release|x64.ActiveCfg = Release|x64
-		{1010CD03-5986-4D78-A7A8-659FC8B80255}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

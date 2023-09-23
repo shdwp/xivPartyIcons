@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.IoC;
-using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;

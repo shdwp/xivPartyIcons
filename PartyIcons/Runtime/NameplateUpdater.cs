@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
-using Dalamud.IoC;
-using Dalamud.Logging;
 using PartyIcons.Api;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
@@ -30,7 +25,7 @@ public sealed class NameplateUpdater : IDisposable
         _address = address;
         _view = view;
         _modeSetter = modeSetter;
-        _hook = new Hook<SetNamePlateDelegate>(_address.AddonNamePlate_SetNamePlatePtr, SetNamePlateDetour);
+        _hook = Service.GameInteropProvider.HookFromAddress<SetNamePlateDelegate>(_address.AddonNamePlate_SetNamePlatePtr, SetNamePlateDetour);
     }
 
     public void Enable()
@@ -59,7 +54,7 @@ public sealed class NameplateUpdater : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "SetNamePlateDetour encountered a critical error");
+            Service.Log.Error(ex, "SetNamePlateDetour encountered a critical error");
 
             return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
@@ -160,7 +155,7 @@ public sealed class NameplateUpdater : IDisposable
     /// <returns>Whether a priority icon was found.</returns>
     private bool IsPriorityIcon(int iconId, out int priorityIconId)
     {
-        // PluginLog.Verbose($"Icon ID: {iconId}, Debug Icon ID: {DebugIcon}");
+        // Service.Log.Verbose($"Icon ID: {iconId}, Debug Icon ID: {DebugIcon}");
         priorityIconId = iconId;
 
         if (_configuration.UsePriorityIcons == false &&
@@ -185,7 +180,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             isPriorityIcon = true;
             priorityIconId = DebugIcon;
-            PluginLog.Verbose($"Setting debug icon. Id: {DebugIcon}");
+            Service.Log.Verbose($"Setting debug icon. Id: {DebugIcon}");
             
             DebugIcon++;
         }

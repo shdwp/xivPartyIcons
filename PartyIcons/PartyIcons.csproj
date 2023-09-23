@@ -41,15 +41,15 @@
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     </PropertyGroup>
 
-    <!-- Referencing Dalamud.Context's net7 branch via submodule until the nuget package is update for net7 -->
+    <!--
     <ItemGroup>
         <ProjectReference Include="..\Dalamud.ContextMenu\src\Dalamud.ContextMenu\Dalamud.ContextMenu.csproj" />
     </ItemGroup>
+    -->
 
     <ItemGroup>
-        <!-- <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" /> -->
-        <PackageReference Include="DalamudPackager" Version="2.1.10" />
-        <PackageReference Include="XivCommon" Version="7.0.0-alpha.1" />
+        <PackageReference Include="Dalamud.ContextMenu" Version="1.3.1" />
+        <PackageReference Include="DalamudPackager" Version="2.1.12" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>

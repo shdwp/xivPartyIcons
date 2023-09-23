@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
-using Dalamud.Interface;
-using Dalamud.Logging;
+using Dalamud.Interface.Utility;
 using ImGuiNET;
 
 namespace PartyIcons.Utils;
@@ -49,7 +48,7 @@ public class WindowSizeHelper
         if (boundsToCheck.X > ImGuiHelpers.MainViewport.Size.X ||
             boundsToCheck.Y > ImGuiHelpers.MainViewport.Size.Y)
         {
-            PluginLog.LogDebug("Unreasonable window size detected as a result of a previously fixed bug. Forcing a reasonable window size.");
+            Service.Log.Debug("Unreasonable window size detected as a result of a previously fixed bug. Forcing a reasonable window size.");
             
             _shouldForceSize = true;
         }

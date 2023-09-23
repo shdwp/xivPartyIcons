@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using Dalamud.Interface;
-using Dalamud.Logging;
+using Dalamud.Interface.Internal;
+using Dalamud.Interface.Utility;
 using ImGuiNET;
 using ImGuiScene;
 using PartyIcons.Configuration;
@@ -14,10 +14,7 @@ namespace PartyIcons.UI;
 
 public sealed class NameplateSettings
 {
-    public NameplateSettings()
-    {
-        _nameplateExamples = new Dictionary<NameplateMode, TextureWrap>();
-    }
+    private readonly Dictionary<NameplateMode, IDalamudTextureWrap> _nameplateExamples = new();
 
     public void Initialize()
     {
@@ -36,7 +33,7 @@ public sealed class NameplateSettings
 
             if (fileStream == null)
             {
-                PluginLog.Error($"Failed to get resource stream for {kv.Value}");
+                Service.Log.Error($"Failed to get resource stream for {kv.Value}");
 
                 continue;
             }
@@ -192,7 +189,7 @@ public sealed class NameplateSettings
         }
     }
 
-    private void CollapsibleExampleImage(NameplateMode mode, TextureWrap tex)
+    private void CollapsibleExampleImage(NameplateMode mode, IDalamudTextureWrap tex)
     {
         if (ImGui.CollapsingHeader(NameplateModeToString(mode)))
         {
@@ -258,6 +255,4 @@ public sealed class NameplateSettings
             ImGui.EndCombo();
         }
     }
-    
-    private readonly Dictionary<NameplateMode, TextureWrap> _nameplateExamples;
 }

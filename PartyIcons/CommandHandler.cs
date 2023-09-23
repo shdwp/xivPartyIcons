@@ -1,6 +1,5 @@
 using System;
 using Dalamud.Game.Command;
-using Dalamud.Logging;
 
 namespace PartyIcons;
 
@@ -55,11 +54,11 @@ public class CommandHandler : IDisposable
                 try
                 {
                     Plugin.NameplateUpdater.DebugIcon = int.Parse(argv[1]);
-                    PluginLog.Verbose($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
+                    Service.Log.Verbose($"Set debug icon to {Plugin.NameplateUpdater.DebugIcon}");
                 }
                 catch (Exception)
                 {
-                    PluginLog.Verbose("Invalid icon id given for debug icon.");
+                    Service.Log.Verbose("Invalid icon id given for debug icon.");
                     Plugin.NameplateUpdater.DebugIcon = -1;
                 }
             }

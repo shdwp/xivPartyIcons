@@ -36,7 +36,6 @@ public sealed class Plugin : IDalamudPlugin
         Settings = Settings.Load();
 
         Address = new PluginAddressResolver();
-        Address.Setup(Service.SigScanner);
 
         PlayerStylesheet = new PlayerStylesheet(Settings);
 
@@ -54,7 +53,7 @@ public sealed class Plugin : IDalamudPlugin
         ModeSetter = new ViewModeSetter(NameplateView, Settings, ChatNameUpdater, PartyListHudUpdater);
         NameplateUpdater = new NameplateUpdater(Settings, Address, NameplateView, ModeSetter);
         NpcNameplateFixer = new NPCNameplateFixer(NameplateView);
-        ContextMenu = new PlayerContextMenu(RoleTracker, Settings, PlayerStylesheet);
+        ContextMenu = new PlayerContextMenu(pluginInterface, RoleTracker, Settings, PlayerStylesheet);
         CommandHandler = new CommandHandler();
 
         SettingsWindow.Initialize();

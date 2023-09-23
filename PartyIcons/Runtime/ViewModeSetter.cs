@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Dalamud.Data;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
-using Dalamud.Logging;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using PartyIcons.Configuration;
@@ -66,7 +61,7 @@ public sealed class ViewModeSetter
         _nameplateView.OthersMode = _configuration.NameplateOthers;
         _chatNameUpdater.OthersMode = _configuration.ChatOthers;
 
-        OnTerritoryChanged(null, 0);
+        OnTerritoryChanged(0);
     }
 
     public void Disable()
@@ -80,14 +75,14 @@ public sealed class ViewModeSetter
         Disable();
     }
 
-    private void OnTerritoryChanged(object? sender, ushort e)
+    private void OnTerritoryChanged(ushort e)
     {
         var content =
             _contentFinderConditionsSheet.FirstOrDefault(t => t.TerritoryType.Row == Service.ClientState.TerritoryType);
 
         if (content == null)
         {
-            PluginLog.Verbose($"Content null {Service.ClientState.TerritoryType}");
+            Service.Log.Verbose($"Content null {Service.ClientState.TerritoryType}");
             _nameplateView.PartyMode = _configuration.NameplateOverworld;
             _chatNameUpdater.PartyMode = _configuration.ChatOverworld;
             ZoneType = ZoneType.Overworld;
@@ -113,7 +108,7 @@ public sealed class ViewModeSetter
                 memberType = 127;
             }
 
-            PluginLog.Verbose(
+            Service.Log.Verbose(
                 $"Territory changed {content.Name} (id {content.RowId} type {content.ContentType.Row}, terr {Service.ClientState.TerritoryType}, memtype {content.ContentMemberType.Row}, overriden {memberType})");
 
             switch (memberType)
@@ -163,7 +158,7 @@ public sealed class ViewModeSetter
         _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
                                          _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
-        PluginLog.Verbose($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
-        PluginLog.Debug($"Entered ZoneType {ZoneType.ToString()}");
+        Service.Log.Verbose($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
+        Service.Log.Debug($"Entered ZoneType {ZoneType.ToString()}");
     }
 }

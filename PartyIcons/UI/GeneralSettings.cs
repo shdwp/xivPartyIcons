@@ -3,10 +3,9 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.Logging;
+using Dalamud.Interface.Utility;
 using ImGuiNET;
 using PartyIcons.UI.Controls;
 
@@ -123,7 +122,7 @@ public sealed class Notice
 
             if (!(_noticeUrl.StartsWith("http://") || _noticeUrl.StartsWith("https://")))
             {
-                PluginLog.Warning($"Received invalid noticeUrl {_noticeUrl}, ignoring");
+                Service.Log.Warning($"Received invalid noticeUrl {_noticeUrl}, ignoring");
                 _noticeUrl = null;
             }
         }

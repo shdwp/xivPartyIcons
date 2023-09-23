@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -87,7 +86,7 @@ public class XivApi : IDisposable
         }
     }
 
-    private void OnLogout_ResetRaptureAtkModule(object sender, EventArgs evt) => _RaptureAtkModulePtr = IntPtr.Zero;
+    private void OnLogout_ResetRaptureAtkModule() => _RaptureAtkModulePtr = IntPtr.Zero;
 
     #endregion
 
@@ -161,7 +160,7 @@ public class XivApi : IDisposable
 
             if (npObjectArrayPtr == IntPtr.Zero)
             {
-                PluginLog.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
+                Service.Log.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
 
                 return null;
             }
@@ -198,7 +197,7 @@ public class XivApi : IDisposable
 
                     if (npObject0 == null)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
+                        Service.Log.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
 
                         return -1;
                     }
@@ -209,7 +208,7 @@ public class XivApi : IDisposable
 
                     if (index < 0 || index >= 50)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
+                        Service.Log.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
 
                         return -1;
                     }
@@ -231,7 +230,7 @@ public class XivApi : IDisposable
 
                     if (rapturePtr == IntPtr.Zero)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
+                        Service.Log.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
 
                         return null;
                     }
