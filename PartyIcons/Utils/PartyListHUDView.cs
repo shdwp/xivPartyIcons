@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Text;
-using Dalamud.Game.ClientState.Party;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using PartyIcons.Entities;
@@ -17,9 +14,9 @@ public unsafe class PartyListHUDView : IDisposable
     // public PartyList PartyList { get; set; }
 
     private readonly PlayerStylesheet _stylesheet;
-    private readonly GameGui _gameGui;
+    private readonly IGameGui _gameGui;
 
-    public PartyListHUDView(GameGui gameGui, PlayerStylesheet stylesheet)
+    public PartyListHUDView(IGameGui gameGui, PlayerStylesheet stylesheet)
     {
         _gameGui = gameGui;
         _stylesheet = stylesheet;
@@ -38,7 +35,7 @@ public unsafe class PartyListHUDView : IDisposable
 
             if (!memberStructOptional.HasValue)
             {
-                PluginLog.Warning($"Failed to dispose member HUD changes - struct null!");
+                Service.Log.Warning($"Failed to dispose member HUD changes - struct null!");
 
                 continue;
             }
@@ -61,7 +58,7 @@ public unsafe class PartyListHUDView : IDisposable
 
         if (hud == null)
         {
-            PluginLog.Warning("AgentHUD null!");
+            Service.Log.Warning("AgentHUD null!");
 
             return null;
         }
@@ -70,7 +67,7 @@ public unsafe class PartyListHUDView : IDisposable
         if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
-            PluginLog.Verbose("GetPartySlotIndex - trust detected, returning null");
+            Service.Log.Verbose("GetPartySlotIndex - trust detected, returning null");
 
             return null;
         }
@@ -105,8 +102,8 @@ public unsafe class PartyListHUDView : IDisposable
                 {
                     if (!index.HasValue || index.Value != i)
                     {
-                        PluginLog.Warning("PartyHUD and HUDAgent id's mismatch!");
-                        // PluginLog.Warning(GetDebugInfo());
+                        Service.Log.Warning("PartyHUD and HUDAgent id's mismatch!");
+                        // Service.Log.Warning(GetDebugInfo());
                     }
 
                     SetPartyMemberRole(i, roleId);
@@ -116,7 +113,7 @@ public unsafe class PartyListHUDView : IDisposable
             }
         }
 
-        PluginLog.Verbose($"Member struct by the name {name} not found.");
+        Service.Log.Verbose($"Member struct by the name {name} not found.");
     }
 
     public void SetPartyMemberRole(uint index, RoleId roleId)
@@ -125,7 +122,7 @@ public unsafe class PartyListHUDView : IDisposable
 
         if (!memberStructOptional.HasValue)
         {
-            PluginLog.Warning($"Failed to set party member HUD role to {roleId} - struct null!");
+            Service.Log.Warning($"Failed to set party member HUD role to {roleId} - struct null!");
 
             return;
         }
@@ -155,7 +152,7 @@ public unsafe class PartyListHUDView : IDisposable
 
         if (hud == null)
         {
-            PluginLog.Warning("AgentHUD null!");
+            Service.Log.Warning("AgentHUD null!");
 
             return null;
         }
@@ -163,7 +160,7 @@ public unsafe class PartyListHUDView : IDisposable
         if (hud->PartyMemberCount > 9)
         {
             // hud->PartyMemberCount gives out special (?) value when in trust
-            PluginLog.Verbose("GetPartySlotIndex - trust detected, returning null");
+            Service.Log.Verbose("GetPartySlotIndex - trust detected, returning null");
 
             return null;
         }
@@ -221,7 +218,7 @@ public unsafe class PartyListHUDView : IDisposable
 
         if (partyListAddon == null)
         {
-            PluginLog.Warning("PartyListAddon null!");
+            Service.Log.Warning("PartyListAddon null!");
 
             return null;
         }

@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -17,43 +16,16 @@ public class XivApi : IDisposable
 
     private static Plugin _plugin;
 
-    private readonly SetNamePlateDelegate SetNamePlate;
-    private readonly Framework_GetUIModuleDelegate GetUIModule;
-    private readonly GroupManager_IsObjectIDInPartyDelegate IsObjectIDInParty;
-    private readonly GroupManager_IsObjectIDInAllianceDelegate IsObjectIDInAlliance;
-    private readonly AtkResNode_SetScaleDelegate SetNodeScale;
-    private readonly AtkResNode_SetPositionShortDelegate SetNodePosition;
-    private readonly BattleCharaStore_LookupBattleCharaByObjectIDDelegate LookupBattleCharaByObjectID;
-
-    public static void Initialize(Plugin plugin, PluginAddressResolver address)
+    public static void Initialize(Plugin plugin)
     {
         _plugin ??= plugin;
-        Instance ??= new XivApi(Service.PluginInterface, address);
+        Instance ??= new XivApi();
     }
 
     private static XivApi Instance;
 
-    private XivApi(DalamudPluginInterface pluginInterface, PluginAddressResolver address)
+    private XivApi()
     {
-        SetNamePlate =
-            Marshal.GetDelegateForFunctionPointer<SetNamePlateDelegate>(address.AddonNamePlate_SetNamePlatePtr);
-        GetUIModule =
-            Marshal.GetDelegateForFunctionPointer<Framework_GetUIModuleDelegate>(address.Framework_GetUIModulePtr);
-        IsObjectIDInParty =
-            Marshal.GetDelegateForFunctionPointer<GroupManager_IsObjectIDInPartyDelegate>(
-                address.GroupManager_IsObjectIDInPartyPtr);
-        IsObjectIDInAlliance =
-            Marshal.GetDelegateForFunctionPointer<GroupManager_IsObjectIDInAllianceDelegate>(
-                address.GroupManager_IsObjectIDInAlliancePtr);
-        SetNodeScale =
-            Marshal.GetDelegateForFunctionPointer<AtkResNode_SetScaleDelegate>(address.AtkResNode_SetScalePtr);
-        SetNodePosition =
-            Marshal.GetDelegateForFunctionPointer<AtkResNode_SetPositionShortDelegate>(
-                address.AtkResNode_SetPositionShortPtr);
-        LookupBattleCharaByObjectID =
-            Marshal.GetDelegateForFunctionPointer<BattleCharaStore_LookupBattleCharaByObjectIDDelegate>(
-                address.BattleCharaStore_LookupBattleCharaByObjectIDPtr);
-
         Service.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
     }
 
@@ -87,7 +59,7 @@ public class XivApi : IDisposable
         }
     }
 
-    private void OnLogout_ResetRaptureAtkModule(object sender, EventArgs evt) => _RaptureAtkModulePtr = IntPtr.Zero;
+    private void OnLogout_ResetRaptureAtkModule() => _RaptureAtkModulePtr = IntPtr.Zero;
 
     #endregion
 
@@ -95,11 +67,11 @@ public class XivApi : IDisposable
 
     public static bool IsLocalPlayer(uint actorID) => Service.ClientState.LocalPlayer?.ObjectId == actorID;
 
-    public static bool IsPartyMember(uint actorID) =>
-        Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
+    public unsafe static bool IsPartyMember(uint actorID) =>
+        FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance()->IsObjectIDInParty(actorID);
 
-    public static bool IsAllianceMember(uint actorID) =>
-        Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
+    public unsafe static bool IsAllianceMember(uint actorID) =>
+        FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance()->IsObjectIDInParty(actorID);
 
     public static bool IsPlayerCharacter(uint actorID)
     {
@@ -161,7 +133,7 @@ public class XivApi : IDisposable
 
             if (npObjectArrayPtr == IntPtr.Zero)
             {
-                PluginLog.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
+                Service.Log.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
 
                 return null;
             }
@@ -198,7 +170,7 @@ public class XivApi : IDisposable
 
                     if (npObject0 == null)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
+                        Service.Log.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
 
                         return -1;
                     }
@@ -209,7 +181,7 @@ public class XivApi : IDisposable
 
                     if (index < 0 || index >= 50)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
+                        Service.Log.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
 
                         return -1;
                     }
@@ -231,7 +203,7 @@ public class XivApi : IDisposable
 
                     if (rapturePtr == IntPtr.Zero)
                     {
-                        PluginLog.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
+                        Service.Log.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
 
                         return null;
                     }
@@ -268,11 +240,11 @@ public class XivApi : IDisposable
         public bool IsPlayer => Data.NameplateKind == 0;
 
         /// <returns>True if the icon scale was changed.</returns>
-        public bool SetIconScale(float scale, bool force = false)
+        public unsafe bool SetIconScale(float scale, bool force = false)
         {
             if (force || !IsIconScaleEqual(scale))
             {
-                Instance.SetNodeScale(IconImageNodeAddress, scale, scale);
+                ((AddonNamePlate.NamePlateObject*)Pointer)->IconImageNode->AtkResNode.SetScale(scale, scale);
                 return true;
             }
 
@@ -280,11 +252,11 @@ public class XivApi : IDisposable
         }
 
         /// <returns>True if the name scale was changed.</returns>
-        public bool SetNameScale(float scale, bool force = false)
+        public unsafe bool SetNameScale(float scale, bool force = false)
         {
             if (force || !IsNameScaleEqual(scale))
             {
-                Instance.SetNodeScale(NameNodeAddress, scale, scale);
+                ((AddonNamePlate.NamePlateObject*)Pointer)->NameText->AtkResNode.SetScale(scale, scale);
                 return true;
             }
 

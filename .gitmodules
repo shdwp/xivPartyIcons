@@ -1,4 +1,0 @@
-[submodule "Dalamud.ContextMenu"]
-	path = Dalamud.ContextMenu
-	url = https://github.com/squidmade/Dalamud.ContextMenu
-	branch = net7

@@ -1,17 +1,16 @@
 ﻿using System;
-using Dalamud.IoC;
-using Dalamud.Logging;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
 using Dalamud.ContextMenu;
+using Dalamud.Plugin;
 using PartyIcons.Configuration;
 
 namespace PartyIcons.View
 {
     public sealed class PlayerContextMenu : IDisposable
     {
-        private DalamudContextMenu _contextMenu = new();
+        private DalamudContextMenu _contextMenu;
         
         // Whether to indicate context menu items are from Dalamud.
         // Setting this to true at least sets apart the menu items given that submenus are not currently supported in Dalamud.ContextMenu.
@@ -21,8 +20,9 @@ namespace PartyIcons.View
         private readonly Settings _configuration;
         private readonly PlayerStylesheet _stylesheet;
 
-        public PlayerContextMenu(RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet)
+        public PlayerContextMenu(DalamudPluginInterface pluginInterface, RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet)
         {
+            _contextMenu = new DalamudContextMenu(pluginInterface);
             _roleTracker = roleTracker;
             _configuration = configuration;
             _stylesheet = stylesheet;
@@ -41,6 +41,7 @@ namespace PartyIcons.View
         public void Dispose()
         {
             Disable();
+            _contextMenu.Dispose();
         }
         
         private void OnOpenContextMenu(GameObjectContextMenuOpenArgs args)
@@ -53,7 +54,7 @@ namespace PartyIcons.View
             var playerName = args.Text.TextValue;
             var playerWorld = args.ObjectWorld;
         
-            PluginLog.Verbose($"Opening menu for {playerName}");
+            Service.Log.Verbose($"Opening menu for {playerName}");
         
             AddSuggestedRoleMenuItem(playerName, playerWorld, args);
             AddSwapRoleMenuItem(playerName, playerWorld, args);
@@ -118,7 +119,7 @@ namespace PartyIcons.View
         
         private bool IsMenuValid(GameObjectContextMenuOpenArgs args)
         {
-            PluginLog.LogDebug($"ParentAddonName {args.ParentAddonName}");
+            Service.Log.Debug($"ParentAddonName {args.ParentAddonName}");
         
             switch (args.ParentAddonName)
             {

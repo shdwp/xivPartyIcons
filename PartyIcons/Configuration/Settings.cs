@@ -4,7 +4,6 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Dalamud.Configuration;
-using Dalamud.Logging;
 using PartyIcons.Entities;
 
 namespace PartyIcons.Configuration;
@@ -97,25 +96,25 @@ public class Settings : IPluginConfiguration
                 if (versionNumber == Settings.CurrentVersion)
                 {
                     config = JsonConvert.DeserializeObject<Settings>(fileText);
-                    PluginLog.Information($"Loaded configuration v{versionNumber} (current)");
+                    Service.Log.Information($"Loaded configuration v{versionNumber} (current)");
                 }
                 else if (versionNumber == 1)
                 {
                     var configV1 = JsonConvert.DeserializeObject<SettingsV1>(fileText);
                     config = new Settings(configV1);
                     config.Save();
-                    PluginLog.Information($"Converted configuration v{versionNumber} to v{Settings.CurrentVersion}");
+                    Service.Log.Information($"Converted configuration v{versionNumber} to v{Settings.CurrentVersion}");
                 }
                 else
                 {
-                    PluginLog.Error($"No reader available for configuration v{versionNumber}");
+                    Service.Log.Error($"No reader available for configuration v{versionNumber}");
                 }
             }
         }
         catch (Exception e)
         {
-            PluginLog.Error("Could not read configuration.");
-            PluginLog.Error(e.ToString());
+            Service.Log.Error("Could not read configuration.");
+            Service.Log.Error(e.ToString());
         }
 
         if (config != null)
@@ -123,7 +122,7 @@ public class Settings : IPluginConfiguration
             return config;
         }
 
-        PluginLog.Information("Creating a new configuration.");
+        Service.Log.Information("Creating a new configuration.");
         return new Settings();
     }
 

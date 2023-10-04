@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Dalamud.Game;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using PartyIcons.Api;
 using PartyIcons.View;
 
@@ -33,7 +30,7 @@ public sealed class NPCNameplateFixer : IDisposable
         RevertAll();
     }
 
-    private void OnUpdate(Framework framework)
+    private void OnUpdate(IFramework framework)
     {
         RevertNPC();
     }
@@ -69,7 +66,7 @@ public sealed class NPCNameplateFixer : IDisposable
 
             if (!isPC && _view.SetupDefault(npObject))
             {
-                PluginLog.Verbose($"Reverted NPC {actorID} (#{i})");
+                Service.Log.Verbose($"Reverted NPC {actorID} (#{i})");
             }
         }
     }
@@ -103,7 +100,7 @@ public sealed class NPCNameplateFixer : IDisposable
 
             if (_view.SetupDefault(npObject))
             {
-                PluginLog.Verbose($"Reverted {actorID} (#{i})");
+                Service.Log.Verbose($"Reverted {actorID} (#{i})");
             }
         }
     }

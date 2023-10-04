@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
-using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Utility.Signatures;
 using PartyIcons.Api;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
@@ -18,36 +15,40 @@ public sealed class NameplateUpdater : IDisposable
 {
     private readonly Settings _configuration;
     private readonly NameplateView _view;
-    private readonly PluginAddressResolver _address;
     private readonly ViewModeSetter _modeSetter;
-    private readonly Hook<SetNamePlateDelegate> _hook;
+
+    [Signature("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 48 8B 5C 24 ?? 45 38 BE", DetourName = nameof(SetNamePlateDetour))]
+    private readonly Hook<SetNamePlateDelegate> _setNamePlateHook = null!;
 
     public int DebugIcon { get; set; } = -1;
     
-    public NameplateUpdater(Settings configuration, PluginAddressResolver address, NameplateView view, ViewModeSetter modeSetter)
+    public NameplateUpdater(Settings configuration, NameplateView view, ViewModeSetter modeSetter)
     {
         _configuration = configuration;
-        _address = address;
         _view = view;
         _modeSetter = modeSetter;
-        _hook = new Hook<SetNamePlateDelegate>(_address.AddonNamePlate_SetNamePlatePtr, SetNamePlateDetour);
-    }
+
+        Service.GameInteropProvider.InitializeFromAttributes(this);
+     }
 
     public void Enable()
     {
-        _hook.Enable();
+        _setNamePlateHook.Enable();
     }
     
     public void Disable()
     {
-        _hook.Disable();
+        _setNamePlateHook.Disable();
     }
 
     public void Dispose()
     {
         Disable();
-        _hook.Dispose();
+        _setNamePlateHook.Dispose();
     }
+
+    private delegate IntPtr SetNamePlateDelegate(IntPtr addon, bool isPrefixTitle, bool displayTitle, IntPtr title,
+        IntPtr name, IntPtr fcName, IntPtr prefix, int iconID);
 
     public IntPtr SetNamePlateDetour(IntPtr namePlateObjectPtr, bool isPrefixTitle, bool displayTitle,
             IntPtr title, IntPtr name, IntPtr fcName, IntPtr prefix, int iconID)
@@ -59,9 +60,9 @@ public sealed class NameplateUpdater : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "SetNamePlateDetour encountered a critical error");
+            Service.Log.Error(ex, "SetNamePlateDetour encountered a critical error");
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
     }
 
@@ -71,7 +72,7 @@ public sealed class NameplateUpdater : IDisposable
         if (Service.ClientState.IsPvP)
         {
             // disable in PvP
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var originalTitle = title;
@@ -84,7 +85,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var npInfo = npObject.NamePlateInfo;
@@ -93,7 +94,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var actorID = npInfo.Data.ObjectID.ObjectID;
@@ -102,14 +103,14 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         if (!npObject.IsPlayer)
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var jobID = npInfo.GetJobID();
@@ -118,7 +119,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             _view.SetupDefault(npObject);
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+            return _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         }
 
         var isPriorityIcon = IsPriorityIcon(iconID, out var priorityIconId);
@@ -130,7 +131,7 @@ public sealed class NameplateUpdater : IDisposable
             iconID = priorityIconId;
         }
 
-        var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
+        var result = _setNamePlateHook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, prefix, iconID);
         _view.SetupForPC(npObject, isPriorityIcon);
 
         if (originalName != name)
@@ -160,7 +161,7 @@ public sealed class NameplateUpdater : IDisposable
     /// <returns>Whether a priority icon was found.</returns>
     private bool IsPriorityIcon(int iconId, out int priorityIconId)
     {
-        // PluginLog.Verbose($"Icon ID: {iconId}, Debug Icon ID: {DebugIcon}");
+        // Service.Log.Verbose($"Icon ID: {iconId}, Debug Icon ID: {DebugIcon}");
         priorityIconId = iconId;
 
         if (_configuration.UsePriorityIcons == false &&
@@ -185,7 +186,7 @@ public sealed class NameplateUpdater : IDisposable
         {
             isPriorityIcon = true;
             priorityIconId = DebugIcon;
-            PluginLog.Verbose($"Setting debug icon. Id: {DebugIcon}");
+            Service.Log.Verbose($"Setting debug icon. Id: {DebugIcon}");
             
             DebugIcon++;
         }

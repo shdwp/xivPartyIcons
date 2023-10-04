@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Dalamud.Game;
 using Dalamud.Hooking;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
@@ -34,7 +33,8 @@ public sealed class PartyListHUDUpdater : IDisposable
         _configuration = configuration;
         
         prepareZoningHook =
-            Hook<PrepareZoningDelegate>.FromAddress(Service.SigScanner.ScanText(PrepareZoningSig), PrepareZoning);
+            Service.GameInteropProvider.HookFromAddress<PrepareZoningDelegate>(
+                Service.SigScanner.ScanText(PrepareZoningSig), PrepareZoning);
         prepareZoningHook?.Enable();
     }
 
@@ -57,8 +57,8 @@ public sealed class PartyListHUDUpdater : IDisposable
 
     private nint PrepareZoning(nint a1, nint a2, byte a3)
     {
-        PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
-        // PluginLog.Verbose(_view.GetDebugInfo());
+        Service.Log.Verbose("PartyListHUDUpdater Forcing update due to zoning");
+        // Service.Log.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
         return prepareZoningHook.OriginalDisposeSafe(a1,a2,a3);
     }
@@ -67,7 +67,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         if (_displayingRoles)
         {
-            PluginLog.Verbose("PartyListHUDUpdater: reverting party list due to entering a PvP zone");
+            Service.Log.Verbose("PartyListHUDUpdater: reverting party list due to entering a PvP zone");
             _displayingRoles = false;
             _view.RevertSlotNumbers();
         }
@@ -77,29 +77,29 @@ public sealed class PartyListHUDUpdater : IDisposable
     {
         if (_displayingRoles)
         {
-            PluginLog.Verbose("PartyListHUDUpdater: reverting party list before the update due to config change");
+            Service.Log.Verbose("PartyListHUDUpdater: reverting party list before the update due to config change");
             _view.RevertSlotNumbers();
         }
 
-        PluginLog.Verbose("PartyListHUDUpdater forcing update due to changes in the config");
-        // PluginLog.Verbose(_view.GetDebugInfo());
+        Service.Log.Verbose("PartyListHUDUpdater forcing update due to changes in the config");
+        // Service.Log.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
 
     private void OnAssignedRolesUpdated()
     {
-        PluginLog.Verbose("PartyListHUDUpdater forcing update due to assignments update");
-        // PluginLog.Verbose(_view.GetDebugInfo());
+        Service.Log.Verbose("PartyListHUDUpdater forcing update due to assignments update");
+        // Service.Log.Verbose(_view.GetDebugInfo());
         UpdatePartyListHUD();
     }
     
-    private void OnUpdate(Framework framework)
+    private void OnUpdate(IFramework framework)
     {
         var inParty = Service.PartyList.Any();
 
         if ((!inParty && _previousInParty) || (!_configuration.TestingMode && _previousTesting))
         {
-            PluginLog.Verbose("No longer in party/testing mode, reverting party list HUD changes");
+            Service.Log.Verbose("No longer in party/testing mode, reverting party list HUD changes");
             _displayingRoles = false;
             _view.RevertSlotNumbers();
         }
@@ -137,21 +137,21 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-        PluginLog.Verbose($"Updating party list HUD. members = {Service.PartyList.Length}");
+        Service.Log.Verbose($"Updating party list HUD. members = {Service.PartyList.Length}");
         _displayingRoles = true;
 
         foreach (var member in Service.PartyList)
         {
-            PluginLog.Verbose($"member {member.Name.ToString()}");
+            Service.Log.Verbose($"member {member.Name.ToString()}");
             
             if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
             {
-                PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
+                Service.Log.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
                 _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
             }
             else
             {
-                PluginLog.Verbose($"Could not get assigned role for member {member.Name.ToString()}, {member.World.Id}");
+                Service.Log.Verbose($"Could not get assigned role for member {member.Name.ToString()}, {member.World.Id}");
             }
         }
     }
