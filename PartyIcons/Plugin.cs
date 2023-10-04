@@ -11,10 +11,6 @@ namespace PartyIcons;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    public string Name => "Party Icons";
-
-    public PluginAddressResolver Address { get; }
-
     public static PartyListHUDView PartyHudView { get; private set; } = null!;
     public static PartyListHUDUpdater PartyListHudUpdater { get; private set; } = null!;
     public static SettingsWindow SettingsWindow { get; private set; } = null!;
@@ -35,13 +31,11 @@ public sealed class Plugin : IDalamudPlugin
 
         Settings = Settings.Load();
 
-        Address = new PluginAddressResolver();
-
         PlayerStylesheet = new PlayerStylesheet(Settings);
 
         SettingsWindow = new SettingsWindow();
 
-        XivApi.Initialize(this, Address);
+        XivApi.Initialize(this);
 
         SeStringUtils.Initialize();
 
@@ -51,7 +45,7 @@ public sealed class Plugin : IDalamudPlugin
         ChatNameUpdater = new ChatNameUpdater(RoleTracker, PlayerStylesheet);
         PartyListHudUpdater = new PartyListHUDUpdater(PartyHudView, RoleTracker, Settings);
         ModeSetter = new ViewModeSetter(NameplateView, Settings, ChatNameUpdater, PartyListHudUpdater);
-        NameplateUpdater = new NameplateUpdater(Settings, Address, NameplateView, ModeSetter);
+        NameplateUpdater = new NameplateUpdater(Settings, NameplateView, ModeSetter);
         NpcNameplateFixer = new NPCNameplateFixer(NameplateView);
         ContextMenu = new PlayerContextMenu(pluginInterface, RoleTracker, Settings, PlayerStylesheet);
         CommandHandler = new CommandHandler();

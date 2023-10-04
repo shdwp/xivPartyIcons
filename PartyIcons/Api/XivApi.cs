@@ -16,43 +16,16 @@ public class XivApi : IDisposable
 
     private static Plugin _plugin;
 
-    private readonly SetNamePlateDelegate SetNamePlate;
-    private readonly Framework_GetUIModuleDelegate GetUIModule;
-    private readonly GroupManager_IsObjectIDInPartyDelegate IsObjectIDInParty;
-    private readonly GroupManager_IsObjectIDInAllianceDelegate IsObjectIDInAlliance;
-    private readonly AtkResNode_SetScaleDelegate SetNodeScale;
-    private readonly AtkResNode_SetPositionShortDelegate SetNodePosition;
-    private readonly BattleCharaStore_LookupBattleCharaByObjectIDDelegate LookupBattleCharaByObjectID;
-
-    public static void Initialize(Plugin plugin, PluginAddressResolver address)
+    public static void Initialize(Plugin plugin)
     {
         _plugin ??= plugin;
-        Instance ??= new XivApi(Service.PluginInterface, address);
+        Instance ??= new XivApi();
     }
 
     private static XivApi Instance;
 
-    private XivApi(DalamudPluginInterface pluginInterface, PluginAddressResolver address)
+    private XivApi()
     {
-        SetNamePlate =
-            Marshal.GetDelegateForFunctionPointer<SetNamePlateDelegate>(address.AddonNamePlate_SetNamePlatePtr);
-        GetUIModule =
-            Marshal.GetDelegateForFunctionPointer<Framework_GetUIModuleDelegate>(address.Framework_GetUIModulePtr);
-        IsObjectIDInParty =
-            Marshal.GetDelegateForFunctionPointer<GroupManager_IsObjectIDInPartyDelegate>(
-                address.GroupManager_IsObjectIDInPartyPtr);
-        IsObjectIDInAlliance =
-            Marshal.GetDelegateForFunctionPointer<GroupManager_IsObjectIDInAllianceDelegate>(
-                address.GroupManager_IsObjectIDInAlliancePtr);
-        SetNodeScale =
-            Marshal.GetDelegateForFunctionPointer<AtkResNode_SetScaleDelegate>(address.AtkResNode_SetScalePtr);
-        SetNodePosition =
-            Marshal.GetDelegateForFunctionPointer<AtkResNode_SetPositionShortDelegate>(
-                address.AtkResNode_SetPositionShortPtr);
-        LookupBattleCharaByObjectID =
-            Marshal.GetDelegateForFunctionPointer<BattleCharaStore_LookupBattleCharaByObjectIDDelegate>(
-                address.BattleCharaStore_LookupBattleCharaByObjectIDPtr);
-
         Service.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
     }
 
