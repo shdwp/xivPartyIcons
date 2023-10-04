@@ -97,7 +97,7 @@ public sealed class RoleTracker : IDisposable
 
         _occupiedRoles[PlayerId(name, world)] = roleId;
         OnRoleOccupied?.Invoke(name, roleId);
-        Service.ToastGui.ShowQuest($"{name} occupied {roleId}", new QuestToastOptions { DisplayCheckmark = true });
+        Service.ToastGui.ShowQuest($"{name} occupied {Plugin.PlayerStylesheet.GetRoleName(roleId)}", new QuestToastOptions { DisplayCheckmark = true });
     }
 
     public void SuggestRole(string name, uint world, RoleId roleId)

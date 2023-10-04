@@ -94,11 +94,11 @@ public class XivApi : IDisposable
 
     public static bool IsLocalPlayer(uint actorID) => Service.ClientState.LocalPlayer?.ObjectId == actorID;
 
-    public static bool IsPartyMember(uint actorID) =>
-        Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
+    public unsafe static bool IsPartyMember(uint actorID) =>
+        FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance()->IsObjectIDInParty(actorID);
 
-    public static bool IsAllianceMember(uint actorID) =>
-        Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
+    public unsafe static bool IsAllianceMember(uint actorID) =>
+        FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance()->IsObjectIDInParty(actorID);
 
     public static bool IsPlayerCharacter(uint actorID)
     {
@@ -267,11 +267,11 @@ public class XivApi : IDisposable
         public bool IsPlayer => Data.NameplateKind == 0;
 
         /// <returns>True if the icon scale was changed.</returns>
-        public bool SetIconScale(float scale, bool force = false)
+        public unsafe bool SetIconScale(float scale, bool force = false)
         {
             if (force || !IsIconScaleEqual(scale))
             {
-                Instance.SetNodeScale(IconImageNodeAddress, scale, scale);
+                ((AddonNamePlate.NamePlateObject*)Pointer)->IconImageNode->AtkResNode.SetScale(scale, scale);
                 return true;
             }
 
@@ -279,11 +279,11 @@ public class XivApi : IDisposable
         }
 
         /// <returns>True if the name scale was changed.</returns>
-        public bool SetNameScale(float scale, bool force = false)
+        public unsafe bool SetNameScale(float scale, bool force = false)
         {
             if (force || !IsNameScaleEqual(scale))
             {
-                Instance.SetNodeScale(NameNodeAddress, scale, scale);
+                ((AddonNamePlate.NamePlateObject*)Pointer)->NameText->AtkResNode.SetScale(scale, scale);
                 return true;
             }
 
